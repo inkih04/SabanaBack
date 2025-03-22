@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>New Issue</h1>
+<form method="post">
+    {% csrf_token %}  <!-- Seguridad contra ataques CSRF -->
+    {{ form.as_p }}  <!-- Muestra el formulario -->
+    <button type="submit">Create Issue</button>
+</form>
+<a href="{% url 'issue_list' %}">Back to Issues</a>
+{% endblock %}

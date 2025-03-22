@@ -1,0 +1,11 @@
+a {
+    color: #3498db; /* Color azul */
+    text-decoration: none; /* Sin subrayado */
+    font-weight: bold; /* Negrita */
+    transition: color 0.3s ease; /* Transición suave para el color */
+}
+
+a:hover {
+    color: #2ecc71; /* Color verde al pasar el ratón */
+    text-decoration: underline; /* Subrayado al pasar el ratón */
+}

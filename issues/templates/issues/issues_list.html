@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Issues</h1>
+<a href="{% url 'issue_create' %}">Create New Issue</a>
+<ul>
+    {% for issue in issues %}
+        <li>
+            <strong>{{ issue.subject }}</strong> - {{ issue.description }}<br>
+            Status: {{ issue.get_status_display }} | Priority: {{ issue.get_priority_display }}
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}
