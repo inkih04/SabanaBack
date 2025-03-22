@@ -5,14 +5,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Issues App{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'issues/styles.css' %}">
 </head>
 <body>
-    <nav>
-        <a href="{% url 'issue_list' %}">Home</a>
-        <a href="{% url 'issue_create' %}">New Issue</a>
-    </nav>
-    <hr>
-    {% block content %}{% endblock %}
+    <header class="header">
+        <div class="header__logo-container">
+            <i class="material-icons">home</i>
+            <h1 class="header__title">Sabana</h1>
+        </div>
+        <nav class="header__nav">
+            <ul class="header__nav-list">
+                <li class="header__nav-item">
+                    <a href="{% url 'issue_list' %}">Issues</a>
+                </li>
+                <li class="header__nav-item">
+                    <a href="{% url 'issue_create' %}">Create Issue</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <div class="content">
+        <aside class="sidebar">
+            <nav class="sidebar__nav">
+                <ul class="sidebar__list">
+                    <li class="sidebar__item">
+                        <span class="material-icons sidebar__icon">notifications</span>
+                        <a href="#" class="sidebar__link">Notifications</a>
+                    </li>
+                    <li class="sidebar__item">
+                        <span class="material-icons sidebar__icon">mail</span>
+                        <a href="#" class="sidebar__link">Mail</a>
+                    </li>
+                    <li class="sidebar__item">
+                        <span class="material-icons sidebar__icon">settings</span>
+                        <a href="#" class="sidebar__link">Settings</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar__profile">
+                <ul>
+                    <li class="sidebar__item item--profile">
+                        <span class="material-icons sidebar__icon">person</span>
+                        <span class="profile-option">Profile</span>
+                    </li>
+                    <li class="sidebar__item">
+                        <span class="material-icons sidebar__icon">logout</span>
+                        <a  href="#">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+        <div class = "issue-container">
+            {% block content %} {% endblock %}
+        </div>
+    </div>
+
 </body>
 </html>
