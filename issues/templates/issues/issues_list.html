@@ -1,14 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Issues</h1>
-<a href="{% url 'issue_create' %}">Create New Issue</a>
-<ul>
-    {% for issue in issues %}
-        <li>
-            <strong>{{ issue.subject }}</strong> - {{ issue.description }}<br>
-            Status: {{ issue.get_status_display }} | Priority: {{ issue.get_priority_display }}
-        </li>
-    {% endfor %}
-</ul>
+    <h1 class="issue">Issues</h1>
+
+
+
+
+    <div  class="issue__list-container">
+        <ul>
+            {% for issue in issues %}
+                    <li class="issue__item">
+                        <div class="issue__item-content">
+                            <div class="issue__item-left">
+                                <div class="issue__type">  </div>
+                                <div class="issue__severity">  </div>
+                                <div class="issue__priority">  </div>
+                                <p class ="issue__id">#{{ issue.id }}</p>
+                                <strong>{{ issue.subject }}</strong>
+                                <p class="issue__description">  {{ issue.description }} </p>
+                            </div>
+                            <div class="issue__item-right">
+                                <a href="{% url 'delete_issue' issue.id %}">
+                                    <span class="material-icons issue__icon">delete</span>
+                                </a>
+                                <span class="material-icons issue__icon">edit</span>
+                            </div>
+                        </div>
+                    </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

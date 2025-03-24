@@ -8,8 +8,8 @@
 }
 
 body {
-    font-family: sans-serif;
-    background-color: #e2eaff;
+     font-family: "Poppins", sans-serif;
+    background-color: #fffffffe;
     color: #101632dd;
     padding: 60px;
 }
@@ -29,7 +29,7 @@ ul {
 
 /*  HEADER            */
 .header {
-    background-color: #fff;
+    background-color: #e2eaff;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -156,9 +156,98 @@ ul {
 }
 
 /*  Issue  */
-
 .issue-container {
     flex-grow: 1;  /* Ocupa el espacio restante */
     padding: 20px;
 }
+
+
+/*      Issue_List              */
+
+.issue {
+    color: #008aa8;
+    margin-bottom: 25px;
+}
+
+.issue__item-content {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.issue__item-left {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    flex-grow: 2;
+}
+
+.issue__item-right {
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+    flex-grow: 1;
+}
+
+.issue__list-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.issue__item {
+    list-style: none;
+    background-color: #22222222;
+    border-radius: 15px;
+    margin-bottom: 15px;
+}
+.issue__type {
+    border-radius: 45px;
+    padding: 12px;
+    background-color: #5b2;
+    margin: 15px;
+}
+
+.issue__severity {
+    border-radius: 45px;
+    padding: 12px;
+    background-color: #b25;
+    margin: 15px;
+
+}
+
+.issue__priority {
+    border-radius: 45px;
+    padding: 12px;
+    background-color: #27b;
+    margin: 15px;
+}
+
+.issue__item:hover {
+    background-color: #bb225588;
+}
+
+.issue__description {
+    margin-left: 20px;
+}
+
+.issue__icon {
+    color: #666;
+    font-size: 30px;
+    margin: 10px;
+}
+
+.issue__id {
+    color: #008aa8;
+    margin: 5px;
+}
+
+
+
+
+
+
+
+
 
