@@ -1,33 +1,60 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1 class="issue">Issues</h1>
+<h1 class="issue">Issues</h1>
 
+<section class="issue__table">
 
-
-
-    <div  class="issue__list-container">
-        <ul>
-            {% for issue in issues %}
-                    <li class="issue__item">
-                        <div class="issue__item-content">
-                            <div class="issue__item-left">
-                                <div class="issue__type">  </div>
-                                <div class="issue__severity">  </div>
-                                <div class="issue__priority">  </div>
-                                <p class ="issue__id">#{{ issue.id }}</p>
-                                <strong>{{ issue.subject }}</strong>
-                                <p class="issue__description">  {{ issue.description }} </p>
-                            </div>
-                            <div class="issue__item-right">
-                                <a href="{% url 'delete_issue' issue.id %}">
-                                    <span class="material-icons issue__icon">delete</span>
-                                </a>
-                                <span class="material-icons issue__icon">edit</span>
-                            </div>
-                        </div>
-                    </li>
-            {% endfor %}
-        </ul>
+    <!-- Cabecera de columnas -->
+    <div class="issue__key-container">
+        <span class="issue__key">Type</span>
+        <span class="issue__key">Severity</span>
+        <span class="issue__key">Priority</span>
+        <span class="">Issue</span>
+        <!-- Última columna para los íconos, si quieres -->
+        <span class="issue__key"> Status</span>
+        <span class="issue__key"> Modified</span>
+        <span class="issue__key"> Assign to </span>
     </div>
+
+    <ul>
+        {% for issue in issues %}
+        <li class="issue__item">
+            <div class="issue__item-content">
+
+                <!-- 1ª columna: Bola de Type -->
+                <div class="issue__type">
+                </div>
+
+                <!-- 2ª columna: Bola de Severity -->
+                <div class="issue__severity">
+                </div>
+
+                <!-- 3ª columna: Bola de Priority -->
+                <div class="issue__priority">
+                </div>
+
+                <!-- 4ª columna: Detalle del Issue (ID, Subject, Descripción...) -->
+                <div class="issue__detail">
+                    <p class="issue__id">#{{ issue.id }}</p>
+                    <p class="issue__topic">{{ issue.subject }}</p>
+                    <p class="issue__description">{{ issue.description }}</p>
+                </div>
+
+                <p class="issue__text"> {{ issue.status }} </p>
+                <p class="issue__text"> {{ issue.created_at }}</p>
+                <p class="issue__text"> Inkih </p>
+
+                <!-- 5ª columna: Íconos (opcional) -->
+                <span class="material-icons issue__icon">edit</span>
+                <a href="{% url 'delete_issue' issue.id %}">
+                    <span class="material-icons issue__icon">delete</span>
+                </a>
+
+
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
 {% endblock %}

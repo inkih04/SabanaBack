@@ -88,7 +88,7 @@ ul {
     left: 0;
     top: 70px;
     height: 100vh;
-    width: clamp(220px, 20vw, 300px);
+    width: clamp(220px, 20vw, 250px);
     background-color: #333;
     display: flex;
     flex-direction: column;
@@ -139,7 +139,7 @@ ul {
     display: flex;
     flex-grow: 1;
     margin-top: 60px; /* Para compensar el header fijo */
-    margin-left: clamp(220px, 20vw, 300px); /* Mueve el contenido para no tapar la sidebar */
+    margin-left: clamp(220px, 20vw, 250px); /* Mueve el contenido para no tapar la sidebar */
     padding: 20px;
 }
 
@@ -164,84 +164,115 @@ ul {
 
 /*      Issue_List              */
 
-.issue {
-    color: #008aa8;
-    margin-bottom: 25px;
+/* Cabecera */
+.issue__key-container {
+    margin-top: 30px;
+    display: grid;
+    font-size: 12px;
+    /* Ajusta los anchos de cada columna a tu gusto */
+    grid-template-columns: 40px 40px 40px auto 40px 160px 60px 40px 40px;
+    align-items: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding: 0 10px;
+    gap: 25px; /* Espacio entre columnas, opcional */
 }
 
+.issue__key, .issue__text {
+    text-align: center;
+}
+
+/* Filas de issues */
 .issue__item-content {
-    display: flex;
+    display: grid;
+    /* Misma configuración de columnas que la cabecera */
+    grid-template-columns: 40px 40px 40px auto 40px 160px 60px 40px 40px;
     align-items: center;
-    padding: 20px;
-    flex-direction: row;
-    justify-content: space-between;
+    padding: 10px;
+    gap: 25px; /* Espacio entre columnas, opcional */
 }
 
-.issue__item-left {
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-    flex-grow: 2;
-}
-
-.issue__item-right {
-    display: flex;
-    align-items: center;
-    flex-direction: row-reverse;
-    flex-grow: 1;
-}
-
-.issue__list-container {
-    display: flex;
-    flex-direction: column;
-}
-
+/* Estilos generales de la lista */
 .issue__item {
     list-style: none;
-    background-color: #22222222;
-    border-radius: 15px;
+    background-color: #f3f3f3;
+    border-radius: 10px;
     margin-bottom: 15px;
 }
-.issue__type {
-    border-radius: 45px;
-    padding: 12px;
-    background-color: #5b2;
-    margin: 15px;
-}
 
-.issue__severity {
-    border-radius: 45px;
-    padding: 12px;
-    background-color: #b25;
-    margin: 15px;
-
-}
-
+/* Para las “bolas” de Type, Severity, Priority */
+.issue__type,
+.issue__severity,
 .issue__priority {
-    border-radius: 45px;
-    padding: 12px;
-    background-color: #27b;
-    margin: 15px;
+    display: flex;
+    justify-content: center; /* Centra el texto/ícono dentro de la bola */
+    align-items: center;
+    padding: 15px;
+    border-radius: 50%;
+    margin: auto; /* Centra la “bola” en su columna */
 }
 
-.issue__item:hover {
-    background-color: #bb225588;
+/* Ejemplo de colores de fondo para cada bola */
+.issue__type {
+    background-color: #2d9;
+    /* Verde */
+
+}
+.issue__severity {
+    background-color: #d29;  /* Rosado/morado */
+}
+.issue__priority {
+    background-color: #29d;  /* Azul */
 }
 
-.issue__description {
-    margin-left: 20px;
-}
-
-.issue__icon {
-    color: #666;
-    font-size: 30px;
-    margin: 10px;
+/* Detalle de la 4ª columna */
+.issue__detail {
+    margin-left: 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .issue__id {
     color: #008aa8;
-    margin: 5px;
+    font-weight: bold;
+    margin-right: 15px;
 }
+
+.issue__description {
+    font-size: 16px;
+    margin-left: 15px;
+}
+
+
+.issue__topic {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
+    margin-left: 5px;
+
+}
+
+
+
+/* Íconos (5ª columna) */
+
+.issue__icon {
+    color: #666;
+    font-size: 24px;
+    margin: 0 5px;
+}
+
+/* Hover */
+.issue__item:hover {
+    background-color: #e0e0e0;
+}
+
+
+
+
+
 
 
 
