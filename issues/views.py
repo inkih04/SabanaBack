@@ -23,3 +23,9 @@ def issue_create(request):
         form = IssueForm()  # Si no es POST, crea un formulario vacío
 
     return render(request, 'issues/issue_create.html', {'form': form})
+
+
+def delete_issue(request, issue_id):
+    issue = Issue.objects.get(id=issue_id)
+    issue.delete()
+    return redirect('issue_list')

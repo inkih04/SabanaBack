@@ -1,14 +1,60 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Issues</h1>
-<a href="{% url 'issue_create' %}">Create New Issue</a>
-<ul>
-    {% for issue in issues %}
-        <li>
-            <strong>{{ issue.subject }}</strong> - {{ issue.description }}<br>
-            Status: {{ issue.get_status_display }} | Priority: {{ issue.get_priority_display }}
+<h1 class="issue">Issues</h1>
+
+<section class="issue__table">
+
+    <!-- Cabecera de columnas -->
+    <div class="issue__key-container">
+        <span class="issue__key">Type</span>
+        <span class="issue__key">Severity</span>
+        <span class="issue__key">Priority</span>
+        <span class="">Issue</span>
+        <!-- Última columna para los íconos, si quieres -->
+        <span class="issue__key"> Status</span>
+        <span class="issue__key"> Modified</span>
+        <span class="issue__key"> Assign to </span>
+    </div>
+
+    <ul>
+        {% for issue in issues %}
+        <li class="issue__item">
+            <div class="issue__item-content">
+
+                <!-- 1ª columna: Bola de Type -->
+                <div class="issue__type">
+                </div>
+
+                <!-- 2ª columna: Bola de Severity -->
+                <div class="issue__severity">
+                </div>
+
+                <!-- 3ª columna: Bola de Priority -->
+                <div class="issue__priority">
+                </div>
+
+                <!-- 4ª columna: Detalle del Issue (ID, Subject, Descripción...) -->
+                <div class="issue__detail">
+                    <p class="issue__id">#{{ issue.id }}</p>
+                    <p class="issue__topic">{{ issue.subject }}</p>
+                    <p class="issue__description">{{ issue.description }}</p>
+                </div>
+
+                <p class="issue__text"> {{ issue.status }} </p>
+                <p class="issue__text"> {{ issue.created_at }}</p>
+                <p class="issue__text"> Inkih </p>
+
+                <!-- 5ª columna: Íconos (opcional) -->
+                <span class="material-icons issue__icon">edit</span>
+                <a href="{% url 'delete_issue' issue.id %}">
+                    <span class="material-icons issue__icon">delete</span>
+                </a>
+
+
+            </div>
         </li>
-    {% endfor %}
-</ul>
+        {% endfor %}
+    </ul>
+</section>
 {% endblock %}
