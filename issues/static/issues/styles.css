@@ -170,7 +170,7 @@ ul {
     display: grid;
     font-size: 12px;
     /* Ajusta los anchos de cada columna a tu gusto */
-    grid-template-columns: 40px 40px 40px auto 100px 160px 60px 40px 40px;
+    grid-template-columns: 40px 40px 40px auto 120px 160px 60px 40px;
     align-items: center;
     font-weight: bold;
     margin-bottom: 10px;
@@ -186,7 +186,7 @@ ul {
 .issue__item-content {
     display: grid;
     /* Misma configuración de columnas que la cabecera */
-    grid-template-columns: 40px 40px 40px auto 100px 160px 60px 40px 40px;
+    grid-template-columns: 40px 40px 40px auto 120px 160px 60px 40px;
     align-items: center;
     padding: 10px;
     gap: 25px; /* Espacio entre columnas, opcional */
@@ -260,6 +260,7 @@ ul {
     border: none;
     outline: none;
     background-color: transparent;
+    font-size: 16px;
 }
 
 .issue__select:hover {
@@ -283,11 +284,16 @@ ul {
     width: 100%;
 }
 
+.issue__text {
+    font-size: 16px;
+}
 
 /* Hover */
 .issue__item:hover {
     background-color: #e0e0e0;
 }
+
+
 
 
 
