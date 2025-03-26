@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import IssueForm
 from .models import Issue
 
@@ -29,3 +29,18 @@ def delete_issue(request, issue_id):
     issue = Issue.objects.get(id=issue_id)
     issue.delete()
     return redirect('issue_list')
+
+
+def update_issue_status(request, issue_id):
+    """ Actualiza el estado de un issue basado en la selección del usuario """
+    issue = get_object_or_404(Issue, id=issue_id)
+
+    if request.method == "POST":
+        new_status = request.POST.get("status")
+        if new_status in dict(Issue.STATUS_CHOICES):  # Verificar que el estado es válido
+            issue.status = new_status
+            issue.save()
+
+    return redirect('issue_list')  # Redirige a la lista de issues
+
+

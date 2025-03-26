@@ -170,7 +170,7 @@ ul {
     display: grid;
     font-size: 12px;
     /* Ajusta los anchos de cada columna a tu gusto */
-    grid-template-columns: 40px 40px 40px auto 40px 160px 60px 40px 40px;
+    grid-template-columns: 40px 40px 40px auto 100px 160px 60px 40px 40px;
     align-items: center;
     font-weight: bold;
     margin-bottom: 10px;
@@ -186,7 +186,7 @@ ul {
 .issue__item-content {
     display: grid;
     /* Misma configuración de columnas que la cabecera */
-    grid-template-columns: 40px 40px 40px auto 40px 160px 60px 40px 40px;
+    grid-template-columns: 40px 40px 40px auto 100px 160px 60px 40px 40px;
     align-items: center;
     padding: 10px;
     gap: 25px; /* Espacio entre columnas, opcional */
@@ -254,6 +254,18 @@ ul {
 
 }
 
+.issue__select {
+    appearance: none;
+    text-align: center;
+    border: none;
+    outline: none;
+    background-color: transparent;
+}
+
+.issue__select:hover {
+    cursor: pointer;
+}
+
 
 
 /* Íconos (5ª columna) */
@@ -263,6 +275,14 @@ ul {
     font-size: 24px;
     margin: 0 5px;
 }
+
+.issue__form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
 
 /* Hover */
 .issue__item:hover {
