@@ -13,7 +13,7 @@ class Issue(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)  # Se guarda la fecha de creación
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')  # Estado de la issue
     assigned_to = models.ForeignKey(
-        'auth.User', on_delete=models.SET_NULL, null=True, blank=True  # Usuario asignado
+        'accounts.CustomUser', on_delete=models.SET_NULL, null=True, blank=True  # Usuario asignado
     )
 
     def __str__(self):
