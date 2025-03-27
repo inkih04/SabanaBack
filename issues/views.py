@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import IssueForm
 from .models import Issue
@@ -10,6 +10,7 @@ def issue_list(request):
 
 
 def issue_create(request):
+    User = get_user_model()  # Obtiene el modelo de usuario personalizado
     default_user = User.objects.first()  # Simulación de usuario logueado
 
     if request.method == 'POST':
