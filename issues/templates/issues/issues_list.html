@@ -3,9 +3,36 @@
 {% block content %}
 <h1 class="issue">Issues</h1>
 
+    <div class="issue__filter-add--Container">
+        <div class="issue__filter" >
+            <a  href="{% url 'issue_create' %}">
+                <div class="issue__filter-button">
+                    <span class="material-icons"> tune</span>
+                    <p class=""> Filters </p>
+                </div>
+            </a>
+        </div>
+        <div class="issue__add">
+            <div class="issue__add-button">
+                <a class="" href="{% url 'issue_create' %}">
+                    <div class="issue__add-button--container">
+                        <span class="material-icons issue__icon"> add </span>
+                        <p>New Issue</p>
+                    </div>
+                </a>
+            </div>
+            <div class="issue__addBulk-button">
+                <a href="{% url 'issue_create' %}">
+                    <span class="material-icons"> post_add </span>
+                </a>
+            </div>
+        </div>
+    </div>
+
 <section class="issue__table">
 
     <!-- Cabecera de columnas -->
+
     <div class="issue__key-container">
         <span class="issue__key">Type</span>
         <span class="issue__key">Severity</span>
@@ -35,11 +62,13 @@
                 </div>
 
                 <!-- 4ª columna: Detalle del Issue (ID, Subject, Descripción...) -->
-                <div class="issue__detail">
-                    <p class="issue__id">#{{ issue.id }}</p>
-                    <p class="issue__topic">{{ issue.subject }}</p>
-                    <p class="issue__description">{{ issue.description }}</p>
-                </div>
+                <a class="issue__detail-link" href="{% url 'issue_detail' issue.id %}">
+                    <div class="issue__detail">
+                        <p class="issue__id">#{{ issue.id }}</p>
+                        <p class="issue__topic">{{ issue.subject }}</p>
+                        <p class="issue__description">{{ issue.description }}</p>
+                    </div>
+                </a>
 
                 <form class="issue__form" method="POST" action="{% url 'update_issue_status' issue.id %}">
                     {% csrf_token %}
