@@ -25,6 +25,12 @@ def issue_create(request):
 
     return render(request, 'issues/issue_create.html', {'form': form})
 
+def issue_detail(request, issue_id):
+    """ Muestra los detalles de un issue específico """
+    issue = get_object_or_404(Issue, id=issue_id)
+    return render(request, 'issues/issue_detail.html', {'issue': issue})
+
+
 
 def delete_issue(request, issue_id):
     issue = Issue.objects.get(id=issue_id)
