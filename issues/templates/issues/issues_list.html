@@ -3,65 +3,52 @@
 {% block content %}
 <h1 class="issue">Issues</h1>
 
-    <div class="issue__filter-add--Container">
-        <div class="issue__filter" >
-            <a  href="{% url 'issue_create' %}">
-                <div class="issue__filter-button">
-                    <span class="material-icons"> tune</span>
-                    <p class=""> Filters </p>
+<div class="issue__filter-add--Container">
+    <div class="issue__filter">
+        <a href="{% url 'issue_create' %}">
+            <div class="issue__filter-button">
+                <span class="material-icons"> tune</span>
+                <p>Filters</p>
+            </div>
+        </a>
+    </div>
+    <div class="issue__add">
+        <div class="issue__add-button">
+            <!-- Enlace que apunta al modal -->
+            <a class="open-modal" href="#modal-create">
+                <div class="issue__add-button--container">
+                    <span class="material-icons"> add </span>
+                    <p>New Issue</p>
                 </div>
             </a>
         </div>
-        <div class="issue__add">
-            <div class="issue__add-button">
-                <a class="" href="{% url 'issue_create' %}">
-                    <div class="issue__add-button--container">
-                        <span class="material-icons issue__icon"> add </span>
-                        <p>New Issue</p>
-                    </div>
-                </a>
-            </div>
-            <div class="issue__addBulk-button">
-                <a href="{% url 'issue_create' %}">
-                    <span class="material-icons"> post_add </span>
-                </a>
-            </div>
+        <div class="issue__addBulk-button">
+            <a href="{% url 'issue_create' %}">
+                <span class="material-icons"> post_add </span>
+            </a>
         </div>
     </div>
+</div>
 
 <section class="issue__table">
-
     <!-- Cabecera de columnas -->
-
     <div class="issue__key-container">
         <span class="issue__key">Type</span>
         <span class="issue__key">Severity</span>
         <span class="issue__key">Priority</span>
-        <span class="">Issue</span>
-        <!-- Última columna para los íconos, si quieres -->
-        <span class="issue__key"> Status</span>
-        <span class="issue__key"> Modified</span>
-        <span class="issue__key"> Assign to </span>
+        <span>Issue</span>
+        <span class="issue__key">Status</span>
+        <span class="issue__key">Modified</span>
+        <span class="issue__key">Assign to</span>
     </div>
 
     <ul>
         {% for issue in issues %}
         <li class="issue__item">
             <div class="issue__item-content">
-
-                <!-- 1ª columna: Bola de Type -->
-                <div class="issue__type">
-                </div>
-
-                <!-- 2ª columna: Bola de Severity -->
-                <div class="issue__severity">
-                </div>
-
-                <!-- 3ª columna: Bola de Priority -->
-                <div class="issue__priority">
-                </div>
-
-                <!-- 4ª columna: Detalle del Issue (ID, Subject, Descripción...) -->
+                <div class="issue__type"></div>
+                <div class="issue__severity"></div>
+                <div class="issue__priority"></div>
                 <a class="issue__detail-link" href="{% url 'issue_detail' issue.id %}">
                     <div class="issue__detail">
                         <p class="issue__id">#{{ issue.id }}</p>
@@ -69,7 +56,6 @@
                         <p class="issue__description">{{ issue.description }}</p>
                     </div>
                 </a>
-
                 <form class="issue__form" method="POST" action="{% url 'update_issue_status' issue.id %}">
                     {% csrf_token %}
                     <select name="status" class="issue__select" onchange="this.form.submit()">
@@ -80,20 +66,68 @@
                         {% endfor %}
                     </select>
                 </form>
-
-
-                <p class="issue__text"> {{ issue.created_at }}</p>
-                <p class="issue__text"> Inkih </p>
-
-                <!-- 5ª columna: Íconos (opcional) -->
+                <p class="issue__text">{{ issue.created_at }}</p>
+                <p class="issue__text">Inkih</p>
                 <a href="{% url 'delete_issue' issue.id %}">
                     <span class="material-icons issue__icon">delete</span>
                 </a>
-
-
             </div>
         </li>
         {% endfor %}
     </ul>
 </section>
+
+<!-- Modal utilizando :target -->
+<div id="modal-create" class="modal">
+    <div class="modal-content">
+        <div class="navBar__modal">
+            <h1>New Issue</h1>
+            <a href="#" class="close">&times;</a>
+        </div>
+
+        <form method="post" action="{% url 'issue_create' %}">
+            {% csrf_token %}
+            <div class="modal__form-container">
+                <!-- Subject -->
+                <div class="modal__form-Subject">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                <!-- Description -->
+                <label for="description">Description</label>
+                <textarea id="description" name="description" placeholder="Please add descriptive text to help others better understand this issue"></textarea>
+
+                <!-- Status -->
+                <label class="modal-text" for="status">Status</label>
+                <select class="modal-text" id="status" name="status">
+                {% for value, label in form.fields.status.choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+                </select>
+
+                <!-- Assigned To -->
+                <label class="modal-text" for="assigned_to">Assigned To</label>
+                <select class="modal-text" id="assigned_to" name="assigned_to">
+                    <option value="">Unassigned</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+
+                <!-- Attachments Section -->
+                <div class="attachments">
+                    <label class="modal-text" >Attachments</label>
+                    <div class="attachment-box">
+                        <p class="modal-text" >Drop attachments here!</p>
+                        <input type="file" id="attachments" name="attachments" multiple>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="create-btn">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 {% endblock %}

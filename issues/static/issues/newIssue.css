@@ -1,0 +1,135 @@
+/* Estilos base para el modal: oculto por defecto */
+.modal {
+    opacity: 0;
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    transition: opacity 0.3s ease;
+    z-index: 2000;
+}
+
+/* Cuando el modal está "targeteado" se muestra */
+.modal:target {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Contenedor del contenido del modal */
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: 9% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 5px;
+}
+
+.navBar__modal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    margin-top: 5px;
+}
+
+
+
+
+/* Estilo para el enlace de cerrar */
+.close {
+    text-decoration: none;
+    font-size: 28px;
+    font-weight: bold;
+    color: #aaa;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+}
+
+textarea, select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Botón de etiqueta */
+.tag-btn {
+    background-color: #f1f1f1;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.tag-btn:hover {
+    background-color: #ddd;
+}
+
+/* Sección de adjuntos */
+.attachments {
+    margin-top: 10px;
+}
+
+.attachment-box {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    margin-top: 5px;
+}
+
+/* Botón de crear */
+.create-btn {
+    background-color: #5ce0b3;
+    color: white;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-top: 20px;
+}
+
+.create-btn:hover {
+    background-color: #4acaa2;
+}
+
+
+.modal__form-container {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.modal__form-Subject {
+    display: flex;
+    flex-direction: row;
+    justify-content: center; /* Centra el texto/ícono dentro de la bola */
+    align-items: center;
+    margin-bottom: 10px;
+}
+.modal__form-Subject label {
+    margin-right: 5px;
+    flex-grow: 1;
+    font-size: 20px;
+}
+.modal__form-Subject input {
+    flex-grow: 10;
+    font-size: 20px;
+}
+
+.modal-text {
+    font-size: 15px;
+}
+
