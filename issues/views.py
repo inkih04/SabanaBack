@@ -5,25 +5,28 @@ from .models import Issue
 
 
 def issue_list(request):
-    issues = Issue.objects.all().order_by('-created_at')  # Orden descendente
-    return render(request, './issues/issues_list.html', {'issues': issues})
+    issues = Issue.objects.all().order_by('-created_at')
+    form = IssueForm()  # Instancia vacía del formulario
+    User = get_user_model()
+    users = User.objects.all()  # Lista de usuarios para el campo "Assigned To"
+    return render(request, './issues/issues_list.html', {'issues': issues, 'form': form, 'users': users})
+
 
 
 def issue_create(request):
-    User = get_user_model()  # Obtiene el modelo de usuario personalizado
-    default_user = User.objects.first()  # Simulación de usuario logueado
+    User = get_user_model()  # Obtiene el modelo de usuario
+    users = User.objects.all()  # Obtiene todos los usuarios disponibles
 
     if request.method == 'POST':
         form = IssueForm(request.POST)
         if form.is_valid():
             issue = form.save(commit=False)  # No guarda aún en la BD
-            issue.assigned_to = default_user  # Asigna el usuario por defecto
             issue.save()  # Guarda la issue en la BD
             return redirect('issue_list')  # Redirige a la lista de issues
     else:
-        form = IssueForm()  # Si no es POST, crea un formulario vacío
+        form = IssueForm()  # Formulario vacío
 
-    return render(request, 'issues/issue_create.html', {'form': form})
+    return render(request, 'issues/issue_create.html', {'form': form, 'users': users})
 
 def issue_detail(request, issue_id):
     """ Muestra los detalles de un issue específico """
