@@ -1,5 +1,6 @@
 @import "issue_list.css";
 @import "newIssue.css";
+@import "addBulk.css";
 
 *{
     box-sizing: border-box;

@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import render, redirect, get_object_or_404
+
 from .forms import IssueForm
 from .models import Issue
 
@@ -53,4 +54,13 @@ def update_issue_status(request, issue_id):
 
     return redirect('issue_list')  # Redirige a la lista de issues
 
+def issue_bulk_create(request):
+    if request.method == "POST":
+        issues_text = request.POST.get("issues_text", "").strip()
+        if issues_text:
+            issues = [Issue(subject=line.strip(), description="Bulk created issue")
+                      for line in issues_text.split("\n") if line.strip()]
+            Issue.objects.bulk_create(issues)
+            return redirect('issue_list')
+    return redirect('issue_list')  # Redirigir a la lista de issues
 

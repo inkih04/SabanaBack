@@ -1,0 +1,49 @@
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    display: none; /* Oculto por defecto */
+}
+
+.modal:target {
+    display: flex; /* Se muestra cuando la URL tiene #modal-bulk-create */
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    text-align: center;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    text-decoration: none;
+    font-size: 24px;
+    color: black;
+}
+
+textarea {
+    width: 100%;
+    height: 150px;
+    resize: none;
+    margin-top: 10px;
+}
+
+.create-btn {
+    background-color: #008aa8;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
