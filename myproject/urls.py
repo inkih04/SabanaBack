@@ -23,6 +23,7 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('issues/', include('issues.urls')),
-    path('accounts/', include('accounts.urls')),
-    path('', lambda request: redirect('login')),
+    path('accounts/', include('allauth.urls')),
+
+    path('', lambda request: redirect('issue_list', permanent=True), name='home')
 ]

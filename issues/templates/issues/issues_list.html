@@ -67,7 +67,16 @@
                     </select>
                 </form>
                 <p class="issue__text">{{ issue.created_at }}</p>
-                <p class="issue__text">Inkih</p>
+
+                <form class="issue__form" method="post" action="{% url 'update_issue_assignee' issue.id %}">
+                    {% csrf_token %}
+                    <select class="issue__select" name="assigned_to" onchange="this.form.submit()">
+                        <option value="">Unassigned</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}" {% if issue.assigned_to == user %}selected{% endif %}>{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
                 <a href="{% url 'delete_issue' issue.id %}">
                     <span class="material-icons issue__icon">delete</span>
                 </a>
@@ -131,7 +140,7 @@
 </div>
     <!-- Modal para Add Bulk -->
 <div id="modal-bulk-create" class="modal">
-    <div class="modal-content">
+    <div class="modal-content-bulk">
         <div class="navBar__modal">
             <h1>Add Issues in Bulk</h1>
             <a href="#" class="close">&times;</a>

@@ -8,12 +8,12 @@ class Issue(models.Model):
         ('ready_for_test', 'Ready for Test'),
     ]
 
-    subject = models.CharField(max_length=255)  # Campo de texto corto
-    description = models.TextField()  # Campo de texto largo
-    created_at = models.DateTimeField(auto_now_add=True)  # Se guarda la fecha de creación
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')  # Estado de la issue
+    subject = models.CharField(max_length=255)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     assigned_to = models.ForeignKey(
-        'accounts.CustomUser', on_delete=models.SET_NULL, null=True, blank=True  # Usuario asignado
+        User, on_delete=models.SET_NULL, null=True, blank=True
     )
 
     def __str__(self):
