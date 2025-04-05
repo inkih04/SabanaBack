@@ -11,6 +11,7 @@ def issue_list(request):
     form = IssueForm()  # Instancia vacía del formulario
     User = get_user_model()
     users = User.objects.all()  # Lista de usuarios para el campo "Assigned To"
+
     return render(request, './issues/issues_list.html', {'issues': issues, 'form': form, 'users': users})
 
 
@@ -56,6 +57,27 @@ def update_issue_status(request, issue_id):
 
     return redirect('issue_list')  # Redirige a la lista de issues
 
+
+@login_required
+def update_issue_assignee(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+
+    if request.method == 'POST':
+        assigned_to_id = request.POST.get("assigned_to")
+        if assigned_to_id:
+            try:
+                user = get_user_model().objects.get(id=assigned_to_id)
+                issue.assigned_to = user
+            except get_user_model().DoesNotExist:
+                issue.assigned_to = None
+        else:
+            issue.assigned_to = None  # Desasignar si el valor está vacío
+
+        issue.save()
+
+    return redirect('issue_list')
+
+
 @login_required
 def issue_bulk_create(request):
     if request.method == "POST":
@@ -70,3 +92,4 @@ def issue_bulk_create(request):
 
 def login(request):
     return render(request, 'issues/custom_login.html')
+

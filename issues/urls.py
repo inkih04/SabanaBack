@@ -1,5 +1,6 @@
 from django.urls import path, include
-from .views import issue_list, issue_create, delete_issue, update_issue_status, issue_detail, issue_bulk_create, login
+from .views import issue_list, issue_create, delete_issue, update_issue_status, issue_detail, issue_bulk_create, login, \
+    update_issue_assignee
 
 urlpatterns = [
     path('', issue_list, name='issue_list'),
@@ -12,6 +13,10 @@ urlpatterns = [
 
     path("issues/bulk_create/", issue_bulk_create, name="issue_bulk_create"),
 
+    path('issues/<int:issue_id>/assign/', update_issue_assignee, name='update_issue_assignee'),
+
+
     path('login/', login, name='custom_login'),
+
 
 ]
