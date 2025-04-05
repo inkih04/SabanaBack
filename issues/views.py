@@ -1,10 +1,11 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import IssueForm
 from .models import Issue
 
-
+@login_required
 def issue_list(request):
     issues = Issue.objects.all().order_by('-created_at')
     form = IssueForm()  # Instancia vacía del formulario
@@ -13,7 +14,7 @@ def issue_list(request):
     return render(request, './issues/issues_list.html', {'issues': issues, 'form': form, 'users': users})
 
 
-
+@login_required
 def issue_create(request):
     User = get_user_model()  # Obtiene el modelo de usuario
     users = User.objects.all()  # Obtiene todos los usuarios disponibles
@@ -29,19 +30,20 @@ def issue_create(request):
 
     return render(request, 'issues/issue_create.html', {'form': form, 'users': users})
 
+@login_required
 def issue_detail(request, issue_id):
     """ Muestra los detalles de un issue específico """
     issue = get_object_or_404(Issue, id=issue_id)
     return render(request, 'issues/issue_detail.html', {'issue': issue})
 
 
-
+@login_required
 def delete_issue(request, issue_id):
     issue = Issue.objects.get(id=issue_id)
     issue.delete()
     return redirect('issue_list')
 
-
+@login_required
 def update_issue_status(request, issue_id):
     """ Actualiza el estado de un issue basado en la selección del usuario """
     issue = get_object_or_404(Issue, id=issue_id)
@@ -54,6 +56,7 @@ def update_issue_status(request, issue_id):
 
     return redirect('issue_list')  # Redirige a la lista de issues
 
+@login_required
 def issue_bulk_create(request):
     if request.method == "POST":
         issues_text = request.POST.get("issues_text", "").strip()
