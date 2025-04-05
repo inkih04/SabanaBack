@@ -93,3 +93,8 @@ def issue_bulk_create(request):
 def login(request):
     return render(request, 'issues/custom_login.html')
 
+def profile(request):
+    # Filtra los issues asignados al usuario logueado
+    issues = Issue.objects.filter(assigned_to=request.user).order_by('-created_at')
+    return render(request, 'BaseProfile.html', {'issues': issues, 'users':{request.user}})
+

@@ -3,7 +3,7 @@
 {% block content %}
 <h1>Issue #{{ issue.id }}</h1>
 
-<div class="issue-detail">
+<div class="issue-detail__container">
     <p><strong>Subject:</strong> {{ issue.subject }}</p>
     <p><strong>Description:</strong> {{ issue.description }}</p>
     <p><strong>Type:</strong> {{ issue.get_type_display }}</p>
