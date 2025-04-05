@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import issue_list, issue_create, delete_issue, update_issue_status, issue_detail, issue_bulk_create
+from .views import issue_list, issue_create, delete_issue, update_issue_status, issue_detail, issue_bulk_create, login
 
 urlpatterns = [
     path('', issue_list, name='issue_list'),
@@ -12,5 +12,6 @@ urlpatterns = [
 
     path("issues/bulk_create/", issue_bulk_create, name="issue_bulk_create"),
 
+    path('login/', login, name='custom_login'),
 
 ]

@@ -2,3 +2,5 @@ Django==5.1.7
 djangorestframework  # Si estás usando Django REST Framework
 django-environ  # Si estás gestionando variables de entorno
 django-cors-headers  # Si usas CORS
+django-allauth
+django-allauth[socialaccount]

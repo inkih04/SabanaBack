@@ -64,3 +64,6 @@ def issue_bulk_create(request):
             return redirect('issue_list')
     return redirect('issue_list')  # Redirigir a la lista de issues
 
+
+def login(request):
+    return render(request, 'issues/custom_login.html')
