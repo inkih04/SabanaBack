@@ -1,7 +1,45 @@
-.idea/
+# Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+venv/
+.env/
+.venv/
+
+# Django stuff:
+*.log
+*.pot
 *.pyc
 *.pyo
 *.pyd
-venv/
-.env/
+db.sqlite3
+media/
+staticfiles/
+local_settings.py
+
+# Django migrations (optional, ignore all or selectively)
+**/migrations/*.py[cod]
+!**/migrations/__init__.py
+
+# PyCharm / VSCode / IDE config
+.idea/
+.vscode/
+*.iml
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Backup or temp files
+*.bak
+*.swp
+*.swo
+*~
+
+# Node/npm (if you ever use frontend tooling)
+node_modules/

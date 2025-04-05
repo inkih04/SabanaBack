@@ -14,7 +14,7 @@
     display: flex; /* Se muestra cuando la URL tiene #modal-bulk-create */
 }
 
-.modal-content {
+.modal-content-bulk {
     background: white;
     padding: 20px;
     border-radius: 10px;
