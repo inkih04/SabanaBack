@@ -22,9 +22,8 @@ media/
 staticfiles/
 local_settings.py
 
-# Django migrations (optional, ignore all or selectively)
-**/migrations/*.py[cod]
-!**/migrations/__init__.py
+# Keep migration Python files, ignore compiled ones
+**/migrations/*.pyc
 
 # PyCharm / VSCode / IDE config
 .idea/
