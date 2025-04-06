@@ -4,6 +4,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import IssueForm
 from .models import Issue
+from .models import Status, Priorities, Types, Severities
+from .forms import StatusForm, PrioritiesForm, TypesForm, SeveritiesForm
+
+MODEL_FORM_MAP = {
+    'status': (Status, StatusForm),
+    'priorities': (Priorities, PrioritiesForm),
+    'types': (Types, TypesForm),
+    'severities': (Severities, SeveritiesForm),
+}
 
 @login_required
 def issue_list(request):
@@ -93,3 +102,53 @@ def issue_bulk_create(request):
 def login(request):
     return render(request, 'issues/custom_login.html')
 
+def settings_list(request):
+    """Muestra la lista de todas las configuraciones."""
+    data = {
+        'status': Status.objects.all(),
+        'priorities': Priorities.objects.all(),
+        'types': Types.objects.all(),
+        'severities': Severities.objects.all(),
+    }
+    return render(request, 'settings/settings_list.html', {'data': data})
+
+
+def settings_edit(request, model_name, pk=None):
+    """Añade o edita un objeto de configuración."""
+    model_data = MODEL_FORM_MAP.get(model_name)
+    if not model_data:
+        return redirect('settings_list')  # Redirige si el modelo no es válido
+
+    model, form_class = model_data
+    instance = get_object_or_404(model, pk=pk) if pk else None
+
+    if request.method == 'POST':
+        form = form_class(request.POST, instance=instance)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            # Generar automáticamente el slug si es necesario (solo para Status)
+            if model_name == 'status' and not obj.slug:
+                from django.utils.text import slugify
+                obj.slug = slugify(obj.nombre)
+            obj.save()
+            return redirect('settings_list')
+    else:
+        form = form_class(instance=instance)
+
+    return render(request, 'settings/settings_form.html', {'form': form})
+
+
+def settings_delete(request, model_name, pk):
+    """Elimina un objeto de configuración."""
+    model_data = MODEL_FORM_MAP.get(model_name)  # Obtiene el modelo y formulario correspondiente
+    if not model_data:
+        return redirect('settings_list')  # Redirige si el modelo no es válido
+
+    model, _ = model_data  # Solo necesitamos el modelo, no el formulario
+    instance = get_object_or_404(model, pk=pk)  # Obtiene la instancia del objeto a eliminar
+
+    if request.method == 'POST':
+        instance.delete()  # Elimina el objeto de la base de datos
+        return redirect('settings_list')  # Redirige a la lista de configuraciones
+
+    return render(request, 'settings/settings_confirm_delete.html', {'instance': instance})
