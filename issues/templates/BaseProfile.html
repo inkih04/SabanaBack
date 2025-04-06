@@ -31,51 +31,56 @@
             </div>
         </nav>
     </header>
+
     <aside class="profile__sidebar">
-        <div class = "profile__content">
-                <div class="profile__avatar">
-                    {% with social=request.user.socialaccount_set.all|first %}
-                        {% if social and social.extra_data.picture %}
-                            <img src="{{ social.extra_data.picture }}" alt="avatar" class="profile__avatar-img">
-                        {% else %}
-                            <div class="header__avatar">
-                                <span class="material-icons">person</span>
-                            </div>
-                        {% endif %}
-                    {% endwith %}
+        <div class="profile__content">
+            <div class="profile__avatar">
+                {% with social=request.user.socialaccount_set.all|first %}
+                    {% if social and social.extra_data.picture %}
+                        <img src="{{ social.extra_data.picture }}" alt="avatar" class="profile__avatar-img">
+                    {% else %}
+                        <div class="header__avatar">
+                            <span class="material-icons">person</span>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            </div>
+            <span class="profile__name"> {{ request.user.username }} </span>
+            <hr class="divider">
+            <div class="profile__stadistics">
+                <div class="profile__stadistics-item">
+                    <span>0</span>
+                    <span>Total Issues</span>
                 </div>
-                <span class="profile__name"> {{ request.user.username }} </span>
-                <hr class="divider">
-                <div class = "profile__stadistics">
-                    <div class="profile__stadistics-item">
-                        <span >0</span>
-                        <span >Total Issues</span>
-                    </div>
-                    <div class="profile__stadistics-item">
-                        <span >0</span>
-                        <span >Total Issues</span>
-                    </div>
-                    <div class="profile__stadistics-item">
-                        <span >0</span>
-                        <span >Total Issues</span>
-                    </div>
+                <div class="profile__stadistics-item">
+                    <span>0</span>
+                    <span>Total Issues</span>
                 </div>
-                <hr class="divider">
-                <span class="profile__text"> Hola que tal soc el Victor i et dono la benvinguda a la meva app</span>
-                <button class="profile__btn-Edit "> Edit Bio </button>
+                <div class="profile__stadistics-item">
+                    <span>0</span>
+                    <span>Total Issues</span>
+                </div>
+            </div>
+            <hr class="divider">
+            <span class="profile__text">
+                {% if request.user.profile.biography %}
+                    {{ request.user.profile.biography }}
+                {% else %}
+                    Enter a bio for your profile
+                {% endif %}
+            </span>
+            <!-- Botón que abre el modal con :target -->
+            <a href="#modal-edit-bio" class="profile__btn-Edit open-modal">
+                Edit Bio
+            </a>
         </div>
     </aside>
+
     <div class="content--profile">
         <div class="profile__changePage">
-                <button class="pageChanger">
-                    Open Assigned Issues
-                </button >
-                <button class="pageChanger">
-                    Watched Issues
-                </button>
-                <button class="pageChanger">
-                    Comments
-                </button>
+            <button class="pageChanger">Open Assigned Issues</button>
+            <button class="pageChanger">Watched Issues</button>
+            <button class="pageChanger">Comments</button>
         </div>
 
         <div class="issue-container">
@@ -83,6 +88,21 @@
         </div>
     </div>
 
+    <!-- Modal para editar la biografía -->
+    <div id="modal-edit-bio" class="profile__modal">
+        <div class="profile__modal-content">
+            <div class="profile__modal-header">
+                <h1>Edit Bio</h1>
+                <a href="#" class="profile__modal-close">&times;</a>
+            </div>
 
+            <form method="post" action="{% url 'update_bio' %}" class="profile__modal-form">
+                {% csrf_token %}
+                <label for="biography">Your biography</label>
+                <textarea id="biography" name="biography" rows="6">{% if request.user.profile.biography %}{{ request.user.profile.biography }}{% else %}Enter a bio for your profile{% endif %}</textarea>
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
