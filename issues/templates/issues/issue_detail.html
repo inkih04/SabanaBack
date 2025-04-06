@@ -6,10 +6,10 @@
 <div class="issue-detail">
     <p><strong>Subject:</strong> {{ issue.subject }}</p>
     <p><strong>Description:</strong> {{ issue.description }}</p>
-    <p><strong>Type:</strong> {{ issue.get_type_display }}</p>
-    <p><strong>Severity:</strong> {{ issue.get_severity_display }}</p>
-    <p><strong>Priority:</strong> {{ issue.get_priority_display }}</p>
-    <p><strong>Status:</strong> {{ issue.get_status_display }}</p>
+    <p><strong>Type:</strong> {{ issue.issue_type.nombre }}</p>
+    <p><strong>Severity:</strong> {{ issue.severity.nombre }}</p>
+    <p><strong>Priority:</strong> {{ issue.priority.nombre }}</p>
+    <p><strong>Status:</strong> {{ issue.status.nombre }}</p>
     <p><strong>Created at:</strong> {{ issue.created_at }}</p>
     <p><strong>Assigned to:</strong> {{ issue.assigned_to }}</p>
 

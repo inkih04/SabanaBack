@@ -13,7 +13,6 @@
     <thead>
     <tr>
         <th>Nombre</th>
-        <th>Slug</th>
         <th>Color</th>
         <th>Acciones</th>
     </tr>
@@ -22,7 +21,6 @@
     {% for obj in objects %}
     <tr>
         <td>{{ obj.nombre }}</td>
-        <td>{{ obj.slug }}</td>
         <td style="background-color: {{ obj.color }};">{{ obj.color }}</td>
         <td>
             <a href="{% url 'settings_edit' key obj.pk %}">Editar</a> |

@@ -20,9 +20,14 @@ def issue_list(request):
     form = IssueForm()  # Instancia vacía del formulario
     User = get_user_model()
     users = User.objects.all()  # Lista de usuarios para el campo "Assigned To"
+    statuses = Status.objects.all()
 
-    return render(request, './issues/issues_list.html', {'issues': issues, 'form': form, 'users': users})
-
+    return render(request, './issues/issues_list.html', {
+        'issues': issues,
+        'form': form,
+        'users': users,
+        'statuses': statuses,
+    })
 
 @login_required
 def issue_create(request):
@@ -59,10 +64,13 @@ def update_issue_status(request, issue_id):
     issue = get_object_or_404(Issue, id=issue_id)
 
     if request.method == "POST":
-        new_status = request.POST.get("status")
-        if new_status in dict(Issue.STATUS_CHOICES):  # Verificar que el estado es válido
+        new_status_id = request.POST.get("status")
+        try:
+            new_status = Status.objects.get(id=new_status_id)
             issue.status = new_status
             issue.save()
+        except Status.DoesNotExist:
+            pass  # Manejar el caso donde el estado no exista
 
     return redirect('issue_list')  # Redirige a la lista de issues
 
@@ -83,6 +91,39 @@ def update_issue_assignee(request, issue_id):
             issue.assigned_to = None  # Desasignar si el valor está vacío
 
         issue.save()
+
+    return redirect('issue_list')
+
+@login_required
+def update_issue_metadata(request, issue_id):
+    """Actualiza tipo, prioridad y severidad de un issue"""
+    issue = get_object_or_404(Issue, id=issue_id)
+
+    if request.method == "POST":
+        try:
+            # Actualizar tipo
+            new_type_id = request.POST.get("type")
+            if new_type_id:
+                new_type = Types.objects.get(id=new_type_id)
+                issue.issue_type = new_type
+
+            # Actualizar prioridad
+            new_priority_id = request.POST.get("priority")
+            if new_priority_id:
+                new_priority = Priorities.objects.get(id=new_priority_id)
+                issue.priority = new_priority
+
+            # Actualizar severidad
+            new_severity_id = request.POST.get("severity")
+            if new_severity_id:
+                new_severity = Severities.objects.get(id=new_severity_id)
+                issue.severity = new_severity
+
+            # Guardar cambios en el modelo Issue
+            issue.save()
+
+        except (Types.DoesNotExist, Priorities.DoesNotExist, Severities.DoesNotExist):
+            pass  # Manejar errores si no se encuentran valores válidos
 
     return redirect('issue_list')
 
