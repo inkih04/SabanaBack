@@ -1,18 +1,139 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Issue #{{ issue.id }}</h1>
 
-<div class="issue-detail">
-    <p><strong>Subject:</strong> {{ issue.subject }}</p>
-    <p><strong>Description:</strong> {{ issue.description }}</p>
-    <p><strong>Type:</strong> {{ issue.get_type_display }}</p>
-    <p><strong>Severity:</strong> {{ issue.get_severity_display }}</p>
-    <p><strong>Priority:</strong> {{ issue.get_priority_display }}</p>
-    <p><strong>Status:</strong> {{ issue.get_status_display }}</p>
-    <p><strong>Created at:</strong> {{ issue.created_at }}</p>
-    <p><strong>Assigned to:</strong> {{ issue.assigned_to }}</p>
 
-    <a href="{% url 'issue_list' %}">Back to Issues</a>
+<div class="issue-info-main">
+
+    <div class="issue-info-principal">
+    <h1>#{{ issue.id }} {{ issue.subject }}</h1>
+
+                    <div class="issue-info-header">
+                            <h2>Issue Details</h2>
+
+
+
+                        <div class="issue-info-created">
+                            <div class="issue-info-goToOtherIssue">
+                                <div class="issue-info-goToOtherIssue-icon">
+                                    <span class="material-icons">arrow_back_ios</span>
+                                </div>
+                                <div class="issue-info-goToOtherIssue-icon">
+                                    <span class="material-icons">arrow_forward_ios</span>
+                                </div>
+                            </div>
+                                <p><strong>Created by:</strong> {{ issue.created_by }}</p>
+                                <p><strong>Created at:</strong> {{ issue.created_at }}</p>
+                        </div>
+                    </div>
+
+
+                <div class="issue-info-description">
+                    <h2>Description</h2>
+                    <textarea id="Description" name="Description" placeholder="Add description">{{ issue.description }}</textarea>
+                    <div class="issue-info-saveButtons">
+                        <input type="submit" value="Save" class="info-issue-saveButton">
+                    </div>
+                </div>
+
+                <div class="issue-info-attachments">
+                <div class="issue-info-attachments-title">
+                    <h2>Attachments</h2>
+                    <div class="issue-info-attachments-add">
+                        <span class="material-icons"> add </span>
+                    </div>
+
+                </div>
+                    <div class="issue-info-attachments-box">
+                        <p class="issue-info-attachments-drop" >Drop attachments here!</p>
+                        <input type="file" id="attachments" name="attachments" multiple>
+                    </div>
+                    {% for attachment in issue.attachments.all %}
+                        <a href="{{ attachment.file.url }}">{{ attachment.file.name }}</a>
+                    {% endfor %}
+                </div>
+
+                <div class="issue-info-comments">
+                <div class="issue-info-comments-title">
+                    <h2> {{ issue.comments.size }}Comments</h2>
+                </div>
+                    <textarea id="Comments" name="Comments" placeholder="Type a new comment here"></textarea>
+                    {% for comment in issue.comments.all %}
+                       <p>{{ comment.text }}</p>
+                    {% endfor %}
+                <div class="issue-info-saveButtons">
+                        <input type="submit" value="Add Comment" class="info-issue-saveButton">
+                </div>
+                </div>
+
+                <div class="issue-info-back">
+                    <a href="{% url 'issue_list' %}">Back to Issues</a>
+                </div>
+    </div>
+        <div class="issue-info-status">
+        <aside>
+            <p><strong>Status:</strong></p>
+        <form method="POST" action="{% url 'update_issue_status' issue.id %}">
+            {% csrf_token %}
+            <label for="status"></label>
+            <select id="info-issue-status-selector"ame="status" onchange="this.form.submit()">
+                {% for value, label in issue.STATUS_CHOICES %}
+                        <option value="{{ value }}" {% if issue.status == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+            </select>
+        </form>
+            <div class="issue-info-status-properties">
+                <p><strong>Severity:</strong> {{ issue.get_severity_display }}</p>
+            <p><strong>Priority:</strong> {{ issue.get_priority_display }}</p>
+            <p><strong>Type:</strong> {{ issue.get_type_display }}</p>
+            </div>
+            <div class="issue-info-status-assigned">
+                <p><strong>Assigned to:</strong> {{ issue.assigned_to }}</p>
+                <div class="issue-info-status-assigned-list">
+                    {% for assigned in issue.assigned_to.all %}
+                        <p>{{ assigned }}</p>
+                    {% endfor %}
+                <div class="issue-info-status-assigned-button">
+                    <span class="material-icons" style="font-size: 30px"> add </span>
+                    <p>Add assigned</p>
+                </div>
+                <div class="issue-info-status-assigned-button">
+                    <span class="material-icons" style="font-size: 30px"> add </span>
+                    <p>Assign to me</p>
+                </div>
+
+                </div>
+            </div>
+            <div class="issue-info-status-watchers">
+                <p><strong>Watchers:</strong> {{ issue.watchers }}</p>
+                <div class="issue-info-status-watchers-list">
+                    {% for watcher in issue.watchers.all %}
+                        <p>{{ watcher }}</p>
+                    {% endfor %}
+                <div class="issue-info-status-watchers-button">
+                    <span class="material-icons" style="font-size: 30px"> add </span>
+
+                    <p>Add watchers</p>
+                </div>
+                <div class="issue-info-status-watchers-button">
+                    <span class="material-icons" style="font-size: 30px"> add </span>
+
+                    <p>Watch</p>
+                </div>
+                </div>
+            </div>
+            <div class="issue-info-status-buttons">
+                <div class="issue-info-status-buttons-icon">
+                    <span class="material-icons">schedule</span>
+                </div>
+                <div class="issue-info-status-buttons-icon">
+                    <span class="material-icons">delete</span>
+                </div>
+            </div>
+        </aside>
+            </div>
 </div>
+
 {% endblock %}
