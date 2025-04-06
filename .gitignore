@@ -17,7 +17,6 @@ venv/
 *.pyc
 *.pyo
 *.pyd
-db.sqlite3
 media/
 staticfiles/
 local_settings.py
