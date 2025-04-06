@@ -166,6 +166,7 @@
     background-color: #83eede;
     border-radius: 7px;
     padding: 10px;
+    box-shadow: 0 0 5px #aaa;
 }
 
 .issue__add-button--container:hover {
@@ -198,7 +199,7 @@
     background-color: #f3f3f3;
     padding: 4px 10px;
     border-radius: 7px;
-
+    box-shadow: 0 0 5px #aaa;
 }
 
 .issue__addBulk-button span {
@@ -215,6 +216,7 @@
     border-radius: 7px;
     padding:10px;
     margin-left: 10px;
+    box-shadow: 0 0 5px #aaa;
 }
 
 .issue__filter a {

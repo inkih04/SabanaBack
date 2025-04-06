@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import IssueForm
 from .models import Issue
+from .models import Profile
 
 @login_required
 def issue_list(request):
@@ -93,3 +94,16 @@ def issue_bulk_create(request):
 def login(request):
     return render(request, 'issues/custom_login.html')
 
+def profile(request):
+    # Filtra los issues asignados al usuario logueado
+    issues = Issue.objects.filter(assigned_to=request.user).order_by('-created_at')
+    return render(request, 'BaseProfile.html', {'issues': issues, 'users':{request.user}})
+
+@login_required
+def update_bio(request):
+    if request.method == 'POST':
+        bio_text = request.POST.get('biography', '')
+        profile = request.user.profile
+        profile.biography = bio_text
+        profile.save()
+    return redirect('profile')
