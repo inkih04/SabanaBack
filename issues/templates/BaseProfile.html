@@ -1,0 +1,88 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Issues App{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'issues/styles.css' %}">
+</head>
+<body>
+    <header class="header shadow">
+        <div class="header__logo-container">
+            <i class="material-icons">home</i>
+            <h1 class="header__title">Sabana</h1>
+        </div>
+        <nav class="header__nav">
+            <div class="header__nav-container">
+                <a href="{% url 'issue_list' %}" class="header__nav-link"> Go back to Issues </a>
+                {% with social=request.user.socialaccount_set.all|first %}
+                    {% if social and social.extra_data.picture %}
+                        <img src="{{ social.extra_data.picture }}" alt="avatar" class="header__avatar-img">
+                    {% else %}
+                        <div class="header__avatar">
+                            <span class="material-icons">person</span>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                <span class="header__username">{{ request.user.username }}</span>
+            </div>
+        </nav>
+    </header>
+    <aside class="profile__sidebar">
+        <div class = "profile__content">
+                <div class="profile__avatar">
+                    {% with social=request.user.socialaccount_set.all|first %}
+                        {% if social and social.extra_data.picture %}
+                            <img src="{{ social.extra_data.picture }}" alt="avatar" class="profile__avatar-img">
+                        {% else %}
+                            <div class="header__avatar">
+                                <span class="material-icons">person</span>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                <span class="profile__name"> {{ request.user.username }} </span>
+                <hr class="divider">
+                <div class = "profile__stadistics">
+                    <div class="profile__stadistics-item">
+                        <span >0</span>
+                        <span >Total Issues</span>
+                    </div>
+                    <div class="profile__stadistics-item">
+                        <span >0</span>
+                        <span >Total Issues</span>
+                    </div>
+                    <div class="profile__stadistics-item">
+                        <span >0</span>
+                        <span >Total Issues</span>
+                    </div>
+                </div>
+                <hr class="divider">
+                <span class="profile__text"> Hola que tal soc el Victor i et dono la benvinguda a la meva app</span>
+                <button class="profile__btn-Edit "> Edit Bio </button>
+        </div>
+    </aside>
+    <div class="content--profile">
+        <div class="profile__changePage">
+                <button class="pageChanger">
+                    Open Assigned Issues
+                </button >
+                <button class="pageChanger">
+                    Watched Issues
+                </button>
+                <button class="pageChanger">
+                    Comments
+                </button>
+        </div>
+
+        <div class="issue-container">
+            {% include "issues/issue_table.html" %}
+        </div>
+    </div>
+
+
+</body>
+</html>
