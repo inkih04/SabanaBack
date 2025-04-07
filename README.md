@@ -17,7 +17,7 @@ We use **Taiga** for tracking tasks and project progress:
 ## 🚀 Deployment
 
 Link to the deployment of the web on **Render**:  
-🔗 [Live API on Render](https://render.com/deployment-link-here)
+🔗 [Live API on Render](https://it22d-backend.onrender.com/)
 
 ## 🛠️ Technologies Used
 
