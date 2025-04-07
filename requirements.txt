@@ -4,3 +4,7 @@ django-environ  # Si estás gestionando variables de entorno
 django-cors-headers  # Si usas CORS
 django-allauth
 django-allauth[socialaccount]
+gunicorn
+psycopg2-binary
+dj_database_url
+whitenoise
