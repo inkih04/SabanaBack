@@ -28,10 +28,11 @@ class Issue(models.Model):
 # -------------------------------
 # Extensión del modelo User: Profile
 # -------------------------------
+# models.py
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    # Campo para guardar la biografía o descripción breve
     biography = models.TextField(blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)  # Campo para el avatar
 
     def __str__(self):
         return f'Perfil de {self.user.username}'
@@ -61,3 +62,12 @@ class Comment(models.Model):
 
     def __str__(self):
         return {self.issue}
+
+
+class Attachment(models.Model):
+    issue = models.ForeignKey(Issue, related_name='attachments', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='attachments/')  # Aquí es donde defines el path dentro del bucket
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Attachment for {self.issue.subject}'

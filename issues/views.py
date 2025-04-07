@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import IssueForm
-from .models import Issue
+from .models import Issue, Attachment
 from .models import Profile
 
 
@@ -31,11 +31,25 @@ def issue_create(request):
     users = User.objects.all()  # Obtiene todos los usuarios disponibles
 
     if request.method == 'POST':
+        if request.method == 'POST':
+            print("FILES RECIBIDOS:")
+            print(request.FILES)  # Muestra todos los archivos recibidos
+            print("Lista de attachments:")
+            print(request.FILES.getlist('attachments'))  # Muestra específicamente el campo "attachments"
+
         form = IssueForm(request.POST)
+        # Obtenemos la lista de archivos enviados con el input "attachments"
+        attachment_files = request.FILES.getlist('attachments')
         if form.is_valid():
             issue = form.save(commit=False)  # No guarda aún en la BD
             issue.created_by = request.user  # Asigna el usuario logueado
             issue.save()  # Guarda el issue en la BD
+
+            # Procesa y guarda cada archivo adjunto
+            for file in attachment_files:
+                attachment = Attachment.objects.create(issue=issue, file=file)
+                print(f"✔ Archivo '{file.name}' guardado como Attachment con ID {attachment.id}")
+
             return redirect('issue_list')  # Redirige a la lista de issues
     else:
         form = IssueForm()  # Formulario vacío

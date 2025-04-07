@@ -48,8 +48,7 @@
             <h1>New Issue</h1>
             <a href="#" class="close">&times;</a>
         </div>
-
-        <form method="post" action="{% url 'issue_create' %}">
+        <form method="post" action="{% url 'issue_create' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="modal__form-container">
                 <!-- Subject -->
@@ -80,9 +79,9 @@
 
                 <!-- Attachments Section -->
                 <div class="attachments">
-                    <label class="modal-text" >Attachments</label>
+                    <label class="modal-text">Attachments</label>
                     <div class="attachment-box">
-                        <p class="modal-text" >Drop attachments here!</p>
+                        <p class="modal-text">Drop attachments here!</p>
                         <input type="file" id="attachments" name="attachments" multiple>
                     </div>
                 </div>
