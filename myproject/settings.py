@@ -30,6 +30,11 @@ SECRET_KEY = 'django-insecure-g(@l(g*1wva2_d+&y*fk5$k0ox%w=$(8e^d*1#6&pr9d$tr@5k
 DEBUG = True
 
 ALLOWED_HOSTS = []
+# Agregar el dominio externo de Render a ALLOWED_HOSTS si está disponible
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 
 # Application definition
