@@ -1,17 +1,26 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import IssueForm
 from .models import Issue
 from .models import Profile
 
+
 @login_required
 def issue_list(request):
-    issues = Issue.objects.all().order_by('-created_at')
     form = IssueForm()  # Instancia vacía del formulario
     User = get_user_model()
     users = User.objects.all()  # Lista de usuarios para el campo "Assigned To"
+
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        issues = Issue.objects.filter(
+            Q(subject__iexact=search_query) | Q(description__iexact=search_query)
+        ).order_by('-created_at')
+    else:
+        issues = Issue.objects.all().order_by('-created_at')
 
     return render(request, './issues/issues_list.html', {'issues': issues, 'form': form, 'users': users})
 
@@ -25,12 +34,14 @@ def issue_create(request):
         form = IssueForm(request.POST)
         if form.is_valid():
             issue = form.save(commit=False)  # No guarda aún en la BD
-            issue.save()  # Guarda la issue en la BD
+            issue.created_by = request.user  # Asigna el usuario logueado
+            issue.save()  # Guarda el issue en la BD
             return redirect('issue_list')  # Redirige a la lista de issues
     else:
         form = IssueForm()  # Formulario vacío
 
     return render(request, 'issues/issue_create.html', {'form': form, 'users': users})
+
 
 @login_required
 def issue_detail(request, issue_id):
@@ -47,16 +58,21 @@ def delete_issue(request, issue_id):
 
 @login_required
 def update_issue_status(request, issue_id):
-    """ Actualiza el estado de un issue basado en la selección del usuario """
+    """Actualiza el estado de un issue y redirige a la página de origen."""
     issue = get_object_or_404(Issue, id=issue_id)
 
     if request.method == "POST":
         new_status = request.POST.get("status")
-        if new_status in dict(Issue.STATUS_CHOICES):  # Verificar que el estado es válido
+        if new_status in dict(Issue.STATUS_CHOICES):
             issue.status = new_status
             issue.save()
 
-    return redirect('issue_list')  # Redirige a la lista de issues
+    # Obtener la URL de retorno enviada en el formulario
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
+    return redirect('issue_list')
+
 
 
 @login_required
@@ -84,11 +100,18 @@ def issue_bulk_create(request):
     if request.method == "POST":
         issues_text = request.POST.get("issues_text", "").strip()
         if issues_text:
-            issues = [Issue(subject=line.strip(), description="Bulk created issue")
-                      for line in issues_text.split("\n") if line.strip()]
+            issues = [
+                Issue(
+                    subject=line.strip(),
+                    description="Bulk created issue",
+                    created_by=request.user  # Asigna el usuario creador
+                )
+                for line in issues_text.split("\n") if line.strip()
+            ]
             Issue.objects.bulk_create(issues)
             return redirect('issue_list')
     return redirect('issue_list')  # Redirigir a la lista de issues
+
 
 
 def login(request):
