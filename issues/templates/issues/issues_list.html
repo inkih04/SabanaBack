@@ -11,7 +11,16 @@
                 <p>Filters</p>
             </div>
         </a>
+        <form method="get" action="{% url 'issue_list' %}">
+          <div class="issue__search-bar">
+            <div class="issue__search-bar--container">
+              <span class="material-icons">search</span>
+              <input type="text" name="search" placeholder="Search issues..." value="{{ request.GET.search|default:'' }}" />
+            </div>
+          </div>
+        </form>
     </div>
+
     <div class="issue__add">
         <div class="issue__add-button">
             <!-- Enlace que apunta al modal -->

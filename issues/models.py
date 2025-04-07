@@ -18,7 +18,9 @@ class Issue(models.Model):
     assigned_to = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True
     )
-
+    created_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="created_issues"
+    )
     def __str__(self):
         return self.subject
 

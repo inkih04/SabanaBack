@@ -26,6 +26,7 @@
                 </a>
                 <form class="issue__form" method="POST" action="{% url 'update_issue_status' issue.id %}">
                     {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
                     <select name="status" class="issue__select" onchange="this.form.submit()">
                         {% for value, label in issue.STATUS_CHOICES %}
                         <option value="{{ value }}" {% if issue.status == value %}selected{% endif %}>
