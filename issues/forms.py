@@ -1,4 +1,3 @@
-# issues/forms.py
 from django import forms
 from .models import Issue
 
@@ -10,7 +9,13 @@ class IssueForm(forms.ModelForm):
 
     class Meta:
         model = Issue
-        fields = ['subject', 'description', 'status', 'assigned_to']
+        fields = ['subject', 'description', 'status', 'assigned_to', 'due_date']
+        widgets = {
+            'due_date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control'
+            }),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

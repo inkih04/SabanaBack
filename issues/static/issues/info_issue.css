@@ -5,6 +5,7 @@ display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 30px; /* espacio entre las columnas */
+      color: #2a6888;
 }
 .issue-info-principal {
 flex: 3;
@@ -58,7 +59,7 @@ flex: 3;
 }
 
 .info-issue-saveButton {
-background-color: #83eede;
+      background-color: #83eede;
       border-radius: 5px;
       text-align: center;
       font-size: 15px;
@@ -248,4 +249,73 @@ display:flex;
 }
 .issue-info-back {
       margin-top: 20px;
+}
+
+.issue-info-comment{
+      border-bottom: 1px solid #609aa3;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: row;
+}
+
+.issue-info-comment:hover .issue-info-comment-buttons {
+      opacity: 1;
+      pointer-events: auto;
+}
+
+.issue-info-comment-main {
+      width: 90%;
+}
+
+.issue-info-comment-buttons {
+      display:flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      align-items: center;
+      gap: 5px;
+      transition: opacity 0.3s ease, pointer-events 0.3s ease;
+}
+
+.issue-info-status-buttons-comment-edit span{
+      color: #6e9197;
+      font-size: 25px;
+}
+
+.issue-info-status-buttons-comment-delete span{
+      color: #b84444;
+      font-size: 25px;
+}
+
+.issue-info-title {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+       justify-content: space-between;
+}
+
+.issue-info-title-title {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      align-items: center;
+}
+
+.issue-info-title-title:hover .issue-info-title-edit {
+      opacity: 1;
+      pointer-events: auto;
+}
+
+.issue-info-title-edit {
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, pointer-events 0.3s ease;
+}
+
+.issue-info-title-edit span {
+      font-size: 25px;
+      color: #6e9197;
 }

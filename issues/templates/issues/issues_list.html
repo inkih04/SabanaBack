@@ -75,9 +75,18 @@
                     {% endif %}
                 </div>
 
+                           <!-- Submit Button -->
                 {% if form.non_field_errors %}
                     <div class="errorlist">{{ form.non_field_errors }}</div>
                 {% endif %}
+
+                <!-- due_date -->
+                <div class="form-group profile__modal-due-date-group profile__modal-due-date-inline">
+                    <label for="{{ form.due_date.id_for_label }}">Due Date</label>
+                    {{ form.due_date }}
+                </div>
+
+
 
                 <button type="submit" class="create-btn">Create</button>
             </div>

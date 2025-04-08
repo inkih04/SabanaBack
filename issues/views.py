@@ -1,11 +1,13 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import IssueForm
 from .models import Issue, Attachment
 from .models import Profile
+from .models import Comment
 
 
 @login_required
@@ -54,7 +56,23 @@ def issue_create(request):
 def issue_detail(request, issue_id):
     """ Muestra los detalles de un issue específico """
     issue = get_object_or_404(Issue, id=issue_id)
-    return render(request, 'issues/issue_detail.html', {'issue': issue})
+
+    # Si estás mostrando el pop-up para asignar
+    show_assign_form = request.GET.get("show_assign_form") == "1"
+    search_query = request.GET.get("q", "")
+
+    # Obtener todos los usuarios o filtrarlos por búsqueda
+    users = Profile.objects.all()
+    if search_query:
+        users = users.filter(username__icontains=search_query)
+
+    context = {
+        'issue': issue,
+        'show_assign_form': show_assign_form,
+        'users': users,
+    }
+
+    return render(request, 'issues/issue_detail.html', context)
 
 
 @login_required
@@ -78,9 +96,34 @@ def update_issue_status(request, issue_id):
     next_url = request.POST.get("next")
     if next_url:
         return redirect(next_url)
-    return redirect('issue_list')
+    return redirect('issue_detail', issue_id=issue_id)
 
+@login_required
+def update_issue_description(request, issue_id):
+    """Actualiza la descripción de un issue y redirige a la página de origen."""
+    issue = get_object_or_404(Issue, id=issue_id)
 
+    if request.method == "POST":
+        new_description = request.POST.get("description")
+        if new_description:
+            issue.description = new_description
+            issue.save()
+
+    # Ontener la URL de retorno enviada en el formaulario
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
+    return redirect('issue_detail', issue_id=issue_id)
+
+@login_required
+def add_comment_to_issue(request,issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    if request.method == "POST":
+        comment_text = request.POST.get("comment_text")
+        if comment_text:
+            comment = issue.comments.create(user=request.user, text=comment_text)
+            comment.save()
+    return redirect('issue_detail', issue_id=issue_id)
 
 @login_required
 def update_issue_assignee(request, issue_id):
@@ -137,3 +180,21 @@ def update_bio(request):
         profile.biography = bio_text
         profile.save()
     return redirect('profile')
+
+@login_required
+def update_issue_info_title(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    if request.method == 'POST':
+        newTitle = request.POST.get('subject')
+        if newTitle:
+            issue.subject = newTitle
+            issue.save()
+        return redirect('issue_detail', issue_id=issue_id)
+
+@login_required
+def issue_info_delete_comment(request, issue_id, comment_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    comment = get_object_or_404(Comment, id=comment_id)
+    if comment.user == request.user or issue.created_by == request.user:
+        comment.delete()
+    return redirect('issue_detail', issue_id=issue_id)
