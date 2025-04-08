@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import IssueForm
-from .models import Issue
+from .models import Issue, Attachment
 from .models import Profile
 
 
@@ -27,20 +27,27 @@ def issue_list(request):
 
 @login_required
 def issue_create(request):
-    User = get_user_model()  # Obtiene el modelo de usuario
-    users = User.objects.all()  # Obtiene todos los usuarios disponibles
+    User = get_user_model()
+    users = User.objects.all()
 
     if request.method == 'POST':
-        form = IssueForm(request.POST)
+        form = IssueForm(request.POST, request.FILES)
         if form.is_valid():
-            issue = form.save(commit=False)  # No guarda aún en la BD
-            issue.created_by = request.user  # Asigna el usuario logueado
-            issue.save()  # Guarda el issue en la BD
-            return redirect('issue_list')  # Redirige a la lista de issues
-    else:
-        form = IssueForm()  # Formulario vacío
+            issue = form.save(commit=False)
+            issue.created_by = request.user
+            issue.save()  # Guarda el issue primero para obtener un ID
 
-    return render(request, 'issues/issue_create.html', {'form': form, 'users': users})
+            # Procesar el archivo adjunto recibido del formulario (solo uno)
+            if 'attachments' in request.FILES:
+                file = request.FILES['attachments']
+                Attachment.objects.create(issue=issue, file=file)
+
+            return redirect('issue_list')
+
+    return redirect('issue_list')
+
+
+
 
 
 @login_required

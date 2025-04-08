@@ -49,51 +49,43 @@
             <a href="#" class="close">&times;</a>
         </div>
 
-        <form method="post" action="{% url 'issue_create' %}">
+        <form method="post" action="{% url 'issue_create' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="modal__form-container">
-                <!-- Subject -->
                 <div class="modal__form-Subject">
-                    <label for="subject">Subject</label>
-                    <input type="text" id="subject" name="subject" required>
+                    <label for="id_subject">Subject</label> {{ form.subject }}
                 </div>
-                <!-- Description -->
-                <label for="description">Description</label>
-                <textarea id="description" name="description" placeholder="Please add descriptive text to help others better understand this issue"></textarea>
 
-                <!-- Status -->
-                <label class="modal-text" for="status">Status</label>
-                <select class="modal-text" id="status" name="status">
-                {% for value, label in form.fields.status.choices %}
-                    <option value="{{ value }}">{{ label }}</option>
-                {% endfor %}
-                </select>
+                <label for="id_description">Description</label>
+                {{ form.description }}
 
-                <!-- Assigned To -->
-                <label class="modal-text" for="assigned_to">Assigned To</label>
-                <select class="modal-text" id="assigned_to" name="assigned_to">
-                    <option value="">Unassigned</option>
-                    {% for user in users %}
-                        <option value="{{ user.id }}">{{ user.username }}</option>
-                    {% endfor %}
-                </select>
+                <label class="modal-text" for="id_status">Status</label>
+                {{ form.status }}
 
-                <!-- Attachments Section -->
+                <label class="modal-text" for="id_assigned_to">Assigned To</label>
+                {{ form.assigned_to }}
+
                 <div class="attachments">
-                    <label class="modal-text" >Attachments</label>
+                    <label class="modal-text" for="id_attachments">Attachments</label>
                     <div class="attachment-box">
-                        <p class="modal-text" >Drop attachments here!</p>
-                        <input type="file" id="attachments" name="attachments" multiple>
+                         {{ form.attachments }}
                     </div>
+                    {% if form.attachments.errors %}
+                        <div class="errorlist">{{ form.attachments.errors }}</div>
+                    {% endif %}
                 </div>
 
-                <!-- Submit Button -->
+                {% if form.non_field_errors %}
+                    <div class="errorlist">{{ form.non_field_errors }}</div>
+                {% endif %}
+
                 <button type="submit" class="create-btn">Create</button>
             </div>
         </form>
     </div>
 </div>
-    <!-- Modal para Add Bulk -->
+
+<!-- Modal para Add Bulk -->
 <div id="modal-bulk-create" class="modal">
     <div class="modal-content-bulk">
         <div class="navBar__modal">
