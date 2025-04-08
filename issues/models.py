@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from storages.backends.s3boto3 import S3Boto3Storage
 
 
 class Issue(models.Model):
@@ -27,6 +28,13 @@ class Issue(models.Model):
         return self.subject
 
 
+class Attachment(models.Model):
+    issue = models.ForeignKey(Issue, related_name='attachments', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='attachments/', storage=S3Boto3Storage())
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+
 # -------------------------------
 # Extensión del modelo User: Profile
 # -------------------------------
@@ -34,6 +42,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     # Campo para guardar la biografía o descripción breve
     biography = models.TextField(blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/', storage=S3Boto3Storage(), blank=True, null=True)
 
     def __str__(self):
         return f'Perfil de {self.user.username}'
