@@ -133,3 +133,24 @@ textarea, select {
     font-size: 15px;
 }
 
+.profile__modal-due-date {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.profile__modal-due-date-group {
+  margin-top: 1rem; /* o 16px */
+}
+
+.profile__modal-due-date-inline {
+  display: flex;
+  align-items: center; /* Esto alinea verticalmente */
+  gap: 0.5rem; /* Espacio entre el texto y el input */
+}
+
+.profile__modal-due-date-inline label {
+  margin-bottom: 0; /* Evita que el label empuje hacia abajo */
+  font-weight: 500;
+}
+
