@@ -60,4 +60,4 @@ class Comment(models.Model):
     published_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return {self.issue}
+        return f"Comentario de {self.user.username} en '{self.issue.subject}'"

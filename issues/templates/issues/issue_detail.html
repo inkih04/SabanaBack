@@ -6,22 +6,40 @@
 <div class="issue-info-main">
 
     <div class="issue-info-principal">
-    <h1>#{{ issue.id }} {{ issue.subject }}</h1>
+    <div class="issue-info-title">
+        <div class="issue-info-title-title">
+            <h1>#{{ issue.id }} {{ issue.subject }}</h1>
+            <div class="issue-info-title-edit">
+                <a href="?edit=true">
+                    <span class="material-icons">edit</span>
+                </a>
+            </div>
+        </div>
+
+
+        {% if request.GET.edit %}
+            <form method="POST" action="{% url 'update_issue_info_title' issue.id %}">
+                {% csrf_token %}
+                <input type="text" name="subject" value="{{ issue.subject }}" required />
+                <button type="submit">Save</button>
+
+                <a href="{% url 'issue_detail' issue.id %}" class="cancel-edit">Cancel</a>
+            </form>
+        {% endif %}
+
+        <div class="issue-info-goToOtherIssue">
+            <div class="issue-info-goToOtherIssue-icon">
+                <span class="material-icons">arrow_back_ios</span>
+            </div>
+            <div class="issue-info-goToOtherIssue-icon">
+                <span class="material-icons">arrow_forward_ios</span>
+            </div>
+        </div>
+    </div>
 
                     <div class="issue-info-header">
                             <h2>Issue Details</h2>
-
-
-
                         <div class="issue-info-created">
-                            <div class="issue-info-goToOtherIssue">
-                                <div class="issue-info-goToOtherIssue-icon">
-                                    <span class="material-icons">arrow_back_ios</span>
-                                </div>
-                                <div class="issue-info-goToOtherIssue-icon">
-                                    <span class="material-icons">arrow_forward_ios</span>
-                                </div>
-                            </div>
                                 <p><strong>Created by:</strong> {{ issue.created_by }}</p>
                                 <p><strong>Created at:</strong> {{ issue.created_at }}</p>
                         </div>
@@ -30,10 +48,13 @@
 
                 <div class="issue-info-description">
                     <h2>Description</h2>
-                    <textarea id="Description" name="Description" placeholder="Add description">{{ issue.description }}</textarea>
-                    <div class="issue-info-saveButtons">
-                        <input type="submit" value="Save" class="info-issue-saveButton">
-                    </div>
+                    <form method="POST" action="{% url 'update_issue_description' issue.id %}">
+                        {% csrf_token %}
+                        <textarea id="description" name="description" placeholder="Add description">{{ issue.description }}</textarea>
+                        <div class="issue-info-saveButtons">
+                            <input type="submit" value="Save" class="info-issue-saveButton">
+                        </div>
+                    </form>
                 </div>
 
                 <div class="issue-info-attachments">
@@ -54,16 +75,41 @@
                 </div>
 
                 <div class="issue-info-comments">
-                <div class="issue-info-comments-title">
-                    <h2> {{ issue.comments.size }}Comments</h2>
-                </div>
-                    <textarea id="Comments" name="Comments" placeholder="Type a new comment here"></textarea>
+                    <div class="issue-info-comments-title">
+                        <h2> {{ issue.comments.size }}Comments</h2>
+                    </div>
                     {% for comment in issue.comments.all %}
-                       <p>{{ comment.text }}</p>
+                        <div class="issue-info-comment">
+                        <p>{{ comment.user.avatar }}</p>
+                            <div class="issue-info-comment-main">
+                                <p><strong>{{ comment.user.username }}</strong></p>
+                                <p>{{ comment.text }}</p>
+                                <p class="issue-info-comment-date">{{ comment.published_at }}</p>
+                            </div>
+                            <div class="issue-info-comment-buttons">
+                                    <div class="issue-info-status-buttons-comment-edit">
+                                        <span class="material-icons">edit</span>
+                                    </div>
+
+                                    <div class="issue-info-status-buttons-comment-delete">
+                                        <a href="{% url 'issue_info_delete_comment' issue.id comment.id  %}">
+                                             <span class="material-icons">delete</span>
+                                        </a>
+                                    </div>
+
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p>No comments yet.</p>
                     {% endfor %}
-                <div class="issue-info-saveButtons">
-                        <input type="submit" value="Add Comment" class="info-issue-saveButton">
-                </div>
+                <form method="POST" action="{% url 'add_comment_to_issue' issue.id %}">
+                    {% csrf_token %}
+                    <textarea  name="comment_text" placeholder="Type a new comment here"></textarea>
+                    <div class="issue-info-saveButtons">
+                            <input type="submit" value="Add Comment" class="info-issue-saveButton">
+                    </div>
+                </form>
+
                 </div>
 
                 <div class="issue-info-back">
@@ -76,7 +122,7 @@
         <form method="POST" action="{% url 'update_issue_status' issue.id %}">
             {% csrf_token %}
             <label for="status"></label>
-            <select id="info-issue-status-selector"ame="status" onchange="this.form.submit()">
+            <select id="info-issue-status-selector" name="status" onchange="this.form.submit()">
                 {% for value, label in issue.STATUS_CHOICES %}
                         <option value="{{ value }}" {% if issue.status == value %}selected{% endif %}>
                             {{ label }}
@@ -96,11 +142,36 @@
                         <p>{{ assigned }}</p>
                     {% endfor %}
                 <div class="issue-info-status-assigned-button">
-                    <span class="material-icons" style="font-size: 30px"> add </span>
-                    <p>Add assigned</p>
+                    <a href="?show_issue_info_assign_user_form=true">
+                        <span class="material-icons" > add </span>
+                        <p>Add assigned</p>
+                    </a>
+                    {% if show_issue_info_assign_user_form %}
+                        <div class="issue-info-add-assigned">
+                            <div class="issue-info-add-assigned-close">
+                                <span class="material-icons">close</span>
+                            </div>
+                            <div class="issue-info-add-assigned-container">
+                                <h1>Select assigned user</h1>
+                                <div class="issue-info-add-assigned-search">
+                                    <form method="GET" action=".">
+                                        <input type="hidden" name="show_assign_form" value="1">
+                                        <input type="text" name="q" placeholder="Search users" value="{{ request.GET.q }}">
+                                        <button type="submit">Search</button>
+                                    </form>
+                                </div>
+                                <div class="issue-info-add-assigned-list">
+
+                                </div>
+                                <div class="issue-info-add-assigned-addButton">
+                                    <input type="submit" value="Add">
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="issue-info-status-assigned-button">
-                    <span class="material-icons" style="font-size: 30px"> add </span>
+                    <span class="material-icons"> add </span>
                     <p>Assign to me</p>
                 </div>
 
@@ -113,12 +184,12 @@
                         <p>{{ watcher }}</p>
                     {% endfor %}
                 <div class="issue-info-status-watchers-button">
-                    <span class="material-icons" style="font-size: 30px"> add </span>
+                    <span class="material-icons"> add </span>
 
                     <p>Add watchers</p>
                 </div>
                 <div class="issue-info-status-watchers-button">
-                    <span class="material-icons" style="font-size: 30px"> add </span>
+                    <span class="material-icons"> add </span>
 
                     <p>Watch</p>
                 </div>
@@ -135,5 +206,7 @@
         </aside>
             </div>
 </div>
+
+
 
 {% endblock %}
