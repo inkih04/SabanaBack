@@ -328,3 +328,55 @@
 .issue__filters-reset:hover {
     background-color: #e0e0e0;
 }
+
+
+
+.modal--subgrup {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal--subgrup-2 {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.prueba {
+    flex: 1; /* Ocupan igual espacio */
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Espacio entre label y select */
+}
+
+
+
+
+/* Etiquetas */
+.modal-text {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+/* Selects */
+.prueba select {
+    width: 100%; /* Ocupa todo el ancho del contenedor */
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+}
+
+/* Ajuste específico para pantallas pequeñas */
+@media (max-width: 768px) {
+    .modal--subgrup,
+    .modal--subgrup-2 {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
