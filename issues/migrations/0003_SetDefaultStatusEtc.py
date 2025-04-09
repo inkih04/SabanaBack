@@ -50,7 +50,7 @@ def create_initial_statuses(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('issues', '0001_initial'),
+        ('issues', '0002_issue_due_date_issue_watchers'),
     ]
 
     operations = [

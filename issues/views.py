@@ -26,13 +26,6 @@ def issue_list(request):
     User = get_user_model()
     users = User.objects.all()  # Lista de usuarios para el campo "Assigned To"
     statuses = Status.objects.all()
-
-    return render(request, './issues/issues_list.html', {
-        'issues': issues,
-        'form': form,
-        'users': users,
-        'statuses': statuses,
-    })
     search_query = request.GET.get('search', '').strip()
     if search_query:
         issues = Issue.objects.filter(
