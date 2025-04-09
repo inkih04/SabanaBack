@@ -1,13 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import IssueForm
 from .models import Status, Priorities, Types, Severities
 from .forms import StatusForm, PrioritiesForm, TypesForm, SeveritiesForm
-from .forms import AvatarForm
 from .models import Issue, Attachment
 from .models import Profile
 from .models import Comment
@@ -219,6 +217,8 @@ def issue_bulk_create(request):
 def login(request):
     return render(request, 'issues/custom_login.html')
 
+
+@login_required
 def settings_list(request):
     """Muestra la lista de todas las configuraciones."""
     data = {
@@ -229,7 +229,7 @@ def settings_list(request):
     }
     return render(request, 'settings/settings_list.html', {'data': data})
 
-
+@login_required
 def settings_edit(request, model_name, pk=None):
     """Añade o edita un objeto de configuración."""
     model_data = MODEL_FORM_MAP.get(model_name)
@@ -254,7 +254,7 @@ def settings_edit(request, model_name, pk=None):
 
     return render(request, 'settings/settings_form.html', {'form': form})
 
-
+@login_required
 def settings_delete(request, model_name, pk):
     """Elimina un objeto de configuración."""
     model_data = MODEL_FORM_MAP.get(model_name)  # Obtiene el modelo y formulario correspondiente
@@ -270,10 +270,12 @@ def settings_delete(request, model_name, pk):
 
     return render(request, 'settings/settings_confirm_delete.html', {'instance': instance})
 
+@login_required
 def profile(request):
     # Filtra los issues asignados al usuario logueado
     issues = Issue.objects.filter(assigned_to=request.user).order_by('-created_at')
     return render(request, 'BaseProfile.html', {'issues': issues, 'users':{request.user}})
+
 
 @login_required
 def update_bio(request):

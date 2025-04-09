@@ -1,34 +1,170 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div style="text-align: right; margin-bottom: 10px;">
-    <a href="{% url 'issue_list' %}" class="btn btn-secondary">Retroceder</a>
+<h1 class="settings__title"> Settings </h1>
+
+<!-- Sección: Status -->
+<div class="settings__container">
+    <div class="settings__bar">
+        <div class="settings__subtitle-container">
+            <h2 class="settings__subtitle">Status</h2>
+        </div>
+        <div class="settings__btn-container">
+            <a href="{% url 'settings_create' 'status' %}" class="btn btn-primary">Add Status</a>
+        </div>
+    </div>
+    <div class="settings__list">
+        <ul class="settings__list-container">
+            {% for obj in data.status %}
+                <li class="settings__item-container">
+                    <div class="settings__item">
+                        <div class="settings__color-name">
+                            <div class="color">
+                                <div class="color__item" style="background-color: {{ obj.color }};"></div>
+                            </div>
+                            <span>{{ obj.nombre }}</span>
+                        </div>
+                        <div class="settings__item-edit">
+                            <!-- Botón editar -->
+                            <a href="{% url 'settings_edit' 'status' obj.id %}">
+                                <span class="settings__edit-icon material-icons">edit</span>
+                            </a>
+                            <!-- Formulario para el botón delete -->
+                            <form action="{% url 'settings_delete' 'status' obj.id %}" method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="boton--delete" title="Eliminar">
+                                    <span class="settings__edit-icon material-icons">delete</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
 
-<h1>Configuraciones</h1>
-{% for key, objects in data.items %}
-<h2>{{ key|title }}</h2>
-<a href="{% url 'settings_create' key %}" class="btn btn-primary">Añadir {{ key|title }}</a>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Color</th>
-        <th>Actions</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for obj in objects %}
-    <tr>
-        <td>{{ obj.nombre }}</td>
-        <td style="background-color: {{ obj.color }};">{{ obj.color }}</td>
-        <td>
-            <a href="{% url 'settings_edit' key obj.pk %}">Editar</a> |
-            <a href="{% url 'settings_delete' key obj.pk %}">Eliminar</a>
-        </td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
-{% endfor %}
+<!-- Sección: Priorities -->
+<div class="settings__container">
+    <div class="settings__bar">
+        <div class="settings__subtitle-container">
+            <h2 class="settings__subtitle">Priorities</h2>
+        </div>
+        <div class="settings__btn-container">
+            <a href="{% url 'settings_create' 'priorities' %}" class="btn btn-primary">Add Priority</a>
+        </div>
+    </div>
+    <div class="settings__list">
+        <ul class="settings__list-container">
+            {% for obj in data.priorities %}
+                <li class="settings__item-container">
+                    <div class="settings__item">
+                        <div class="settings__color-name">
+                            <div class="color">
+                                <div class="color__item" style="background-color: {{ obj.color }};"></div>
+                            </div>
+                            <span>{{ obj.nombre }}</span>
+                        </div>
+                        <div class="settings__item-edit">
+                            <!-- Botón editar -->
+                            <a href="{% url 'settings_edit' 'priorities' obj.id %}">
+                                <span class="settings__edit-icon material-icons">edit</span>
+                            </a>
+                            <!-- Formulario para el botón delete -->
+                            <form action="{% url 'settings_delete' 'priorities' obj.id %}" method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="boton--delete" title="Eliminar">
+                                    <span class="settings__edit-icon material-icons">delete</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<!-- Sección: Types -->
+<div class="settings__container">
+    <div class="settings__bar">
+        <div class="settings__subtitle-container">
+            <h2 class="settings__subtitle">Types</h2>
+        </div>
+        <div class="settings__btn-container">
+            <a href="{% url 'settings_create' 'types' %}" class="btn btn-primary">Add Type</a>
+        </div>
+    </div>
+    <div class="settings__list">
+        <ul class="settings__list-container">
+            {% for obj in data.types %}
+                <li class="settings__item-container">
+                    <div class="settings__item">
+                        <div class="settings__color-name">
+                            <div class="color">
+                                <div class="color__item" style="background-color: {{ obj.color }};"></div>
+                            </div>
+                            <span>{{ obj.nombre }}</span>
+                        </div>
+                        <div class="settings__item-edit">
+                            <!-- Botón editar -->
+                            <a href="{% url 'settings_edit' 'types' obj.id %}">
+                                <span class="settings__edit-icon material-icons">edit</span>
+                            </a>
+                            <!-- Formulario para el botón delete -->
+                            <form action="{% url 'settings_delete' 'types' obj.id %}" method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="boton--delete" title="Eliminar">
+                                    <span class="settings__edit-icon material-icons">delete</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<!-- Sección: Severities -->
+<div class="settings__container">
+    <div class="settings__bar">
+        <div class="settings__subtitle-container">
+            <h2 class="settings__subtitle">Severities</h2>
+        </div>
+        <div class="settings__btn-container">
+            <a href="{% url 'settings_create' 'severities' %}" class="btn btn-primary">Add Severity</a>
+        </div>
+    </div>
+    <div class="settings__list">
+        <ul class="settings__list-container">
+            {% for obj in data.severities %}
+                <li class="settings__item-container">
+                    <div class="settings__item">
+                        <div class="settings__color-name">
+                            <div class="color">
+                                <div class="color__item" style="background-color: {{ obj.color }};"></div>
+                            </div>
+                            <span>{{ obj.nombre }}</span>
+                        </div>
+                        <div class="settings__item-edit">
+                            <!-- Botón editar -->
+                            <a href="{% url 'settings_edit' 'severities' obj.id %}">
+                                <span class="settings__edit-icon material-icons">edit</span>
+                            </a>
+                            <!-- Formulario para el botón delete -->
+                            <form action="{% url 'settings_delete' 'severities' obj.id %}" method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="boton--delete" title="Eliminar">
+                                    <span class="settings__edit-icon material-icons">delete</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
 {% endblock %}

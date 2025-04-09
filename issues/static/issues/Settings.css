@@ -1,0 +1,104 @@
+.settings__container {
+    background-color: #f3f3f3;
+    box-shadow: 0 0 5px #aaa;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 35px;
+}
+
+.settings__bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.settings__btn-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #83eede;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #aaa;
+}
+
+.settings__btn-container a {
+    text-decoration: none;
+    color: #000;
+    font-size: 20px;
+}
+
+.settings__subtitle-container h2 {
+    font-size: 35px;
+}
+
+.settings__title {
+    font-size: 40px;
+}
+
+.settings__item-container {
+    list-style: none;
+    padding: 20px;
+}
+
+.settings__item-container {
+    list-style: none;
+    background-color: #e0e0e0;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 3px #bbb;
+}
+
+.settings__item-container:hover {
+    background-color: #c0c0c0;
+}
+
+.settings__item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.color__item {
+    padding: 15px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+.settings__color-name {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.settings__color-name span {
+    font-size: 18px;
+}
+
+.settings__container .settings__edit-icon {
+    font-size: 25px;
+    color: #2d3436;
+}
+
+.settings__item-edit {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+.settings__item-edit a {
+    margin-left: 10px;
+}
+
+.boton--delete {
+    background-color: transparent; /* Fondo transparente */
+    color: white;
+    border: none; /* Sin borde */
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
