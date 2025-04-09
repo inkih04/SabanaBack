@@ -1,6 +1,7 @@
 from django.urls import path, include
 from .views import issue_list, issue_create, delete_issue, update_issue_status, issue_detail, issue_bulk_create, login, \
-    update_issue_assignee, profile, update_bio, update_issue_description, add_comment_to_issue, update_issue_info_title, issue_info_delete_comment
+    update_issue_assignee, profile, update_bio, update_issue_description, add_comment_to_issue, update_issue_info_title, issue_info_delete_comment,settings_list,settings_edit,settings_delete
+
 
 urlpatterns = [
     path('', issue_list, name='issue_list'),
@@ -26,8 +27,16 @@ urlpatterns = [
 
     path('login/', login, name='custom_login'),
 
+
+    path('settings/', settings_list, name='settings_list'),
+    path('settings/<str:model_name>/new/', settings_edit, name='settings_create'),
+    path('settings/<str:model_name>/<int:pk>/edit/', settings_edit, name='settings_edit'),
+    path('settings/<str:model_name>/<int:pk>/delete/', settings_delete, name='settings_delete'),
+
+
     path('profile/', profile, name='profile'),
 
     path('update_bio/', update_bio, name='update_bio'),
+
 
 ]

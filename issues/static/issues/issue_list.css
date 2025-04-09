@@ -46,19 +46,6 @@
     margin: auto; /* Centra la “bola” en su columna */
 }
 
-/* Ejemplo de colores de fondo para cada bola */
-.issue__type {
-    background-color: #2d9;
-    /* Verde */
-
-}
-.issue__severity {
-    background-color: #d29;  /* Rosado/morado */
-}
-.issue__priority {
-    background-color: #29d;  /* Azul */
-}
-
 /* Detalle de la 4ª columna */
 .issue__detail {
     margin-left: 10px;
