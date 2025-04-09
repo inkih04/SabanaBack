@@ -111,12 +111,12 @@
 }
 
 .profile__changePage {
-    display: grid;
-    grid-template-columns: 300px 300px 300px 1fr;
+    display: flex;
     align-items: center;
     margin-top: 25px;
     width: 100%;
     gap: 25px;
+    justify-content: left;
 
 }
 
@@ -127,6 +127,8 @@
     border: none;
     border-radius: 5px;
     box-shadow: 0 0 5px #aaa;
+    text-decoration: none; /* Elimina el subrayado */
+    color: #000;
 }
 
 .profile__content {
@@ -308,4 +310,14 @@
 
 .avatar-form input[type="file"] {
   display: none;
+}
+
+.profile--comment{
+    margin-right: 35px;
+    margin-top: 15px;
+}
+.profile__to-issue-link {
+    text-decoration: none;
+    color: #008aa8;
+
 }
