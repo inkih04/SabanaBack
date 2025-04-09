@@ -14,9 +14,15 @@
         {% for issue in issues %}
         <li class="issue__item">
             <div class="issue__item-content">
-                <div class="issue__type"></div>
-                <div class="issue__severity"></div>
-                <div class="issue__priority"></div>
+                <div class="issue__type" style="background-color: {{ issue.issue_type.color }};">
+                    <!--{{ issue.issue_type.nombre }}-->
+                </div>
+                <div class="issue__severity" style="background-color: {{ issue.severity.color }};">
+                    <!--{{ issue.severity.nombre }}-->
+                </div>
+                <div class="issue__priority" style="background-color: {{ issue.priority.color }};">
+                    <!--{{ issue.priority.nombre }}-->
+                </div>
                 <a class="issue__detail-link" href="{% url 'issue_detail' issue.id %}">
                     <div class="issue__detail">
                         <p class="issue__id">#{{ issue.id }}</p>
@@ -28,9 +34,9 @@
                     {% csrf_token %}
                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
                     <select name="status" class="issue__select" onchange="this.form.submit()">
-                        {% for value, label in issue.STATUS_CHOICES %}
-                        <option value="{{ value }}" {% if issue.status == value %}selected{% endif %}>
-                            {{ label }}
+                        {% for status in statuses %}
+                        <option value="{{ status.id }}" {% if issue.status and issue.status.id == status.id %}selected{% endif %}>
+                            {{ status.nombre }}
                         </option>
                         {% endfor %}
                     </select>
