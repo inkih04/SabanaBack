@@ -260,6 +260,128 @@
     margin-left: 10px;
 }
 
+/* Estilos para el Modal Filters */
+.modal-content-filters {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 50%;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.issue__filters {
+    display: flex;
+    flex-direction: column;
+}
+
+.issue__filters-field {
+    margin-bottom: 15px;
+}
+
+.issue__filters-field label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.issue__filters-field select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.issue__filters-submit {
+    background-color: #83eede;
+    color: #000;
+    padding: 10px;
+    border: none;
+    border-radius: 7px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.issue__filters-submit:hover {
+    background-color: #6be3d399;
+}
+
+.issue__filters-reset {
+    background-color: #f3f3f3;
+    color: #000;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 7px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-top: 10px;
+    display: inline-block;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.issue__filters-reset:hover {
+    background-color: #e0e0e0;
+}
+
+
+
+.modal--subgrup {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal--subgrup-2 {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.prueba {
+    flex: 1; /* Ocupan igual espacio */
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Espacio entre label y select */
+}
+
+
+
+
+/* Etiquetas */
+.modal-text {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+/* Selects */
+.prueba select {
+    width: 100%; /* Ocupa todo el ancho del contenedor */
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+}
+
+/* Ajuste específico para pantallas pequeñas */
+@media (max-width: 768px) {
+    .modal--subgrup,
+    .modal--subgrup-2 {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+
+
 
 .modal--subgrup {
     display: flex;

@@ -22,21 +22,45 @@ MODEL_FORM_MAP = {
 def issue_list(request):
     form = IssueForm()  # Instancia vacía del formulario
     User = get_user_model()
-    users = User.objects.all()  # Lista de usuarios para el campo "Assigned To"
+    users = User.objects.all()  # Lista de usuarios para "Assigned To" y "Created By"
     statuses = Status.objects.all()
+    types = Types.objects.all()
+    severities = Severities.objects.all()
+    priorities = Priorities.objects.all()
+
+    issues = Issue.objects.all()
+
+    # Busqueda por texto
     search_query = request.GET.get('search', '').strip()
     if search_query:
-        issues = Issue.objects.filter(
-            Q(subject__iexact=search_query) | Q(description__iexact=search_query)
-        ).order_by('-created_at')
-    else:
-        issues = Issue.objects.all().order_by('-created_at')
+        issues = issues.filter(
+            Q(subject__icontains=search_query) | Q(description__icontains=search_query)
+        )
+
+    # Filtros individuales
+    if request.GET.get('issue_type'):
+        issues = issues.filter(issue_type_id=request.GET.get('issue_type'))
+    if request.GET.get('severity'):
+        issues = issues.filter(severity_id=request.GET.get('severity'))
+    if request.GET.get('priority'):
+        issues = issues.filter(priority_id=request.GET.get('priority'))
+    if request.GET.get('status'):
+        issues = issues.filter(status_id=request.GET.get('status'))
+    if request.GET.get('assigned_to'):
+        issues = issues.filter(assigned_to_id=request.GET.get('assigned_to'))
+    if request.GET.get('created_by'):
+        issues = issues.filter(created_by_id=request.GET.get('created_by'))
+
+    issues = issues.order_by('-created_at')
 
     return render(request, './issues/issues_list.html', {
         'issues': issues,
         'form': form,
         'users': users,
         'statuses': statuses,
+        'types': types,
+        'severities': severities,
+        'priorities': priorities,
     })
 
 @login_required
