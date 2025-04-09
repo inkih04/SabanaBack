@@ -64,17 +64,27 @@
                 <label class="modal-text" for="id_status">Status</label>
                 {{ form.status }}
 
-                <label class="modal-text" for="id_type">Type</label>
-                {{ form.issue_type }}
+                <div class="modal--subgrup">
+                    <div class="prueba">
+                        <label class="modal-text" for="id_type">Type</label>
+                        {{ form.issue_type }}
+                    </div>
+                    <div class="prueba">
+                        <label class="modal-text" for="id_priority">Priority</label>
+                        {{ form.priority }}
+                    </div>
+                </div>
 
-                <label class="modal-text" for="id_priority">Priority</label>
-                {{ form.priority }}
-
-                <label class="modal-text" for="id_severity">Severity</label>
-                {{ form.severity }}
-
-                <label class="modal-text" for="id_assigned_to">Assigned To</label>
-                {{ form.assigned_to }}
+                  <div class="modal--subgrup-2">
+                      <div class="prueba">
+                            <label class="modal-text" for="id_severity">Severity</label>
+                            {{ form.severity }}
+                      </div>
+                      <div class="prueba">
+                        <label class="modal-text" for="id_assigned_to">Assigned To</label>
+                        {{ form.assigned_to }}
+                      </div>
+                </div>
 
                 <div class="attachments">
                     <label class="modal-text" for="id_attachments">Attachments</label>

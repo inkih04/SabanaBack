@@ -119,21 +119,21 @@
         <div class="issue-info-status">
         <aside>
             <p><strong>Status:</strong></p>
-        <form method="POST" action="{% url 'update_issue_status' issue.id %}">
-            {% csrf_token %}
-            <label for="status"></label>
-            <select id="info-issue-status-selector" name="status" onchange="this.form.submit()">
-                {% for value, label in issue.STATUS_CHOICES %}
-                        <option value="{{ value }}" {% if issue.status == value %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                        {% endfor %}
-            </select>
-        </form>
+            <form method="POST" action="{% url 'update_issue_status' issue.id %}">
+                {% csrf_token %}
+                <label for="status"></label>
+                <select id="info-issue-status-selector" name="status" onchange="this.form.submit()">
+                    {% for status in statuses %}
+                    <option value="{{ status.id }}" {% if issue.status and issue.status.id == status.id %}selected{% endif %}>
+                        {{ status.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
             <div class="issue-info-status-properties">
                 <p><strong>Severity:</strong> {{ issue.severity.nombre }}</p>
-            <p><strong>Priority:</strong> {{ issue.get_priority_display }}</p>
-            <p><strong>Type:</strong> {{ issue.issue_type.nombre }}</p>
+                <p><strong>Priority:</strong> {{ issue.priority.nombre }}</p>
+                <p><strong>Type:</strong> {{ issue.issue_type.nombre }}</p>
             </div>
             <div class="issue-info-status-assigned">
                 <p><strong>Assigned to:</strong> {{ issue.assigned_to }}</p>
