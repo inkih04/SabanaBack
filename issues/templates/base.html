@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{% static 'issues/styles.css' %}">
 </head>
 <body>
-    <header class="header">
+    <header class="header shadow">
         <div class="header__logo-container">
             <i class="material-icons">home</i>
             <h1 class="header__title">Sabana</h1>
@@ -38,8 +38,8 @@
                         <a href="#" class="sidebar__link">Notifications</a>
                     </li>
                     <li class="sidebar__item">
-                        <span class="material-icons sidebar__icon">mail</span>
-                        <a href="#" class="sidebar__link">Mail</a>
+                        <span class="material-icons sidebar__icon">bug_report</span>
+                        <a href="{% url 'issue_list' %}" class="sidebar__link">Issues</a>
                     </li>
                     <li class="sidebar__item">
                         <span class="material-icons sidebar__icon">settings</span>
@@ -59,7 +59,7 @@
                                 </div>
                             {% endif %}
                         {% endwith %}
-                        <a  href="{% url 'account_logout' %}"> Profile </a>
+                        <a  href="{% url 'profile' %}"> Profile </a>
                     </li>
                     <li class="sidebar__item">
                         <span class="material-icons sidebar__icon">logout</span>

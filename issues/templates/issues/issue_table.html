@@ -1,0 +1,56 @@
+<section class="issue__table">
+    <!-- Cabecera de columnas -->
+    <div class="issue__key-container">
+        <span class="issue__key">Type</span>
+        <span class="issue__key">Severity</span>
+        <span class="issue__key">Priority</span>
+        <span>Issue</span>
+        <span class="issue__key">Status</span>
+        <span class="issue__key">Modified</span>
+        <span class="issue__key">Assign to</span>
+    </div>
+
+    <ul>
+        {% for issue in issues %}
+        <li class="issue__item">
+            <div class="issue__item-content">
+                <div class="issue__type"></div>
+                <div class="issue__severity"></div>
+                <div class="issue__priority"></div>
+                <a class="issue__detail-link" href="{% url 'issue_detail' issue.id %}">
+                    <div class="issue__detail">
+                        <p class="issue__id">#{{ issue.id }}</p>
+                        <p class="issue__topic">{{ issue.subject }}</p>
+                        <p class="issue__description">{{ issue.description }}</p>
+                    </div>
+                </a>
+                <form class="issue__form" method="POST" action="{% url 'update_issue_status' issue.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <select name="status" class="issue__select" onchange="this.form.submit()">
+                        {% for value, label in issue.STATUS_CHOICES %}
+                        <option value="{{ value }}" {% if issue.status == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </form>
+                <p class="issue__text">{{ issue.created_at }}</p>
+
+                <form class="issue__form" method="post" action="{% url 'update_issue_assignee' issue.id %}">
+                    {% csrf_token %}
+                    <select class="issue__select" name="assigned_to" onchange="this.form.submit()">
+                        <option value="">Unassigned</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}" {% if issue.assigned_to == user %}selected{% endif %}>{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+                <a href="{% url 'delete_issue' issue.id %}">
+                    <span class="material-icons issue__icon">delete</span>
+                </a>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</section>

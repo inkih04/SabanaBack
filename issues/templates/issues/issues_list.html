@@ -11,7 +11,16 @@
                 <p>Filters</p>
             </div>
         </a>
+        <form method="get" action="{% url 'issue_list' %}">
+          <div class="issue__search-bar">
+            <div class="issue__search-bar--container">
+              <span class="material-icons">search</span>
+              <input type="text" name="search" placeholder="Search issues..." value="{{ request.GET.search|default:'' }}" />
+            </div>
+          </div>
+        </form>
     </div>
+
     <div class="issue__add">
         <div class="issue__add-button">
             <!-- Enlace que apunta al modal -->
@@ -30,67 +39,8 @@
     </div>
 </div>
 
-<section class="issue__table">
-    <!-- Cabecera de columnas -->
-    <div class="issue__key-container">
-        <span class="issue__key">Type</span>
-        <span class="issue__key">Severity</span>
-        <span class="issue__key">Priority</span>
-        <span>Issue</span>
-        <span class="issue__key">Status</span>
-        <span class="issue__key">Modified</span>
-        <span class="issue__key">Assign to</span>
-    </div>
+{% include "issues/issue_table.html" %}
 
-    <ul>
-        {% for issue in issues %}
-        <li class="issue__item">
-            <div class="issue__item-content">
-                <div class="issue__type" style="background-color: {{ issue.issue_type.color }};">
-                    <!--{{ issue.issue_type.nombre }}-->
-                </div>
-                <div class="issue__severity" style="background-color: {{ issue.severity.color }};">
-                    <!--{{ issue.severity.nombre }}-->
-                </div>
-                <div class="issue__priority" style="background-color: {{ issue.priority.color }};">
-                    <!--{{ issue.priority.nombre }}-->
-                </div>
-                <a class="issue__detail-link" href="{% url 'issue_detail' issue.id %}">
-                    <div class="issue__detail">
-                        <p class="issue__id">#{{ issue.id }}</p>
-                        <p class="issue__topic">{{ issue.subject }}</p>
-                        <p class="issue__description">{{ issue.description }}</p>
-                    </div>
-                </a>
-                <form class="issue__form" method="POST" action="{% url 'update_issue_status' issue.id %}">
-                    {% csrf_token %}
-                    <select name="status" class="issue__select" onchange="this.form.submit()">
-                        {% for status in statuses %}
-                        <option value="{{ status.id }}" {% if issue.status and issue.status.id == status.id %}selected{% endif %}>
-                            {{ status.nombre }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </form>
-                <p class="issue__text">{{ issue.created_at }}</p>
-
-                <form class="issue__form" method="post" action="{% url 'update_issue_assignee' issue.id %}">
-                    {% csrf_token %}
-                    <select class="issue__select" name="assigned_to" onchange="this.form.submit()">
-                        <option value="">Unassigned</option>
-                        {% for user in users %}
-                            <option value="{{ user.id }}" {% if issue.assigned_to == user %}selected{% endif %}>{{ user.username }}</option>
-                        {% endfor %}
-                    </select>
-                </form>
-                <a href="{% url 'delete_issue' issue.id %}">
-                    <span class="material-icons issue__icon">delete</span>
-                </a>
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
-</section>
 
 <!-- Modal utilizando :target -->
 <div id="modal-create" class="modal">
@@ -100,51 +50,52 @@
             <a href="#" class="close">&times;</a>
         </div>
 
-        <form method="post" action="{% url 'issue_create' %}">
+        <form method="post" action="{% url 'issue_create' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="modal__form-container">
-                <!-- Subject -->
                 <div class="modal__form-Subject">
-                    <label for="subject">Subject</label>
-                    <input type="text" id="subject" name="subject" required>
+                    <label for="id_subject">Subject</label> {{ form.subject }}
                 </div>
-                <!-- Description -->
-                <label for="description">Description</label>
-                <textarea id="description" name="description" placeholder="Please add descriptive text to help others better understand this issue"></textarea>
 
-                <!-- Status -->
-                <label class="modal-text" for="status">Status</label>
-                <select class="modal-text" id="status" name="status">
-                {% for value, label in form.fields.status.choices %}
-                    <option value="{{ value }}">{{ label }}</option>
-                {% endfor %}
-                </select>
+                <label for="id_description">Description</label>
+                {{ form.description }}
 
-                <!-- Assigned To -->
-                <label class="modal-text" for="assigned_to">Assigned To</label>
-                <select class="modal-text" id="assigned_to" name="assigned_to">
-                    <option value="">Unassigned</option>
-                    {% for user in users %}
-                        <option value="{{ user.id }}">{{ user.username }}</option>
-                    {% endfor %}
-                </select>
+                <label class="modal-text" for="id_status">Status</label>
+                {{ form.status }}
 
-                <!-- Attachments Section -->
+                <label class="modal-text" for="id_assigned_to">Assigned To</label>
+                {{ form.assigned_to }}
+
                 <div class="attachments">
-                    <label class="modal-text" >Attachments</label>
+                    <label class="modal-text" for="id_attachments">Attachments</label>
                     <div class="attachment-box">
-                        <p class="modal-text" >Drop attachments here!</p>
-                        <input type="file" id="attachments" name="attachments" multiple>
+                         {{ form.attachments }}
                     </div>
+                    {% if form.attachments.errors %}
+                        <div class="errorlist">{{ form.attachments.errors }}</div>
+                    {% endif %}
                 </div>
 
-                <!-- Submit Button -->
+                           <!-- Submit Button -->
+                {% if form.non_field_errors %}
+                    <div class="errorlist">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <!-- due_date -->
+                <div class="form-group profile__modal-due-date-group profile__modal-due-date-inline">
+                    <label for="{{ form.due_date.id_for_label }}">Due Date</label>
+                    {{ form.due_date }}
+                </div>
+
+
+
                 <button type="submit" class="create-btn">Create</button>
             </div>
         </form>
     </div>
 </div>
-    <!-- Modal para Add Bulk -->
+
+<!-- Modal para Add Bulk -->
 <div id="modal-bulk-create" class="modal">
     <div class="modal-content-bulk">
         <div class="navBar__modal">
@@ -166,7 +117,4 @@
         </form>
     </div>
 </div>
-
-
-
 {% endblock %}

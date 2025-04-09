@@ -1,11 +1,16 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import IssueForm
-from .models import Issue
 from .models import Status, Priorities, Types, Severities
 from .forms import StatusForm, PrioritiesForm, TypesForm, SeveritiesForm
+
+from .models import Issue, Attachment
+from .models import Profile
+from .models import Comment
 
 MODEL_FORM_MAP = {
     'status': (Status, StatusForm),
@@ -14,9 +19,9 @@ MODEL_FORM_MAP = {
     'severities': (Severities, SeveritiesForm),
 }
 
+
 @login_required
 def issue_list(request):
-    issues = Issue.objects.all().order_by('-created_at')
     form = IssueForm()  # Instancia vacía del formulario
     User = get_user_model()
     users = User.objects.all()  # Lista de usuarios para el campo "Assigned To"
@@ -28,28 +33,67 @@ def issue_list(request):
         'users': users,
         'statuses': statuses,
     })
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        issues = Issue.objects.filter(
+            Q(subject__iexact=search_query) | Q(description__iexact=search_query)
+        ).order_by('-created_at')
+    else:
+        issues = Issue.objects.all().order_by('-created_at')
+
+    return render(request, './issues/issues_list.html', {
+        'issues': issues,
+        'form': form,
+        'users': users,
+        'statuses': statuses,
+    })
 
 @login_required
 def issue_create(request):
-    User = get_user_model()  # Obtiene el modelo de usuario
-    users = User.objects.all()  # Obtiene todos los usuarios disponibles
+    User = get_user_model()
+    users = User.objects.all()
 
     if request.method == 'POST':
-        form = IssueForm(request.POST)
+        form = IssueForm(request.POST, request.FILES)
         if form.is_valid():
-            issue = form.save(commit=False)  # No guarda aún en la BD
-            issue.save()  # Guarda la issue en la BD
-            return redirect('issue_list')  # Redirige a la lista de issues
-    else:
-        form = IssueForm()  # Formulario vacío
+            issue = form.save(commit=False)
+            issue.created_by = request.user
+            issue.save()  # Guarda el issue primero para obtener un ID
 
-    return render(request, 'issues/issue_create.html', {'form': form, 'users': users})
+            # Procesar el archivo adjunto recibido del formulario (solo uno)
+            if 'attachments' in request.FILES:
+                file = request.FILES['attachments']
+                Attachment.objects.create(issue=issue, file=file)
+
+            return redirect('issue_list')
+
+    return redirect('issue_list')
+
+
+
+
 
 @login_required
 def issue_detail(request, issue_id):
     """ Muestra los detalles de un issue específico """
     issue = get_object_or_404(Issue, id=issue_id)
-    return render(request, 'issues/issue_detail.html', {'issue': issue})
+
+    # Si estás mostrando el pop-up para asignar
+    show_assign_form = request.GET.get("show_assign_form") == "1"
+    search_query = request.GET.get("q", "")
+
+    # Obtener todos los usuarios o filtrarlos por búsqueda
+    users = Profile.objects.all()
+    if search_query:
+        users = users.filter(username__icontains=search_query)
+
+    context = {
+        'issue': issue,
+        'show_assign_form': show_assign_form,
+        'users': users,
+    }
+
+    return render(request, 'issues/issue_detail.html', context)
 
 
 @login_required
@@ -60,7 +104,7 @@ def delete_issue(request, issue_id):
 
 @login_required
 def update_issue_status(request, issue_id):
-    """ Actualiza el estado de un issue basado en la selección del usuario """
+    """Actualiza el estado de un issue y redirige a la página de origen."""
     issue = get_object_or_404(Issue, id=issue_id)
 
     if request.method == "POST":
@@ -72,8 +116,38 @@ def update_issue_status(request, issue_id):
         except Status.DoesNotExist:
             pass  # Manejar el caso donde el estado no exista
 
-    return redirect('issue_list')  # Redirige a la lista de issues
+    # Obtener la URL de retorno enviada en el formulario
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
+    return redirect('issue_detail', issue_id=issue_id)
 
+@login_required
+def update_issue_description(request, issue_id):
+    """Actualiza la descripción de un issue y redirige a la página de origen."""
+    issue = get_object_or_404(Issue, id=issue_id)
+
+    if request.method == "POST":
+        new_description = request.POST.get("description")
+        if new_description:
+            issue.description = new_description
+            issue.save()
+
+    # Ontener la URL de retorno enviada en el formaulario
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
+    return redirect('issue_detail', issue_id=issue_id)
+
+@login_required
+def add_comment_to_issue(request,issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    if request.method == "POST":
+        comment_text = request.POST.get("comment_text")
+        if comment_text:
+            comment = issue.comments.create(user=request.user, text=comment_text)
+            comment.save()
+    return redirect('issue_detail', issue_id=issue_id)
 
 @login_required
 def update_issue_assignee(request, issue_id):
@@ -133,11 +207,18 @@ def issue_bulk_create(request):
     if request.method == "POST":
         issues_text = request.POST.get("issues_text", "").strip()
         if issues_text:
-            issues = [Issue(subject=line.strip(), description="Bulk created issue")
-                      for line in issues_text.split("\n") if line.strip()]
+            issues = [
+                Issue(
+                    subject=line.strip(),
+                    description="Bulk created issue",
+                    created_by=request.user  # Asigna el usuario creador
+                )
+                for line in issues_text.split("\n") if line.strip()
+            ]
             Issue.objects.bulk_create(issues)
             return redirect('issue_list')
     return redirect('issue_list')  # Redirigir a la lista de issues
+
 
 
 def login(request):
@@ -193,3 +274,36 @@ def settings_delete(request, model_name, pk):
         return redirect('settings_list')  # Redirige a la lista de configuraciones
 
     return render(request, 'settings/settings_confirm_delete.html', {'instance': instance})
+
+def profile(request):
+    # Filtra los issues asignados al usuario logueado
+    issues = Issue.objects.filter(assigned_to=request.user).order_by('-created_at')
+    return render(request, 'BaseProfile.html', {'issues': issues, 'users':{request.user}})
+
+@login_required
+def update_bio(request):
+    if request.method == 'POST':
+        bio_text = request.POST.get('biography', '')
+        profile = request.user.profile
+        profile.biography = bio_text
+        profile.save()
+    return redirect('profile')
+
+@login_required
+def update_issue_info_title(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    if request.method == 'POST':
+        newTitle = request.POST.get('subject')
+        if newTitle:
+            issue.subject = newTitle
+            issue.save()
+        return redirect('issue_detail', issue_id=issue_id)
+
+@login_required
+def issue_info_delete_comment(request, issue_id, comment_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    comment = get_object_or_404(Comment, id=comment_id)
+    if comment.user == request.user or issue.created_by == request.user:
+        comment.delete()
+    return redirect('issue_detail', issue_id=issue_id)
+
