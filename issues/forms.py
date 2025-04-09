@@ -44,7 +44,10 @@ class PrioritiesForm(forms.ModelForm):
         model = Priorities
         fields = ['nombre', 'color']
         widgets = {
-            'color': forms.TextInput(attrs={'type': 'color'}),
+            'color': forms.TextInput(attrs={
+                'type': 'color',
+                'style': 'font-size: 8px;'
+            }),
         }
 
 class TypesForm(forms.ModelForm):
@@ -52,7 +55,10 @@ class TypesForm(forms.ModelForm):
         model = Types
         fields = ['nombre', 'color']
         widgets = {
-            'color': forms.TextInput(attrs={'type': 'color'}),
+            'color': forms.TextInput(attrs={
+                'type': 'color',
+                'style': 'font-size: 8px;'
+            }),
         }
 
 class SeveritiesForm(forms.ModelForm):
@@ -60,5 +66,9 @@ class SeveritiesForm(forms.ModelForm):
         model = Severities
         fields = ['nombre', 'color']
         widgets = {
-            'color': forms.TextInput(attrs={'type': 'color'}),
+            'color': forms.TextInput(attrs={
+                'type': 'color',
+                'style': 'font-size: 8px;'
+            }),
         }
+
