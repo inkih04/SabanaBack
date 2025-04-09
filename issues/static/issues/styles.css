@@ -3,6 +3,7 @@
 @import "addBulk.css";
 @import "info_issue.css";
 @import "profile.css";
+@import "Settings.css";
 
 *{
     box-sizing: border-box;
