@@ -249,3 +249,63 @@
   text-align: left; /* Alinea el texto a la izquierda */
 }
 
+.profile__avatar-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.profile__avatar-circle {
+  width: 120px;
+  height: 120px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.profile__avatar-circle img,
+.profile__avatar-circle .default-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Edit icon styling stays the same */
+.avatar-form {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-edit-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;  /* Ocupa todo el contenedor del avatar */
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);  /* Fondo oscuro semi-transparente */
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background-color 0.3s ease;
+}
+
+.avatar-form:hover .avatar-edit-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-form input[type="file"] {
+  display: none;
+}
