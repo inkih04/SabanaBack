@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import IssueForm
 from .models import Status, Priorities, Types, Severities
 from .forms import StatusForm, PrioritiesForm, TypesForm, SeveritiesForm
-
+from .forms import AvatarForm
 from .models import Issue, Attachment
 from .models import Profile
 from .models import Comment
@@ -302,3 +302,15 @@ def issue_info_delete_comment(request, issue_id, comment_id):
         comment.delete()
     return redirect('issue_detail', issue_id=issue_id)
 
+
+@login_required
+def update_avatar(request):
+    if request.method == 'POST' and request.FILES.get('avatar'):
+        profile = request.user.profile
+        avatar_file = request.FILES['avatar']
+
+        # Guarda en el campo avatar si tienes uno
+        profile.avatar.save(avatar_file.name, avatar_file)
+        profile.save()
+
+    return redirect('profile')

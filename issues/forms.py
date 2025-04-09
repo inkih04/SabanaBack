@@ -1,5 +1,6 @@
 from django import forms
 from .models import Issue
+from .models import Profile
 from .models import Status, Priorities, Types, Severities
 
 
@@ -25,11 +26,11 @@ class IssueForm(forms.ModelForm):
             'priority': forms.Select(attrs={'class': 'form-control'}),
             'severity': forms.Select(attrs={'class': 'form-control'}),
         }"""
-        
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['attachments'].label = "Upload Attachment"      
-      
+        self.fields['attachments'].label = "Upload Attachment"
+
 
 class StatusForm(forms.ModelForm):
     class Meta:
@@ -44,7 +45,10 @@ class PrioritiesForm(forms.ModelForm):
         model = Priorities
         fields = ['nombre', 'color']
         widgets = {
-            'color': forms.TextInput(attrs={'type': 'color'}),
+            'color': forms.TextInput(attrs={
+                'type': 'color',
+                'style': 'font-size: 8px;'
+            }),
         }
 
 class TypesForm(forms.ModelForm):
@@ -52,7 +56,10 @@ class TypesForm(forms.ModelForm):
         model = Types
         fields = ['nombre', 'color']
         widgets = {
-            'color': forms.TextInput(attrs={'type': 'color'}),
+            'color': forms.TextInput(attrs={
+                'type': 'color',
+                'style': 'font-size: 8px;'
+            }),
         }
 
 class SeveritiesForm(forms.ModelForm):
@@ -60,5 +67,13 @@ class SeveritiesForm(forms.ModelForm):
         model = Severities
         fields = ['nombre', 'color']
         widgets = {
-            'color': forms.TextInput(attrs={'type': 'color'}),
+            'color': forms.TextInput(attrs={
+                'type': 'color',
+                'style': 'font-size: 8px;'
+            }),
         }
+
+class AvatarForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['avatar']
