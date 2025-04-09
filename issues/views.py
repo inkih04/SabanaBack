@@ -294,11 +294,25 @@ def settings_delete(request, model_name, pk):
 
     return render(request, 'settings/settings_confirm_delete.html', {'instance': instance})
 
+
 @login_required
 def profile(request):
-    # Filtra los issues asignados al usuario logueado
+    # Obtener los issues asignados al usuario
     issues = Issue.objects.filter(assigned_to=request.user).order_by('-created_at')
-    return render(request, 'BaseProfile.html', {'issues': issues, 'users':{request.user}})
+
+    # Obtener todos los comentarios realizados por el usuario, incluyendo el issue asociado
+    user_comments = Comment.objects.filter(user=request.user).select_related('issue').order_by('-published_at')
+
+    # Leer el modo de vista (por defecto "issues")
+    view_mode = request.GET.get('view', 'issues')
+
+    context = {
+        'issues': issues,
+        'user_comments': user_comments,
+        'users': {request.user},
+        'view_mode': view_mode,
+    }
+    return render(request, 'BaseProfile.html', context)
 
 
 @login_required

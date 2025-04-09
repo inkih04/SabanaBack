@@ -1,0 +1,36 @@
+<div class="issue-info-comments">
+    <div class="issue-info-comments-title">
+        <h2>{{ user_comments.count }} Comments</h2>
+    </div>
+    {% for comment in user_comments %}
+        <div class="issue-info-comment">
+            {# Mostrar la foto del usuario, o la imagen asociada al issue si es necesario #}
+            {% if comment.user.profile.avatar %}
+                <img  src="{{ comment.user.profile.avatar.url }}" alt="avatar" class="issue-info-comment-avatar profile--comment">
+            {% else %}
+                <span class="material-icons">person</span>
+            {% endif %}
+            <div class="issue-info-comment-main">
+                <p>
+                    <strong>{{ comment.user.username }}</strong>
+                    on the issue:
+                    <a class ="profile__to-issue-link" href="{% url 'issue_detail' comment.issue.id %}">
+                        {{ comment.issue.subject }}
+                        (click to view)
+                    </a>
+                </p>
+                <p>{{ comment.text }}</p>
+                <p class="issue-info-comment-date">{{ comment.published_at }}</p>
+            </div>
+            <div class="issue-info-comment-buttons">
+                <div class="issue-info-status-buttons-comment-delete">
+                    <a href="{% url 'issue_info_delete_comment' comment.issue.id comment.id  %}">
+                        <span class="material-icons">delete</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>No comments yet.</p>
+    {% endfor %}
+</div>
