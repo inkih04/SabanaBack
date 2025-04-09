@@ -5,9 +5,19 @@ from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import IssueForm
+from .models import Status, Priorities, Types, Severities
+from .forms import StatusForm, PrioritiesForm, TypesForm, SeveritiesForm
+
 from .models import Issue, Attachment
 from .models import Profile
 from .models import Comment
+
+MODEL_FORM_MAP = {
+    'status': (Status, StatusForm),
+    'priorities': (Priorities, PrioritiesForm),
+    'types': (Types, TypesForm),
+    'severities': (Severities, SeveritiesForm),
+}
 
 
 @login_required
@@ -15,7 +25,14 @@ def issue_list(request):
     form = IssueForm()  # Instancia vacía del formulario
     User = get_user_model()
     users = User.objects.all()  # Lista de usuarios para el campo "Assigned To"
+    statuses = Status.objects.all()
 
+    return render(request, './issues/issues_list.html', {
+        'issues': issues,
+        'form': form,
+        'users': users,
+        'statuses': statuses,
+    })
     search_query = request.GET.get('search', '').strip()
     if search_query:
         issues = Issue.objects.filter(
@@ -24,8 +41,12 @@ def issue_list(request):
     else:
         issues = Issue.objects.all().order_by('-created_at')
 
-    return render(request, './issues/issues_list.html', {'issues': issues, 'form': form, 'users': users})
-
+    return render(request, './issues/issues_list.html', {
+        'issues': issues,
+        'form': form,
+        'users': users,
+        'statuses': statuses,
+    })
 
 @login_required
 def issue_create(request):
@@ -87,10 +108,13 @@ def update_issue_status(request, issue_id):
     issue = get_object_or_404(Issue, id=issue_id)
 
     if request.method == "POST":
-        new_status = request.POST.get("status")
-        if new_status in dict(Issue.STATUS_CHOICES):
+        new_status_id = request.POST.get("status")
+        try:
+            new_status = Status.objects.get(id=new_status_id)
             issue.status = new_status
             issue.save()
+        except Status.DoesNotExist:
+            pass  # Manejar el caso donde el estado no exista
 
     # Obtener la URL de retorno enviada en el formulario
     next_url = request.POST.get("next")
@@ -144,6 +168,39 @@ def update_issue_assignee(request, issue_id):
 
     return redirect('issue_list')
 
+@login_required
+def update_issue_metadata(request, issue_id):
+    """Actualiza tipo, prioridad y severidad de un issue"""
+    issue = get_object_or_404(Issue, id=issue_id)
+
+    if request.method == "POST":
+        try:
+            # Actualizar tipo
+            new_type_id = request.POST.get("type")
+            if new_type_id:
+                new_type = Types.objects.get(id=new_type_id)
+                issue.issue_type = new_type
+
+            # Actualizar prioridad
+            new_priority_id = request.POST.get("priority")
+            if new_priority_id:
+                new_priority = Priorities.objects.get(id=new_priority_id)
+                issue.priority = new_priority
+
+            # Actualizar severidad
+            new_severity_id = request.POST.get("severity")
+            if new_severity_id:
+                new_severity = Severities.objects.get(id=new_severity_id)
+                issue.severity = new_severity
+
+            # Guardar cambios en el modelo Issue
+            issue.save()
+
+        except (Types.DoesNotExist, Priorities.DoesNotExist, Severities.DoesNotExist):
+            pass  # Manejar errores si no se encuentran valores válidos
+
+    return redirect('issue_list')
+
 
 @login_required
 def issue_bulk_create(request):
@@ -166,6 +223,57 @@ def issue_bulk_create(request):
 
 def login(request):
     return render(request, 'issues/custom_login.html')
+
+def settings_list(request):
+    """Muestra la lista de todas las configuraciones."""
+    data = {
+        'status': Status.objects.all(),
+        'priorities': Priorities.objects.all(),
+        'types': Types.objects.all(),
+        'severities': Severities.objects.all(),
+    }
+    return render(request, 'settings/settings_list.html', {'data': data})
+
+
+def settings_edit(request, model_name, pk=None):
+    """Añade o edita un objeto de configuración."""
+    model_data = MODEL_FORM_MAP.get(model_name)
+    if not model_data:
+        return redirect('settings_list')  # Redirige si el modelo no es válido
+
+    model, form_class = model_data
+    instance = get_object_or_404(model, pk=pk) if pk else None
+
+    if request.method == 'POST':
+        form = form_class(request.POST, instance=instance)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            # Generar automáticamente el slug si es necesario (solo para Status)
+            if model_name == 'status' and not obj.slug:
+                from django.utils.text import slugify
+                obj.slug = slugify(obj.nombre)
+            obj.save()
+            return redirect('settings_list')
+    else:
+        form = form_class(instance=instance)
+
+    return render(request, 'settings/settings_form.html', {'form': form})
+
+
+def settings_delete(request, model_name, pk):
+    """Elimina un objeto de configuración."""
+    model_data = MODEL_FORM_MAP.get(model_name)  # Obtiene el modelo y formulario correspondiente
+    if not model_data:
+        return redirect('settings_list')  # Redirige si el modelo no es válido
+
+    model, _ = model_data  # Solo necesitamos el modelo, no el formulario
+    instance = get_object_or_404(model, pk=pk)  # Obtiene la instancia del objeto a eliminar
+
+    if request.method == 'POST':
+        instance.delete()  # Elimina el objeto de la base de datos
+        return redirect('settings_list')  # Redirige a la lista de configuraciones
+
+    return render(request, 'settings/settings_confirm_delete.html', {'instance': instance})
 
 def profile(request):
     # Filtra los issues asignados al usuario logueado
@@ -198,3 +306,4 @@ def issue_info_delete_comment(request, issue_id, comment_id):
     if comment.user == request.user or issue.created_by == request.user:
         comment.delete()
     return redirect('issue_detail', issue_id=issue_id)
+
