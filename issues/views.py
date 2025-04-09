@@ -26,19 +26,44 @@ def issue_list(request):
     User = get_user_model()
     users = User.objects.all()  # Lista de usuarios para el campo "Assigned To"
     statuses = Status.objects.all()
+    priorities = Priorities.objects.all()
+    severities = Severities.objects.all()
+    types = Types.objects.all()
+
     search_query = request.GET.get('search', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+    priority_filter = request.GET.get('priority', '').strip()
+    severity_filter = request.GET.get('severity', '').strip()
+    type_filter = request.GET.get('type', '').strip()
+
+    issues = Issue.objects.all()
     if search_query:
-        issues = Issue.objects.filter(
+        issues = issues.filter(
             Q(subject__iexact=search_query) | Q(description__iexact=search_query)
-        ).order_by('-created_at')
-    else:
-        issues = Issue.objects.all().order_by('-created_at')
+        )
+
+    if status_filter:
+        issues = issues.filter(status__slug=status_filter)
+
+    if priority_filter:
+        issues = issues.filter(priority__nombre=priority_filter)
+
+    if severity_filter:
+        issues = issues.filter(severity__nombre=severity_filter)
+
+    if type_filter:
+        issues = issues.filter(issue_type__nombre=type_filter)
+
+    issues = issues.order_by('-created_at')
 
     return render(request, './issues/issues_list.html', {
         'issues': issues,
         'form': form,
         'users': users,
         'statuses': statuses,
+        'priorities': priorities,
+        'severities': severities,
+        'types': types,
     })
 
 @login_required
