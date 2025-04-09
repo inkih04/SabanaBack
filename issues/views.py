@@ -77,6 +77,7 @@ def issue_detail(request, issue_id):
 
     # Obtener todos los usuarios o filtrarlos por búsqueda
     users = Profile.objects.all()
+    statuses = Status.objects.all()
     if search_query:
         users = users.filter(username__icontains=search_query)
 
@@ -84,6 +85,7 @@ def issue_detail(request, issue_id):
         'issue': issue,
         'show_assign_form': show_assign_form,
         'users': users,
+        'statuses': statuses,
     }
 
     return render(request, 'issues/issue_detail.html', context)
