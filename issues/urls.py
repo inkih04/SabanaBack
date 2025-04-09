@@ -1,6 +1,7 @@
 from django.urls import path, include
 from .views import issue_list, issue_create, delete_issue, update_issue_status, issue_detail, issue_bulk_create, login, \
-    update_issue_assignee, profile, update_bio, update_issue_description, add_comment_to_issue, update_issue_info_title, issue_info_delete_comment
+    update_issue_assignee, profile, update_bio, update_issue_description, add_comment_to_issue, update_issue_info_title, \
+    issue_info_delete_comment, update_avatar
 
 urlpatterns = [
     path('', issue_list, name='issue_list'),
@@ -30,4 +31,5 @@ urlpatterns = [
 
     path('update_bio/', update_bio, name='update_bio'),
 
+    path('update-avatar/', update_avatar, name='update_avatar'),
 ]

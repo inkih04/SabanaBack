@@ -1,5 +1,6 @@
 from django import forms
 from .models import Issue
+from .models import Profile
 
 class IssueForm(forms.ModelForm):
     attachments = forms.FileField(
@@ -20,3 +21,9 @@ class IssueForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['attachments'].label = "Upload Attachment"
+
+
+class AvatarForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['avatar']
