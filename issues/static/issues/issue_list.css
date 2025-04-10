@@ -591,3 +591,20 @@
 .modal:target .modal-content-filters {
     animation: modalAppear 0.4s ease-out, pulse 1.5s ease-out;
 }
+
+
+/* Estilos para el mensaje de alerta */
+.alert {
+    background-color: #fdecea; /* Color de fondo suave */
+    color: #d32f2f; /* Color de texto rojo */
+    font-weight: bold;
+    animation: fadeOut 5s ease forwards; /* Animación para desvanecer */
+    margin-left: 15px;
+}
+
+/* Animación de desvanecimiento */
+@keyframes fadeOut {
+    0%   { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { opacity: 0; height: 0; margin: 0; padding: 0; overflow: hidden; }
+}
