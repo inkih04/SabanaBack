@@ -99,7 +99,7 @@
 
         {% elif view_mode == "watched" %}
             {# Aquí incluir otro template o código para "Watched Issues" #}
-            <p>Aquí se mostrarán los "Watched Issues".</p>
+            {% include "issues/issue_table.html" %}
         {% else %}
             {# Valor por defecto, muestra la tabla de issues asignados #}
             {% include "issues/issue_table.html" %}

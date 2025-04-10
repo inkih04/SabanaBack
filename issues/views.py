@@ -311,29 +311,36 @@ def settings_delete(request, model_name, pk):
 
 @login_required
 def profile(request):
-    # Issues asignados al usuario
     assigned_issues = Issue.objects.filter(assigned_to=request.user).order_by('-created_at')
     total_issues = assigned_issues.count()
 
-    # Issues en los que el usuario es watcher
-    watched_issues = Issue.objects.filter(watchers=request.user).count()
+    watched_issues_qs = Issue.objects.filter(watchers=request.user).order_by('-created_at')
+    watched_count = watched_issues_qs.count()
 
-    # Comentarios realizados por el usuario
     user_comments = Comment.objects.filter(user=request.user).order_by('-published_at')
     comment_count = user_comments.count()
 
     view_mode = request.GET.get('view', 'issues')
     attachment_error = request.session.pop('attachment_error', None)
 
+    if view_mode == "watched":
+        issues_to_display = watched_issues_qs
+    else:
+        issues_to_display = assigned_issues
+
+    # 👇 Aquí añadimos todos los estatus
+    all_statuses = Status.objects.all().order_by('nombre')
+
     context = {
-        'issues': assigned_issues,
+        'issues': issues_to_display,
         'user_comments': user_comments,
         'total_issues': total_issues,
-        'watched_issues': watched_issues,
+        'watched_issues': watched_count,
         'comment_count': comment_count,
         'users': {request.user},
         'view_mode': view_mode,
         'attachment_error': attachment_error,
+        'statuses': all_statuses,  # ✅ Aquí está la clave
     }
     return render(request, 'BaseProfile.html', context)
 
