@@ -2,6 +2,9 @@ from django.urls import path, include
 from .views import issue_list, issue_create, delete_issue, update_issue_status, issue_detail, issue_bulk_create, login, \
     update_issue_assignee, profile, update_bio, update_issue_description, add_comment_to_issue, update_issue_info_title, issue_info_delete_comment,settings_list,settings_edit,settings_delete, \
     update_avatar
+from .views import (issue_list, issue_create, delete_issue, update_issue_status, issue_detail, issue_bulk_create, login, \
+    update_issue_assignee, profile, update_bio, update_issue_description, add_comment_to_issue, update_issue_info_title,
+                    issue_info_delete_comment, info_issue_upload_attachment, issue_info_delete_attachment)
 
 urlpatterns = [
     path('', issue_list, name='issue_list'),
@@ -17,6 +20,10 @@ urlpatterns = [
     path('update_issue_info_title/<int:issue_id>/', update_issue_info_title, name='update_issue_info_title'),
 
     path('issue/<int:issue_id>/comment/<int:comment_id>/delete/',issue_info_delete_comment, name='issue_info_delete_comment'),
+
+    path('info_issue_upload_attachment/<int:issue_id>/', info_issue_upload_attachment, name='info_issue_upload_attachment'),
+
+    path('issue/<int:issue_id>/attachment/<int:attachment_id>/delete/',issue_info_delete_attachment, name='issue_info_delete_attachment'),
 
     path('<int:issue_id>/', issue_detail, name='issue_detail'),
 

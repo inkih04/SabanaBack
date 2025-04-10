@@ -76,9 +76,12 @@ class Issue(models.Model):
 
 
 class Attachment(models.Model):
-    issue = models.ForeignKey(Issue, related_name='attachments', on_delete=models.CASCADE)
+    issue = models.ForeignKey(Issue, related_name='attachment', on_delete=models.CASCADE)
     file = models.FileField(upload_to='attachments/', storage=S3Boto3Storage())
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.file.name} ({self.uploaded_at.strftime('%Y-%m-%d %H:%M:%S')})"
 
 
 

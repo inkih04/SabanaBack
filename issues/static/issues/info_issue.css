@@ -319,3 +319,66 @@ display:flex;
       font-size: 25px;
       color: #6e9197;
 }
+
+.issue-info-attachment {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      align-items: center;
+      border-bottom: 1px solid #adafaf;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+}
+
+.issue-info-attachment-main {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      width: 90%;
+      margin-right: 10px;
+}
+
+.issue-info-attachment-buttons {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      align-items: center;
+      gap: 5px;
+      transition: opacity 0.3s ease, pointer-events 0.3s ease;
+}
+
+
+.issue-info-status-buttons-attachment-delete span{
+      color: #b84444;
+      font-size: 25px;
+}
+
+.issue-info-attachment:hover .issue-info-attachment-buttons {
+      opacity: 1;
+      pointer-events: auto;
+}
+
+.issue-info-attachment-upload {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: 10px;
+}
+
+.issue-info-hidden-upload-button {
+      background-color: #83eede;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 15px;
+      padding: 5px;
+      border-color: #83eede;
+}
+
+.issue-info-hidden-upload-button:hover {
+      background-color: #6be3d399;
+}
