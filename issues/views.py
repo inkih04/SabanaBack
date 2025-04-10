@@ -311,19 +311,32 @@ def settings_delete(request, model_name, pk):
 
 @login_required
 def profile(request):
-    issues = Issue.objects.filter(assigned_to=request.user).order_by('-created_at')
-    user_comments = Comment.objects.filter(user=request.user).select_related('issue').order_by('-published_at')
+    # Issues asignados al usuario
+    assigned_issues = Issue.objects.filter(assigned_to=request.user).order_by('-created_at')
+    total_issues = assigned_issues.count()
+
+    # Issues en los que el usuario es watcher
+    watched_issues = Issue.objects.filter(watchers=request.user).count()
+
+    # Comentarios realizados por el usuario
+    user_comments = Comment.objects.filter(user=request.user).order_by('-published_at')
+    comment_count = user_comments.count()
+
     view_mode = request.GET.get('view', 'issues')
     attachment_error = request.session.pop('attachment_error', None)
 
     context = {
-        'issues': issues,
+        'issues': assigned_issues,
         'user_comments': user_comments,
+        'total_issues': total_issues,
+        'watched_issues': watched_issues,
+        'comment_count': comment_count,
         'users': {request.user},
         'view_mode': view_mode,
         'attachment_error': attachment_error,
     }
     return render(request, 'BaseProfile.html', context)
+
 
 
 
