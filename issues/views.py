@@ -100,6 +100,8 @@ def issue_detail(request, issue_id):
     # Obtener todos los usuarios o filtrarlos por búsqueda
     users = Profile.objects.all()
     statuses = Status.objects.all()
+
+
     if search_query:
         users = users.filter(username__icontains=search_query)
 
@@ -383,3 +385,31 @@ def issue_info_delete_attachment(request, issue_id, attachment_id):
         attachment.delete()
     return redirect('issue_detail', issue_id=issue_id)
 
+@login_required
+def issue_info_add_watcher(request,issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    if request.user not in issue.watchers.all():
+        issue.watchers.add(request.user)
+    return redirect('issue_detail', issue_id=issue_id)
+
+
+@login_required
+def issue_info_remove_watcher(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+
+    # Eliminar al usuario actual de los watchers
+    if request.user in issue.watchers.all():
+        issue.watchers.remove(request.user)
+
+    return redirect('issue_detail', issue_id=issue.id)
+
+@login_required
+def issue_info_add_multiple_watchers(request, issue_id):
+    issue = get_object_or_404(Issue, pk=issue_id)
+    if request.method == 'POST':
+        selected_profile_ids = request.POST.getlist('users') # users es el name del select en el html
+        for profile_id in selected_profile_ids:
+            profile = get_object_or_404(Profile, pk=profile_id)
+            issue.watchers.add(profile.user) # Añadimos el User asociado al Profile
+        return redirect('issue_detail', issue_id=issue_id)
+    return redirect('issue_detail', issue_id=issue_id)
