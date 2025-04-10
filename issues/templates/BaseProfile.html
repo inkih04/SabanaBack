@@ -78,6 +78,10 @@
                 {% endif %}
             </span>
             <a href="#modal-edit-bio" class="profile__btn-Edit open-modal">Edit Bio</a>
+            {% if attachment_error %}
+                <p class="alert"> {{ attachment_error }} </p>
+            {% else %}
+            {% endif %}
         </div>
     </aside>
 

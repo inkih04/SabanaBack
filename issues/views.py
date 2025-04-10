@@ -311,22 +311,20 @@ def settings_delete(request, model_name, pk):
 
 @login_required
 def profile(request):
-    # Obtener los issues asignados al usuario
     issues = Issue.objects.filter(assigned_to=request.user).order_by('-created_at')
-
-    # Obtener todos los comentarios realizados por el usuario, incluyendo el issue asociado
     user_comments = Comment.objects.filter(user=request.user).select_related('issue').order_by('-published_at')
-
-    # Leer el modo de vista (por defecto "issues")
     view_mode = request.GET.get('view', 'issues')
+    attachment_error = request.session.pop('attachment_error', None)
 
     context = {
         'issues': issues,
         'user_comments': user_comments,
         'users': {request.user},
         'view_mode': view_mode,
+        'attachment_error': attachment_error,
     }
     return render(request, 'BaseProfile.html', context)
+
 
 
 @login_required
@@ -377,12 +375,14 @@ def update_avatar(request):
     if request.method == 'POST' and request.FILES.get('avatar'):
         profile = request.user.profile
         avatar_file = request.FILES['avatar']
-
-        # Guarda en el campo avatar si tienes uno
-        profile.avatar.save(avatar_file.name, avatar_file)
-        profile.save()
-
+        try:
+            profile.avatar.save(avatar_file.name, avatar_file)
+            profile.save()
+        except Exception:
+            # Guardar en la sesión el mensaje de error para luego mostrarlo en el template
+            request.session['attachment_error'] = "The bucket is currently disabled. Please try again later."
     return redirect('profile')
+
 
 @login_required
 def issue_info_delete_attachment(request, issue_id, attachment_id):
