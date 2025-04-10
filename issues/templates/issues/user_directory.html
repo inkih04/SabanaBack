@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="userDirectory__title">User Directory</h1>
+
+<div class="userDirectory__header">
+    <form method="get" action="{% url 'user_directory' %}">
+      <div class="user__search-bar">
+          <div class="user__search-bar--container">
+              <span class="material-icons">search</span>
+              <input type="text" name="search" placeholder="Search user..." value="{{ request.GET.search|default:'' }}" />
+          </div>
+      </div>
+    </form>
+    <div class="userDirectory__NavBar">
+      <div class="userDirectory__NavBar-stat-item">
+          <span>Issues</span>
+      </div>
+      <div class="userDirectory__NavBar-stat-item">
+          <span>Watching</span>
+      </div>
+      <div class="userDirectory__NavBar-stat-item">
+          <span>Comments</span>
+      </div>
+    </div>
+</div>
+
+{% for data in user_data %}
+<a href="{% url 'user_profile' username=data.user.username %}" class="a__noStyle">
+  <div class="userDirectory__user-card">
+      <div class="user-card__avatar">
+          {% if data.user.profile.avatar %}
+              <img src="{{ data.user.profile.avatar.url }}" alt="avatar" class="userDirectory_user-card__avatar-img">
+          {% else %}
+              <div class="user-card__avatar-icon">
+                  <span class="material-icons">person</span>
+              </div>
+          {% endif %}
+      </div>
+
+      <div class="userDirectory_user-card__bio">
+          <div class="userDirectory__userName">
+            <p class="userDirectory_user-card__name">{{ data.user.username }}</p>
+          </div>
+          {% if data.user.profile.biography %}
+              <p>{{ data.user.profile.biography }}</p>
+          {% endif %}
+      </div>
+      <div class="userDirectory__stat-item">
+          <span class="stat-number">{{ data.assigned_issues_count }}</span>
+      </div>
+      <div class="userDirectory__stat-item">
+          <span class="stat-number">{{ data.watched_issues_count }}</span>
+      </div>
+      <div class="userDirectory__stat-item">
+          <span class="stat-number">{{ data.comments_count }}</span>
+      </div>
+  </div>
+</a>
+{% endfor %}
+
+{% endblock %}

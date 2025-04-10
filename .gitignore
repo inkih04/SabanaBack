@@ -1,0 +1,45 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+venv/
+.env/
+.venv/
+.env
+
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+media/
+staticfiles/
+local_settings.py
+
+# Keep migration Python files, ignore compiled ones
+**/migrations/*.pyc
+
+# PyCharm / VSCode / IDE config
+.idea/
+.vscode/
+*.iml
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Backup or temp files
+*.bak
+*.swp
+*.swo
+*~
+
+# Node/npm (if you ever use frontend tooling)
+node_modules/

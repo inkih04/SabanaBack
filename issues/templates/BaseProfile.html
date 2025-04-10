@@ -1,0 +1,149 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Issues App{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'issues/styles.css' %}">
+</head>
+<body>
+    <header class="header shadow">
+        <div class="header__logo-container">
+            <i class="material-icons">home</i>
+            <h1 class="header__title">Sabana</h1>
+        </div>
+        <nav class="header__nav">
+            <div class="header__nav-container">
+                <a href="{% url 'issue_list' %}" class="header__nav-link">Go back to Issues</a>
+
+                {% if request.user.profile.avatar %}
+                    <img src="{{ request.user.profile.avatar.url }}" alt="avatar" class="header__avatar-img">
+                {% else %}
+                    <div class="header__avatar-img default-avatar">
+                        <span class="material-icons">person</span>
+                    </div>
+                {% endif %}
+
+                <span class="header__username">{{ request.user.username }}</span>
+            </div>
+        </nav>
+    </header>
+<aside class="profile__sidebar">
+        <div class="profile__content">
+            <div class="profile__avatar-wrapper">
+              {% if is_own_profile %}
+              <form class="avatar-form" method="post" action="{% url 'update_avatar' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                    <div class="profile__avatar-circle">
+                        {% if profile_user.profile.avatar %}
+                            <img src="{{ profile_user.profile.avatar.url }}" alt="avatar" class="profile__avatar-img">
+                        {% else %}
+                            <div>
+                                <span class="material-icons">person</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                <label for="avatar-upload-sidebar" class="avatar-edit-icon">
+                  <span class="material-icons">edit</span>
+                </label>
+                <input id="avatar-upload-sidebar" type="file" name="avatar" onchange="this.form.submit()">
+              </form>
+              {% else %}
+                <div class="profile__avatar-circle">
+                    {% if profile_user.profile.avatar %}
+                        <img src="{{ profile_user.profile.avatar.url }}" alt="avatar" class="profile__avatar-img">
+                    {% else %}
+                        <div>
+                            <span class="material-icons">person</span>
+                        </div>
+                    {% endif %}
+                </div>
+              {% endif %}
+            </div>
+            <span class="profile__name">{{ profile_user.username }}</span>
+            <hr class="divider">
+            <div class="profile__stadistics">
+                <div class="profile__stadistics-item">
+                    <span>{{ total_issues }}</span>
+                    <span>Total Issues</span>
+                </div>
+                <div class="profile__stadistics-item">
+                    <span>{{ watched_issues }}</span>
+                    <span>Watched Issues</span>
+                </div>
+                <div class="profile__stadistics-item">
+                    <span>{{ comment_count }}</span>
+                    <span>Comment Issues</span>
+                </div>
+            </div>
+            <hr class="divider">
+            <span class="profile__text">
+                {% if profile_user.profile.biography %}
+                    {{ profile_user.profile.biography }}
+                {% else %}
+                    {% if is_own_profile %}
+                        Enter a bio for your profile
+                    {% else %}
+                        This user hasn't set a bio yet
+                    {% endif %}
+                {% endif %}
+            </span>
+            {% if is_own_profile %}
+            <a href="#modal-edit-bio" class="profile__btn-Edit open-modal">Edit Bio</a>
+            {% endif %}
+            {% if attachment_error %}
+                <p class="alert"> {{ attachment_error }} </p>
+            {% else %}
+            {% endif %}
+        </div>
+</aside>
+
+<div class="content--profile">
+    <div class="profile__changePage">
+        {% if is_own_profile %}
+            <a href="{% url 'profile' %}?view=issues" class="pageChanger">Open Assigned Issues</a>
+            <a href="{% url 'profile' %}?view=watched" class="pageChanger">Watched Issues</a>
+            <a href="{% url 'profile' %}?view=comments" class="pageChanger">Comments</a>
+        {% else %}
+            <a href="{% url 'user_profile' username=profile_user.username %}?view=issues" class="pageChanger">Open Assigned Issues</a>
+            <a href="{% url 'user_profile' username=profile_user.username %}?view=watched" class="pageChanger">Watched Issues</a>
+            <a href="{% url 'user_profile' username=profile_user.username %}?view=comments" class="pageChanger">Comments</a>
+        {% endif %}
+    </div>
+
+    <div class="issue-container">
+        {% if view_mode == "comments" %}
+            {# Aquí puedes incluir otro template, por ejemplo: #}
+            {% include "issues/Comments.html" %}
+
+        {% elif view_mode == "watched" %}
+            {# Aquí incluir otro template o código para "Watched Issues" #}
+            {% include "issues/issue_table.html" %}
+        {% else %}
+            {# Valor por defecto, muestra la tabla de issues asignados #}
+            {% include "issues/issue_table.html" %}
+        {% endif %}
+    </div>
+</div>
+
+    {% if is_own_profile %}
+    <div id="modal-edit-bio" class="profile__modal">
+        <div class="profile__modal-content">
+            <div class="profile__modal-header">
+                <h1>Edit Bio</h1>
+                <a href="#" class="profile__modal-close">&times;</a>
+            </div>
+            <form method="post" action="{% url 'update_bio' %}" class="profile__modal-form">
+                {% csrf_token %}
+                <label for="biography">Your biography</label>
+                <textarea id="biography" name="biography" rows="6">{% if profile_user.profile.biography %}{{ profile_user.profile.biography }}{% else %}Enter a bio for your profile{% endif %}</textarea>
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</body>
+</html>

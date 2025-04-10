@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Issues App{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'issues/styles.css' %}">
+</head>
+<body>
+    <header class="header shadow">
+        <div class="header__logo-container">
+            <i class="material-icons">home</i>
+            <h1 class="header__title">Sabana</h1>
+        </div>
+        <nav class="header__nav">
+            <div class="header__nav-container">
+                {% if request.user.profile.avatar %}
+                    <img src="{{ request.user.profile.avatar.url }}" alt="avatar" class="header__avatar-img">
+                {% else %}
+                    <div class="header__avatar">
+                        <span class="material-icons">person</span>
+                    </div>
+                {% endif %}
+                <span class="header__username">{{ request.user.username }}</span>
+            </div>
+        </nav>
+    </header>
+    <div class="content">
+        <aside class="sidebar">
+            <nav class="sidebar__nav">
+                <ul class="sidebar__list">
+                    <li class="sidebar__item">
+                        <span class="material-icons sidebar__icon">group_work</span>
+                        <a href="{%url 'user_directory' %}" class="sidebar__link">Teammates</a>
+                    </li>
+                    <li class="sidebar__item">
+                        <span class="material-icons sidebar__icon">bug_report</span>
+                        <a href="{% url 'issue_list' %}" class="sidebar__link">Issues</a>
+                    </li>
+                    <li class="sidebar__item">
+                        <span class="material-icons sidebar__icon">settings</span>
+                        <a href="{% url 'settings_list' %}" class="sidebar__link">Settings</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar__profile">
+                <ul>
+                    <li class="sidebar__item">
+                        {% if request.user.profile.avatar %}
+                            <img src="{{ request.user.profile.avatar.url }}" alt="avatar" class="sidebar__avatar">
+                        {% else %}
+                            <div class="sidebar__icons">
+                                <span class="material-icons sidebar__icon">person</span>
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'profile' %}?view=issues">Profile</a>
+                    </li>
+                    <li class="sidebar__item">
+                        <span class="material-icons sidebar__icon">logout</span>
+                        <a href="{% url 'account_logout' %}">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+        <div class = "issue-container">
+            {% block content %} {% endblock %}
+        </div>
+    </div>
+</body>
+</html>

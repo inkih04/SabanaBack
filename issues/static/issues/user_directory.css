@@ -1,0 +1,109 @@
+.userDirectory__user-card {
+    display: grid;
+    grid-template-columns: 100px auto 125px 125px 125px;
+    padding: 10px;
+    margin-top: 15px;
+    background-color: #e2eaff;
+    border-radius: 10px;
+    box-shadow: 0 0 4px #eee;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-card__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.userDirectory_user-card__name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #008aa8;
+}
+
+.userDirectory__user-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 45px;
+    justify-content: end;
+    margin-right: 20px;
+}
+
+.userDirectory__stat-item {
+    display: flex;
+    justify-content: center;
+    min-width: 30px;
+}
+
+.userDirectory__NavBar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 45px;
+    justify-content: end;
+    margin-right: 20px;
+}
+
+.userDirectory__NavBar-stat-item {
+    display: flex;
+    justify-content: center;
+}
+
+.userDirectory__NavBar span {
+    font-size: 20px;
+    color: #008aa8;
+}
+
+.userDirectory__header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.user__search-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.user__search-bar--container {
+    background-color: #f3f3f3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    box-shadow: 0 0 5px #aaa;
+    padding: 0 5px;
+}
+
+.user__search-bar--container span {
+    color: #008aa8;
+    font-size: 20px;
+}
+
+.user__search-bar--container input {
+    border: none;
+    outline: none;
+    background-color: transparent;
+    color: #000;
+    font-size: 17px;
+    padding: 7px;
+}
+
+.userDirectory_user-card__bio {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+}
+
+.userDirectory_user-card__bio p {
+    margin-left: 15px;
+}
+
+.a__noStyle {
+    text-decoration: none;
+    color: #000;
+}

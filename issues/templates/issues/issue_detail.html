@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<div class="issue-info-main">
+
+    <div class="issue-info-principal">
+    <div class="issue-info-title-title">
+        <h1>
+            {% if request.GET.edit %}
+                <form method="POST" action="{% url 'update_issue_info_title' issue.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="text" name="subject" value="{{ issue.subject }}" required />
+                    <button type="submit" class="issue-info-title-saveButton">Save</button>
+                    {% if issue %}
+                        <a href="{% url 'issue_detail' issue.id %}" class="issue-info-title-cancel-edit">
+                            <span class="material-icons">close</span>
+                        </a>
+                    {% endif %}
+                </form>
+            {% else %}
+                #{{ issue.id }} {{ issue.subject }}
+                <div class="issue-info-title-edit">
+                    <a href="?edit=true">
+                        <span class="material-icons">edit</span>
+                    </a>
+                </div>
+            {% endif %}
+            {% if issue.due_date %}
+                <div class="issue-info-due-date-title">
+                    <span class="material-icons">schedule</span>
+                </div>
+            {% endif %}
+        </h1>
+
+
+        <div class="issue-info-goToOtherIssue">
+            {% if prev_issue %}
+                <div class="issue-info-goToOtherIssue-icon">
+                    <a href="{% url 'issue_detail' prev_issue.id %}">
+                        <span class="material-icons">arrow_back_ios</span>
+                    </a>
+                </div>
+            {% endif %}
+            {% if next_issue %}
+                <div class="issue-info-goToOtherIssue-icon">
+                    <a href="{% url 'issue_detail' next_issue.id %}">
+                        <span class="material-icons">arrow_forward_ios</span>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+                    <div class="issue-info-header">
+                            <h2>Issue Details</h2>
+                        <div class="issue-info-created">
+                                <p><strong>Created by:</strong> {{ issue.created_by }}</p>
+                                <p><strong>Created at:</strong> {{ issue.created_at }}</p>
+                        </div>
+                    </div>
+
+
+                <div class="issue-info-description">
+                    <h2>Description</h2>
+                    <form method="POST" action="{% url 'update_issue_description' issue.id %}">
+                        {% csrf_token %}
+                        <textarea id="description" name="description" placeholder="Add description">{{ issue.description }}</textarea>
+                        <div class="issue-info-saveButtons">
+                            <input type="submit" value="Save" class="info-issue-saveButton">
+                        </div>
+                    </form>
+                </div>
+
+                <div class="issue-info-attachments">
+                    <!-- Formulario para subir archivos -->
+                    <form method="POST" action="{% url 'info_issue_upload_attachment' issue.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="issue-info-attachments-title">
+                            <h2>Attachments</h2>
+                            <label for="attachments" class="issue-info-attachments-add">
+                                <span class="material-icons"> add </span>
+                            </label>
+                        </div>
+
+                        {% for attachment in issue.attachment.all %}
+                            <div class="issue-info-attachment">
+                                <div class="issue-info-attachment-main">
+                                    <!-- Mostrar el archivo con un enlace -->
+                                    <a href="{{ attachment.file.url }}" target="_blank">
+                                        {{ attachment.file.name|cut:"attachments/" }}
+                                    </a>
+
+                                    <!-- Tamaño del archivo -->
+                                    <p>{{ attachment.file.size|filesizeformat }}</p>
+
+                                    <!-- Fecha de subida -->
+                                    <p class="issue-info-attachment-date">{{ attachment.uploaded_at }}</p>
+                                </div>
+
+                                <div class="issue-info-attachment-buttons">
+
+                                    <!-- Botón de eliminación -->
+                                    <div class="issue-info-status-buttons-attachment-delete">
+                                        <a href="{% url 'issue_info_delete_attachment' issue.id attachment.id %}">
+                                            <span class="material-icons">delete</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <!-- Mensaje si no hay attachments -->
+                            <label for="attachments" class="issue-info-attachments-box">
+                                <p class="issue-info-attachments-drop">
+                                    {% if attachment_error %}
+                                        {{ attachment_error }}
+                                    {% else %}
+                                        Add attachments here!
+                                    {% endif %}
+                                </p>
+                            </label>
+                        {% endfor %}
+
+                    <div class="issue-info-attachment-upload">
+                        <input type="file" id="attachments" name="file" style="display: none;" />
+                        <button type="submit" class="issue-info-hidden-upload-button">Upload</button>
+                    </div>
+                    </form>
+                </div>
+
+
+
+                <div class="issue-info-comments">
+                    <div class="issue-info-comments-title">
+                        <h2> {{ issue.comments.size }}Comments</h2>
+                    </div>
+                    {% for comment in issue.comments.all %}
+                        <div class="issue-info-comment">
+                            {% if comment.user.profile.avatar %}
+                                <img src="{{ comment.user.profile.avatar.url }}" alt="Avatar" style="width: 50px; height: 50px; border-radius: 50%;">
+                            {% endif %}
+                            <div class="issue-info-comment-main">
+                                <p><strong>{{ comment.user.username }}</strong></p>
+                                {% if edit_comment_id == comment.id %}
+                                    <form method="POST" action="{% url 'issue_info_edit_comment' issue.id comment.id %}" class="edit-comment-form">
+                                        {% csrf_token %}
+                                        <textarea name="text">{{ comment.text }}</textarea>
+                                        <button type="submit" class="info-issue-saveButton">Save</button>
+                                        <a href="{% url 'issue_detail' issue.id %}" class="cancel-edit-comment">Cancel</a>
+                                    </form>
+                                {% else %}
+                                    <p class="comment-text">{{ comment.text }}</p>
+                                {% endif %}
+                                <p class="issue-info-comment-date">{{ comment.published_at }}</p>
+                            </div>
+                            <div class="issue-info-comment-buttons">
+
+                                    {% if edit_comment_id != comment.id %}
+                                        <a href="{% url 'issue_info_edit_comment' issue.id comment.id %}" class="issue-info-status-buttons-comment-edit">
+                                            <span class="material-icons edit-comment-button">edit</span>
+                                        </a>
+                                    {% endif %}
+
+                                    <div class="issue-info-status-buttons-comment-delete">
+                                        <a href="{% url 'issue_info_delete_comment' issue.id comment.id  %}">
+                                             <span class="material-icons">delete</span>
+                                        </a>
+                                    </div>
+
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p>No comments yet.</p>
+                    {% endfor %}
+                <form method="POST" action="{% url 'add_comment_to_issue' issue.id %}">
+                    {% csrf_token %}
+                    <textarea  name="comment_text" placeholder="Type a new comment here"></textarea>
+                    <div class="issue-info-saveButtons">
+                            <input type="submit" value="Add Comment" class="info-issue-saveButton">
+                    </div>
+                </form>
+
+                </div>
+    </div>
+        <div class="issue-info-status">
+        <aside>
+            <p><strong>Status:</strong></p>
+            <form method="POST" action="{% url 'update_issue_status' issue.id %}">
+                {% csrf_token %}
+                <label for="status"></label>
+                <select id="info-issue-status-selector" name="status" class="sutil-select" onchange="this.form.submit()">
+                    {% for status in statuses %}
+                    <option value="{{ status.id }}" {% if issue.status and issue.status.id == status.id %}selected{% endif %}>
+                        {{ status.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+            <div class="issue-info-status-properties">
+                <form method="POST" action="{% url 'issue_info_edit_properties' issue.id %}">
+                    {% csrf_token %}
+                    <div class="issue-info-status-properties-severity">
+                        <strong>Severity:</strong>
+                        <select name="severity" class="sutil-select" onchange="this.form.submit()">
+                            {% for severity in severities %}
+                                <option value="{{ severity.id }}" {% if issue.severity == severity %}selected{% endif %}>{{ severity.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="issue-info-status-properties-priority">
+                        <strong>Priority:</strong>
+                        <select name="priority" class="sutil-select" onchange="this.form.submit()">
+                            {% for priority in priorities %}
+                                <option value="{{ priority.id }}" {% if issue.priority == priority %}selected{% endif %}>{{ priority.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="issue-info-status-properties-type">
+                        <strong>Type:</strong>
+                        <select name="issue_type" class="sutil-select" onchange="this.form.submit()">
+                            {% for issue_type in types %}
+                                <option value="{{ issue_type.id }}" {% if issue.issue_type == issue_type %}selected{% endif %}>{{ issue_type.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="issue-info-status-assigned">
+                <p><strong>Assigned to:</strong></p>
+                <div class="issue-info-status-assigned-list">
+                    <div class="issue-info-assigned-item">
+                    {% if issue.assigned_to is not None %}
+                         {% if issue.assigned_to.profile.avatar %}
+                            <img src="{{ issue.assigned_to.profile.avatar.url }}" alt="Avatar" style="width: 50px; height: 50px; border-radius: 50%;">
+                        {% endif %}
+                        <p>{{ issue.assigned_to }}</p>
+                        <form method="POST" action="{% url 'issue_info_remove_assigned' issue.id %}" class="issue-info-delete-form">
+                            {% csrf_token %}
+                            <button type="submit" name="issue_info_remove_assigned" value="true" class="issue-info-delete-button">
+                                <span class="material-icons">close</span>
+                            </button>
+                            <input type="hidden" name="user_id" value="{{ issue.assigned_to.id }}">
+                        </form>
+                    {% else %}
+                        <p>Issue not assigned</p>
+                    {% endif %}
+                    </div>
+                </div>
+                <div class="issue-info-status-assigned-buttons">
+                    <a href="#addAssignedToModal" class="issue-info-status-assigned-button">
+                            <span class="material-icons" > add </span>
+                            <p>Add assigned</p>
+                    </a>
+                    {% if request.user != issue.assigned_to %}
+                        <form method="POST" action="{% url 'issue_info_assign_to_current_user' issue.id %}" id="assign-to-me-form">
+                            {% csrf_token %}
+                            <button type="button" class="issue-info-status-assigned-button" onclick="document.getElementById('assign-to-me-form').submit();">
+                                <p>Assign to me</p>
+                            </button>
+                        </form>
+                    {% endif %}
+
+                    <div id="addAssignedToModal" class="modal">
+                        <div class="modal-content">
+                        <a href="." class="close">&times;</a>
+                        <h2>Add assigned users</h2>
+                        <form method="POST" action="{% url 'issue_info_add_assigned_user' issue.id %}">
+                            {% csrf_token %}
+                            <select name="users">
+                            {% for profile in users %}
+                                    {% if issue.assigned_to is None or profile.user != issue.assigned_to %}
+                                        <option value="{{ profile.id }}">{{ profile.user.username }}</option>
+                                    {% endif %}
+                            {% endfor %}
+                            </select>
+                            <div class="issue-info-saveButtons">
+                                <button type="submit" class="info-issue-saveButton">Add Selected</button>
+                            </div>
+                        </form>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="issue-info-status-watchers">
+                <p><strong>Watchers:</strong></p>
+                <div class="issue-info-status-watchers-list">
+                    {% for watcher in issue.watchers.all %}
+                        <div class="issue-info-watcher-item">
+                             {% if watcher.profile.avatar %}
+                                <img src="{{ watcher.profile.avatar.url }}" alt="Avatar" style="width: 50px; height: 50px; border-radius: 50%;">
+                            {% endif %}
+                            <p>{{ watcher }}</p>
+                            <form method="POST" action="{% url 'issue_info_remove_watcher' issue.id %}" class="issue-info-delete-form">
+                                {% csrf_token %}
+                                <button type="submit" name="issue_info_remove_watcher" value="true" class="issue-info-delete-button">
+                                    <span class="material-icons">close</span>
+                                </button>
+                                <input type="hidden" name="user_id" value="{{ watcher.id }}">
+                            </form>
+                        </div>
+                    {% empty %}
+                        <p>No watchers yet.</p>
+                    {% endfor %}
+                </div>
+
+            <div class="issue-info-status-watchers-buttons">
+                <a href="#addWatchersModal" class="issue-info-status-watchers-button">
+                    <span class="material-icons"> add </span>
+                    <p>Add watchers</p>
+                </a>
+
+                    {% if request.user not in issue.watchers.all %}
+                        <a href="{% url 'issue_info_add_watcher' issue.id %}" class="issue-info-status-watchers-button">
+                            <span class="material-icons"> visibility </span>
+                            <p>Watch</p>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'issue_info_remove_watcher' issue.id %}" class="issue-info-status-watchers-button">
+                            <span class="material-icons"> visibility_off </span>
+                            <p>Unwatch</p>
+                        </a>
+                    {% endif %}
+            </div>
+
+            <div id="addWatchersModal" class="modal">
+                <div class="modal-content">
+                    <a href="." class="close">&times;</a>
+                    <h2>Add Watchers</h2>
+                    <form method="POST" action="{% url 'issue_info_add_multiple_watchers' issue.id %}">
+                        {% csrf_token %}
+                        <select name="users" multiple>
+                            {% for profile in users %}
+                                {% if profile.user not in issue.watchers.all and profile.user != request.user %}
+                                    <option value="{{ profile.id }}">{{ profile.user.username }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <div class="issue-info-saveButtons">
+                            <button type="submit" class="info-issue-saveButton">Add Selected</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+
+            </div>
+            <div class="issue-info-status-buttons">
+
+
+                <div class="issue-info-status-buttons-icon {% if issue.due_date %}issue-info-due-date-set{% endif %}">
+                    <a href="#infoIssueSetDueDateModal">
+                        <span class="material-icons">schedule</span>
+                    </a>
+                </div>
+
+                <div id="infoIssueSetDueDateModal" class="modal">
+                    <div class="modal-content">
+                        <a href="." class="close">&times;</a>
+                        <h2>Set Due Date</h2>
+                        <form method="POST" action="{% url 'issue_info_set_due_date' issue.id %}">
+                            {% csrf_token %}
+                            <div class="form-group profile__modal-due-date-group profile__modal-due-date-inline">
+                                <label for="{{ due_date_form.due_date.id_for_label }}">Due Date</label>
+                                {{ due_date_form.due_date }}
+                            </div>
+                            <div class="issue-info-saveButtonsDueDate">
+                                <button type="submit"  class="info-issue-saveButton">Set Due Date</button>
+                                {% if issue.due_date %}
+                                   <button type="button" class="info-issue-deleteDueDateButton" onclick="location.href='{% url 'issue_info_remove_due_date' issue.id %}'">
+                                        <span class="material-icons">delete</span>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+
+                <div class="issue-info-status-buttons-icon">
+                    <form method="POST" action="{% url 'issue_info_delete_issue' issue.id %}">
+                        {% csrf_token %}
+                        <button type="submit" style="background: none; border: none; padding: 0; cursor: pointer;">
+                            <span class="material-icons">delete</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+            </div>
+</div>
+
+
+
+{% endblock %}

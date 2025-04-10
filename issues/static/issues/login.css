@@ -1,0 +1,101 @@
+/* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #bbb;  /* Fondo gris suave */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+h1 {
+    font-size: 34px;
+    margin-top: 0;
+}
+
+h2 {
+    font-size: 24px;
+}
+
+
+.button-text {
+    padding: 0;
+    margin: 0;
+    margin-left: 5px;
+}
+
+.button-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+}
+
+/* Contenedor principal */
+.login-container {
+    background-color: #fffc;  /* Blanco ligeramente apagado */
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Sombra más suave */
+    text-align: center;
+    width: 350px;
+    border: 1px solid #dee2e6; /* Borde sutil */
+    margin-bottom: 75px;
+}
+
+/* Logo */
+.logo {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: #2d3436; /* Gris oscuro */
+    letter-spacing: -0.5px;
+}
+
+/* Botones sociales */
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 7px;
+    background-color: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    gap: 10px;
+}
+
+.social-btn:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Iconos */
+.fa-google {
+    font-size: 18px;
+}
+
+.fa-github {
+    color: #181717;
+    font-size: 18px;
+}
+
+/* Texto footer */
+.footer {
+    margin-top: 30px;
+    font-size: 12px;
+    color: #6c757d; /* Gris más oscuro */
+    line-height: 1.5;
+}
+
+/* Texto presentado por */
+.presented-by {
+    margin-top: 15px;
+    color: #adb5bd;
+    font-size: 11px;
+}
