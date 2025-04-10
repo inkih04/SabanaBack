@@ -103,8 +103,11 @@ def issue_detail(request, issue_id):
     if search_query:
         users = users.filter(username__icontains=search_query)
 
+    attachments = Attachment.objects.filter(issue=issue)
+
     context = {
         'issue': issue,
+        'attachments': attachments,
         'show_assign_form': show_assign_form,
         'users': users,
         'statuses': statuses,
@@ -342,6 +345,23 @@ def issue_info_delete_comment(request, issue_id, comment_id):
         comment.delete()
     return redirect('issue_detail', issue_id=issue_id)
 
+@login_required
+def info_issue_upload_attachment(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+
+    if request.method == 'POST' and request.FILES:
+        # Procesar el archivo adjunto directamente (como en issue_create)
+        file = request.FILES.get('file')
+        if file:
+            print(f"Archivo guardado: {file.name}")
+            Attachment.objects.create(issue=issue, file=file)
+
+
+        return redirect('issue_detail', issue_id=issue.id)
+
+        # Si no es POST o no hay archivos, redirige de nuevo
+    return redirect('issue_detail', issue_id=issue.id)
+
 
 @login_required
 def update_avatar(request):
@@ -354,3 +374,12 @@ def update_avatar(request):
         profile.save()
 
     return redirect('profile')
+
+@login_required
+def issue_info_delete_attachment(request, issue_id, attachment_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    attachment = get_object_or_404(Attachment, id=attachment_id)
+    if attachment.issue == issue or issue.created_by == request.user:
+        attachment.delete()
+    return redirect('issue_detail', issue_id=issue_id)
+

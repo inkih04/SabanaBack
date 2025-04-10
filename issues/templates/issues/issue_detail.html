@@ -58,21 +58,56 @@
                 </div>
 
                 <div class="issue-info-attachments">
-                <div class="issue-info-attachments-title">
-                    <h2>Attachments</h2>
-                    <div class="issue-info-attachments-add">
-                        <span class="material-icons"> add </span>
-                    </div>
+                    <!-- Formulario para subir archivos -->
+                    <form method="POST" action="{% url 'info_issue_upload_attachment' issue.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="issue-info-attachments-title">
+                            <h2>Attachments</h2>
+                            <label for="attachments" class="issue-info-attachments-add">
+                                <span class="material-icons"> add </span>
+                            </label>
+                        </div>
 
-                </div>
-                    <div class="issue-info-attachments-box">
-                        <p class="issue-info-attachments-drop" >Drop attachments here!</p>
-                        <input type="file" id="attachments" name="attachments" multiple>
+                        {% for attachment in issue.attachment.all %}
+                            <div class="issue-info-attachment">
+                                <div class="issue-info-attachment-main">
+                                    <!-- Mostrar el archivo con un enlace -->
+                                    <a href="{{ attachment.file.url }}" target="_blank">
+                                        {{ attachment.file.name|cut:"attachments/" }}
+                                    </a>
+
+                                    <!-- Tamaño del archivo -->
+                                    <p>{{ attachment.file.size|filesizeformat }}</p>
+
+                                    <!-- Fecha de subida -->
+                                    <p class="issue-info-attachment-date">{{ attachment.uploaded_at }}</p>
+                                </div>
+
+                                <div class="issue-info-attachment-buttons">
+
+                                    <!-- Botón de eliminación -->
+                                    <div class="issue-info-status-buttons-attachment-delete">
+                                        <a href="{% url 'issue_info_delete_attachment' issue.id attachment.id %}">
+                                            <span class="material-icons">delete</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <!-- Mensaje si no hay attachments -->
+                            <label for="attachments" class="issue-info-attachments-box">
+                                <p class="issue-info-attachments-drop">Add attachments here!</p>
+                            </label>
+                        {% endfor %}
+
+                    <div class="issue-info-attachment-upload">
+                        <input type="file" id="attachments" name="file" style="display: none;" />
+                        <button type="submit" class="issue-info-hidden-upload-button">Upload</button>
                     </div>
-                    {% for attachment in issue.attachments.all %}
-                        <a href="{{ attachment.file.url }}">{{ attachment.file.name }}</a>
-                    {% endfor %}
+                    </form>
                 </div>
+
+
 
                 <div class="issue-info-comments">
                     <div class="issue-info-comments-title">
