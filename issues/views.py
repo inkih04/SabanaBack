@@ -1,5 +1,7 @@
+from botocore.exceptions import ClientError
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -19,10 +21,10 @@ MODEL_FORM_MAP = {
 
 
 @login_required
-def issue_list(request):
-    form = IssueForm()  # Instancia vacía del formulario
+def issue_list(request, attachment_error=None):
+    form = IssueForm()
     User = get_user_model()
-    users = User.objects.all()  # Lista de usuarios para "Assigned To" y "Created By"
+    users = User.objects.all()
     statuses = Status.objects.all()
     types = Types.objects.all()
     severities = Severities.objects.all()
@@ -30,14 +32,12 @@ def issue_list(request):
 
     issues = Issue.objects.all()
 
-    # Busqueda por texto
     search_query = request.GET.get('search', '').strip()
     if search_query:
         issues = issues.filter(
             Q(subject__icontains=search_query) | Q(description__icontains=search_query)
         )
 
-    # Filtros individuales
     if request.GET.get('issue_type'):
         issues = issues.filter(issue_type_id=request.GET.get('issue_type'))
     if request.GET.get('severity'):
@@ -61,7 +61,10 @@ def issue_list(request):
         'types': types,
         'severities': severities,
         'priorities': priorities,
+        'attachment_error': attachment_error,  # 👉 Pasamos el error aquí
     })
+
+
 
 @login_required
 def issue_create(request):
@@ -73,17 +76,19 @@ def issue_create(request):
         if form.is_valid():
             issue = form.save(commit=False)
             issue.created_by = request.user
-            issue.save()  # Guarda el issue primero para obtener un ID
+            issue.save()
 
-            # Procesar el archivo adjunto recibido del formulario (solo uno)
             if 'attachments' in request.FILES:
                 file = request.FILES['attachments']
-                Attachment.objects.create(issue=issue, file=file)
+                try:
+                    Attachment.objects.create(issue=issue, file=file)
+                except ClientError:
+                    # En lugar de redirigir, renderiza issue_list con un error
+                    return issue_list(request, attachment_error="The bucket is currently disabled. Please try again later.")
 
             return redirect('issue_list')
 
     return redirect('issue_list')
-
 
 
 
@@ -101,11 +106,13 @@ def issue_detail(request, issue_id):
     users = Profile.objects.all()
     statuses = Status.objects.all()
 
-
     if search_query:
         users = users.filter(username__icontains=search_query)
 
     attachments = Attachment.objects.filter(issue=issue)
+
+    # Leer y eliminar el mensaje de error de la sesión si existe
+    attachment_error = request.session.pop('attachment_error', None)
 
     context = {
         'issue': issue,
@@ -113,9 +120,11 @@ def issue_detail(request, issue_id):
         'show_assign_form': show_assign_form,
         'users': users,
         'statuses': statuses,
+        'attachment_error': attachment_error,  # <-- Añadido aquí
     }
 
     return render(request, 'issues/issue_detail.html', context)
+
 
 
 @login_required
@@ -352,18 +361,16 @@ def info_issue_upload_attachment(request, issue_id):
     issue = get_object_or_404(Issue, id=issue_id)
 
     if request.method == 'POST' and request.FILES:
-        # Procesar el archivo adjunto directamente (como en issue_create)
         file = request.FILES.get('file')
         if file:
-            print(f"Archivo guardado: {file.name}")
-            Attachment.objects.create(issue=issue, file=file)
+            try:
+                Attachment.objects.create(issue=issue, file=file)
+            except ClientError:
+                request.session['attachment_error'] = "The bucket is currently disabled. Please try again later."
+            except Exception:
+                request.session['attachment_error'] = "An unexpected error occurred while uploading the file."
 
-
-        return redirect('issue_detail', issue_id=issue.id)
-
-        # Si no es POST o no hay archivos, redirige de nuevo
     return redirect('issue_detail', issue_id=issue.id)
-
 
 @login_required
 def update_avatar(request):

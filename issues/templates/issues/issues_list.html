@@ -20,6 +20,12 @@
                 </div>
             </div>
         </form>
+        <div>
+            {% if attachment_error %}
+            <p class="alert">{{ attachment_error }}</p>
+            {% else %}
+            {% endif %}
+        </div>
     </div>
 
     <div class="issue__add">
@@ -91,9 +97,6 @@
                     <div class="attachment-box">
                         {{ form.attachments }}
                     </div>
-                    {% if form.attachments.errors %}
-                        <div class="errorlist">{{ form.attachments.errors }}</div>
-                    {% endif %}
                 </div>
 
                 {% if form.non_field_errors %}

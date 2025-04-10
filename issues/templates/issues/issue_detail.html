@@ -96,7 +96,13 @@
                         {% empty %}
                             <!-- Mensaje si no hay attachments -->
                             <label for="attachments" class="issue-info-attachments-box">
-                                <p class="issue-info-attachments-drop">Add attachments here!</p>
+                                <p class="issue-info-attachments-drop">
+                                    {% if attachment_error %}
+                                        {{ attachment_error }}
+                                    {% else %}
+                                        Add attachments here!
+                                    {% endif %}
+                                </p>
                             </label>
                         {% endfor %}
 
