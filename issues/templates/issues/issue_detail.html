@@ -213,22 +213,63 @@
                 </div>
             </div>
             <div class="issue-info-status-watchers">
-                <p><strong>Watchers:</strong> {{ issue.watchers }}</p>
+                <p><strong>Watchers:</strong></p>
                 <div class="issue-info-status-watchers-list">
                     {% for watcher in issue.watchers.all %}
-                        <p>{{ watcher }}</p>
+                        <div class="issue-info-watcher-item">
+                            <p>{{ watcher }}</p>
+                            <form method="POST" action="{% url 'issue_info_remove_watcher' issue.id %}" class="issue-info-delete-form">
+                                {% csrf_token %}
+                                <button type="submit" name="issue_info_remove_watcher" value="true" class="issue-info-delete-button">
+                                    <span class="material-icons">close</span>
+                                </button>
+                                <input type="hidden" name="user_id" value="{{ watcher.id }}">
+                            </form>
+                        </div>
+                    {% empty %}
+                        <p>No watchers yet.</p>
                     {% endfor %}
-                <div class="issue-info-status-watchers-button">
-                    <span class="material-icons"> add </span>
+                </div>
 
+            <div class="issue-info-status-watchers-buttons">
+                <a href="#addWatchersModal" class="issue-info-status-watchers-button">
+                    <span class="material-icons"> add </span>
                     <p>Add watchers</p>
-                </div>
-                <div class="issue-info-status-watchers-button">
-                    <span class="material-icons"> add </span>
+                </a>
 
-                    <p>Watch</p>
+                    {% if request.user not in issue.watchers.all %}
+                        <a href="{% url 'issue_info_add_watcher' issue.id %}" class="issue-info-status-watchers-button">
+                            <span class="material-icons"> visibility </span>
+                            <p>Watch</p>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'issue_info_remove_watcher' issue.id %}" class="issue-info-status-watchers-button">
+                            <span class="material-icons"> visibility_off </span>
+                            <p>Unwatch</p>
+                        </a>
+                    {% endif %}
+            </div>
+
+            <div id="addWatchersModal" class="modal">
+                <div class="modal-content">
+                    <a href="." class="close">&times;</a>
+                    <h2>Add Watchers</h2>
+                    <form method="POST" action="{% url 'issue_info_add_multiple_watchers' issue.id %}">
+                        {% csrf_token %}
+                        <select name="users" multiple>
+                            {% for profile in all_profiles %}
+                                {% if profile.user not in issue.watchers.all and profile.user != request.user %}
+                                    <option value="{{ profile.id }}">{{ profile.user.username }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <button type="submit">Add Selected</button>
+                    </form>
                 </div>
-                </div>
+            </div>
+
+
+
             </div>
             <div class="issue-info-status-buttons">
                 <div class="issue-info-status-buttons-icon">
