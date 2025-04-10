@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="issue">Issues</h1>
+
+<div class="issue__filter-add--Container">
+    <div class="issue__filter">
+        <!-- Botón para abrir el modal de filtros -->
+        <a class="open-modal" href="#modal-filters">
+            <div class="issue__filter-button">
+                <span class="material-icons">tune</span>
+                <p>Filters</p>
+            </div>
+        </a>
+        <form method="get" action="{% url 'issue_list' %}">
+            <div class="issue__search-bar">
+                <div class="issue__search-bar--container">
+                    <span class="material-icons">search</span>
+                    <input type="text" name="search" placeholder="Search issues..." value="{{ request.GET.search|default:'' }}" />
+                </div>
+            </div>
+        </form>
+        <div>
+            {% if attachment_error %}
+            <p class="alert"> {{ attachment_error }} </p>
+            {% else %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="issue__add">
+        <div class="issue__add-button">
+            <!-- Modal New Issue -->
+            <a class="open-modal" href="#modal-create">
+                <div class="issue__add-button--container">
+                    <span class="material-icons">add</span>
+                    <p>New Issue</p>
+                </div>
+            </a>
+        </div>
+        <div class="issue__addBulk-button">
+            <!-- Modal Bulk Create -->
+            <a class="open-modal" href="#modal-bulk-create">
+                <span class="material-icons">post_add</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+{% include "issues/issue_table.html" %}
+
+<!-- Modal New Issue -->
+<div id="modal-create" class="modal">
+    <div class="modal-content">
+        <div class="navBar__modal">
+            <h1>New Issue</h1>
+            <a href="#" class="close">&times;</a>
+        </div>
+
+        <form method="post" action="{% url 'issue_create' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="modal__form-container">
+                <div class="modal__form-Subject">
+                    <label for="id_subject">Subject</label> {{ form.subject }}
+                </div>
+
+                <label for="id_description">Description</label>
+                {{ form.description }}
+
+                <label class="modal-text" for="id_status">Status</label>
+                {{ form.status }}
+
+                <div class="modal--subgrup">
+                    <div class="prueba">
+                        <label class="modal-text" for="id_type">Type</label>
+                        {{ form.issue_type }}
+                    </div>
+                    <div class="prueba">
+                        <label class="modal-text" for="id_priority">Priority</label>
+                        {{ form.priority }}
+                    </div>
+                </div>
+
+                  <div class="modal--subgrup-2">
+                      <div class="prueba">
+                            <label class="modal-text" for="id_severity">Severity</label>
+                            {{ form.severity }}
+                      </div>
+                      <div class="prueba">
+                        <label class="modal-text" for="id_assigned_to">Assigned To</label>
+                        {{ form.assigned_to }}
+                      </div>
+                </div>
+
+                <div class="attachments">
+                    <label class="modal-text" for="id_attachments">Attachments</label>
+                    <div class="attachment-box">
+                        {{ form.attachments }}
+                    </div>
+                </div>
+
+                {% if form.non_field_errors %}
+                    <div class="errorlist">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="form-group profile__modal-due-date-group profile__modal-due-date-inline">
+                    <label for="{{ form.due_date.id_for_label }}">Due Date</label>
+                    {{ form.due_date }}
+                </div>
+
+                <button type="submit" class="create-btn">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Bulk Create -->
+<div id="modal-bulk-create" class="modal">
+    <div class="modal-content-bulk">
+        <div class="navBar__modal">
+            <h1>Add Issues in Bulk</h1>
+            <a href="#" class="close">&times;</a>
+        </div>
+
+        <form method="post" action="{% url 'issue_bulk_create' %}">
+            {% csrf_token %}
+            <div class="modal__form-container">
+                <label for="issues_text">Enter issues (one per line)</label>
+                <textarea id="issues_text" name="issues_text" rows="10"
+                          placeholder="Issue 1&#10;Issue 2&#10;Issue 3"></textarea>
+                <button type="submit" class="create-btn">Create Issues</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Filters -->
+<div id="modal-filters" class="modal">
+    <div class="modal-content-filters">
+        <div class="navBar__modal">
+            <h1>Filters</h1>
+            <a href="#" class="close">&times;</a>
+        </div>
+        <form method="get" action="{% url 'issue_list' %}" class="issue__filters">
+            <div class="issue__filters-field">
+                <label for="issue__filters_type">Type</label>
+                <select id="issue__filters_type" name="issue_type">
+                    <option value="">All</option>
+                    {% for type in types %}
+                        <option value="{{ type.id }}">{{ type.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="issue__filters-field">
+                <label for="issue__filters_severity">Severity</label>
+                <select id="issue__filters_severity" name="severity">
+                    <option value="">All</option>
+                    {% for severity in severities %}
+                        <option value="{{ severity.id }}">{{ severity.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="issue__filters-field">
+                <label for="issue__filters_priority">Priority</label>
+                <select id="issue__filters_priority" name="priority">
+                    <option value="">All</option>
+                    {% for priority in priorities %}
+                        <option value="{{ priority.id }}">{{ priority.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="issue__filters-field">
+                <label for="issue__filters_status">Status</label>
+                <select id="issue__filters_status" name="status">
+                    <option value="">All</option>
+                    {% for status in statuses %}
+                        <option value="{{ status.id }}">{{ status.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="issue__filters-field">
+                <label for="issue__filters_assigned_to">Assigned to</label>
+                <select id="issue__filters_assigned_to" name="assigned_to">
+                    <option value="">All</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="issue__filters-field">
+                <label for="issue__filters_created_by">Created by</label>
+                <select id="issue__filters_created_by" name="created_by">
+                    <option value="">All</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="issue__filters-submit">Apply Filters</button>
+            <!-- Botón para resetear los filtros, redirige a la lista sin parámetros -->
+            <a href="{% url 'issue_list' %}" class="issue__filters-reset">Reset Filters</a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

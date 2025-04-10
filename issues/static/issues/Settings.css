@@ -1,0 +1,254 @@
+.settings__container {
+    background-color: #f3f3f3;
+    box-shadow: 0 0 5px #aaa;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 35px;
+}
+
+.settings__bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.settings__btn-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #83eede;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #aaa;
+}
+
+.settings__btn-container a {
+    text-decoration: none;
+    color: #000;
+    font-size: 20px;
+}
+
+.settings__subtitle-container h2 {
+    font-size: 25px;
+}
+
+
+.settings__item-container {
+    list-style: none;
+    padding: 20px;
+}
+
+.settings__item-container {
+    list-style: none;
+    background-color: #e0e0e0;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 3px #bbb;
+}
+
+.settings__item-container:hover {
+    background-color: #c0c0c0;
+}
+
+.settings__item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.color__item {
+    padding: 15px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+.settings__color-name {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.settings__color-name span {
+    font-size: 18px;
+}
+
+.settings__container .settings__edit-icon {
+    font-size: 25px;
+    color: #2d3436;
+}
+
+.settings__item-edit {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+.settings__item-edit a {
+    margin-left: 10px;
+}
+
+.boton--delete {
+    background-color: transparent; /* Fondo transparente */
+    color: white;
+    border: none; /* Sin borde */
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Estilos para los modales de Settings */
+
+/* Modal base */
+.modal__settings__edit {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    overflow: auto;
+}
+
+/* Mostrar modal cuando se ancla el enlace */
+.modal__settings__edit:target {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Contenido del modal */
+.modal__settings__content {
+    background-color: #fff;
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 80%;
+    max-width: 500px;
+    position: relative;
+    animation: modalappear 0.3s ease;
+}
+
+/* Animación para la aparición del modal */
+@keyframes modalappear {
+    from {transform: translateY(-50px); opacity: 0;}
+    to {transform: translateY(0); opacity: 1;}
+}
+
+/* Encabezado del modal */
+.modal__settings__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #83eede;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.modal__settings__header h2 {
+    margin: 0;
+    color: #2d3436;
+    font-size: 22px;
+}
+
+/* Botón cerrar */
+.modal__settings__close {
+    font-size: 30px;
+    color: #2d3436;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.modal__settings__close:hover {
+    color: #ff6b6b;
+}
+
+/* Cuerpo del modal */
+.modal__settings__body {
+    padding: 20px;
+}
+
+/* Pie del modal */
+.modal__settings__footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 15px 0 5px 0;
+    gap: 10px;
+}
+
+/* Estilos para el formulario dentro del modal */
+.form__group {
+    margin-bottom: 15px;
+}
+
+.form__group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form__group input[type="text"],
+.form__group input[type="color"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.form__group input[type="color"] {
+    height: 40px;
+    cursor: pointer;
+}
+
+/* Estilos para los botones */
+.btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.btn-success {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #27ae60;
+}
+
+.btn-secondary {
+    background-color: #95a5a6;
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary:hover {
+    background-color: #7f8c8d;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+/* Mensaje de confirmación para eliminar */
+.modal__settings__body p {
+    margin-bottom: 20px;
+    font-size: 16px;
+    text-align: center;
+}

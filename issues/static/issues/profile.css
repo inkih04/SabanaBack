@@ -1,0 +1,323 @@
+.profile__text {
+    color: #2d3436;
+}
+
+.profile__sidebar {
+    position: fixed;
+    left: 0;
+    top: 70px;
+    height: 100vh;
+    width: clamp(220px, 20vw, 250px);
+    background-color: #ffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 30px 0 30px 6px;
+    z-index: 1000; /* Asegura que quede encima de otros elementos */
+    box-shadow: 0 5px 5px #aaa;
+}
+
+.shadow {
+    box-shadow: 0 2px 5px #aaa;
+}
+
+.profile__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+}
+
+.profile__avatar {
+    border-radius: 50%;
+    width: 200px;
+    height: auto;
+    box-shadow: 0 0 10px #aaa;
+}
+
+.profile__avatar-img {
+    width: 100%;
+    border-radius: 50%;
+    height: 100%;
+}
+
+.profile__name {
+    color: #008aa8;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    font-size: 32px;
+    font-weight: bold;
+}
+.profile__stadistics{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.profile__stadistics-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.profile__stadistics-item span {
+    margin: 0;
+    font-size: 16px;
+    text-align: center;
+}
+
+.divider {
+    border: none;
+    height: 2px;
+    margin-top: 5px;
+    background-color: #33333322;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    width: 100%;
+}
+
+.profile__btn-Edit {
+    margin-top: 35px;
+    font-size: 25px;
+    padding: 10px 30px;
+    background-color: #83eede;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #aaa;
+    text-decoration: none; /* Elimina el subrayado */
+    color: inherit; /* Mantiene el color del texto original, o puedes poner un color específico */
+}
+
+.profile__btn-Edit:visited {
+    color: inherit; /* Mantiene el color original después de hacer clic */
+}
+
+.profile__btn-Edit:active {
+    color: inherit; /* Mantiene el color original cuando se hace clic */
+}
+
+.profile__btn-Edit:hover {
+    background-color: #008aa8;
+    color: white;
+    cursor: pointer;
+}
+.profile__text {
+    margin-top: 15px;
+    font-size: 18px;
+
+}
+
+.profile__changePage {
+    display: flex;
+    align-items: center;
+    margin-top: 25px;
+    width: 100%;
+    gap: 25px;
+    justify-content: left;
+
+}
+
+.pageChanger {
+    padding: 20px 30px;
+    font-size: 20px;
+    background-color: #83eede;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #aaa;
+    text-decoration: none; /* Elimina el subrayado */
+    color: #000;
+}
+
+.profile__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.pageChanger:hover {
+    background-color: #008aa8;
+    color: white;
+    cursor: pointer;
+}
+
+.content--profile {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-top: 60px; /* Para compensar el header fijo */
+    margin-left: clamp(220px, 20vw, 250px); /* Mueve el contenido para no tapar la sidebar */
+    padding: 20px;
+}
+
+.header__nav-link {
+    text-decoration: none;
+    color: #008aa8;
+    margin-right: 20px;
+    font-size: 20px;
+}
+
+.header__nav-link:hover {
+    color: #005f7f;
+}
+
+/* === MODAL PROFILE BIO === */
+.profile__modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(49, 49, 49, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#modal-edit-bio:target {
+  display: flex;
+}
+
+.profile__modal-content {
+  background-color: #fff;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.profile__modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile__modal-header h1 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.profile__modal-close {
+  font-size: 1.8rem;
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+
+.profile__modal-close:hover {
+  color: #e63946;
+}
+
+
+.profile__modal-form button {
+  background-color: #2a9d8f;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.profile__modal-form button:hover {
+  background-color: #21867a;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.profile__modal-form textarea {
+  width: 100%;
+  height: 120px;
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 1rem;
+  text-align: left; /* Alinea el texto a la izquierda */
+}
+
+.profile__avatar-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.profile__avatar-circle {
+  width: 120px;
+  height: 120px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.profile__avatar-circle img,
+.profile__avatar-circle .default-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Edit icon styling stays the same */
+.avatar-form {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-edit-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;  /* Ocupa todo el contenedor del avatar */
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);  /* Fondo oscuro semi-transparente */
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background-color 0.3s ease;
+}
+
+.avatar-form:hover .avatar-edit-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-form input[type="file"] {
+  display: none;
+}
+
+.profile--comment{
+    margin-right: 35px;
+    margin-top: 15px;
+}
+.profile__to-issue-link {
+    text-decoration: none;
+    color: #008aa8;
+
+}

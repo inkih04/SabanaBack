@@ -1,0 +1,610 @@
+/* Cabecera */
+.issue__key-container {
+    margin-top: 30px;
+    display: grid;
+    font-size: 12px;
+    /* Ajusta los anchos de cada columna a tu gusto */
+    grid-template-columns: 40px 40px 40px auto 130px 160px 160px 40px;
+    align-items: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding: 0 10px;
+    gap: 25px; /* Espacio entre columnas, opcional */
+}
+
+.issue__key, .issue__text {
+    text-align: center;
+}
+
+/* Filas de issues */
+.issue__item-content {
+    display: grid;
+    /* Misma configuración de columnas que la cabecera */
+    grid-template-columns: 40px 40px 40px auto 130px 160px 160px 40px;
+    align-items: center;
+    padding: 10px;
+    gap: 25px; /* Espacio entre columnas, opcional */
+}
+
+/* Estilos generales de la lista */
+.issue__item {
+    list-style: none;
+    background-color: #f3f3f3;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+/* Para las “bolas” de Type, Severity, Priority */
+.issue__type,
+.issue__severity,
+.issue__priority {
+    display: flex;
+    justify-content: center; /* Centra el texto/ícono dentro de la bola */
+    align-items: center;
+    padding: 15px;
+    border-radius: 50%;
+    margin: auto; /* Centra la “bola” en su columna */
+}
+
+/* Detalle de la 4ª columna */
+.issue__detail {
+    margin-left: 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.issue__id {
+    color: #008aa8;
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+.issue__description {
+    font-size: 16px;
+    margin-left: 15px;
+}
+
+
+.issue__topic {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
+    margin-left: 5px;
+
+}
+
+.issue__select {
+    appearance: none;
+    text-align: center;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    font-size: 16px;
+}
+
+.issue__select:hover {
+    cursor: pointer;
+}
+
+
+
+/* Íconos (5ª columna) */
+
+.issue__icon {
+    color: #666;
+    font-size: 24px;
+    margin: 0 5px;
+}
+
+.issue__form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.issue__text {
+    font-size: 16px;
+}
+
+/* Hover */
+.issue__item:hover {
+    background-color: #e0e0e0;
+}
+
+
+.issue__detail-link {
+    text-decoration: none;
+    color: inherit;
+
+}
+
+.issue__search-bar {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    flex-grow: 4;
+    margin-left: 15px;
+
+}
+
+.issue__search-bar--container {
+    background-color: #f3f3f3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    box-shadow: 0 0 5px #aaa;
+    padding: 0 10px;
+}
+
+.issue__search-bar--container span {
+    color: #008aa8;
+    font-size: 30px;
+}
+
+.issue__search-bar--container input {
+    border: none;
+    outline: none;
+    background-color: transparent;
+    color: #000;
+    font-size: 20px;
+    padding: 10px;
+}
+
+
+.issue__filter-add--Container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    flex-direction: row;
+}
+
+.issue__filter {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+
+.issue__add {
+    flex-grow: 2;
+    margin-left: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: right;
+}
+.issue__add-button--container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #83eede;
+    border-radius: 7px;
+    padding: 10px;
+    box-shadow: 0 0 5px #aaa;
+}
+
+.issue__add-button--container:hover {
+    background-color: #6be3d399;
+
+}
+
+
+.issue__add-button--container span {
+    color: #000;
+    margin: 0;
+    font-size: 20px;
+}
+.issue__add-button--container P {
+    color: #000;
+    font-size: 20px;
+    margin: 0 10px 0 10px;
+}
+
+.issue__add-button a {
+    text-decoration: none;
+    color: #000;
+    font-size: 20px;
+}
+
+
+
+.issue__addBulk-button {
+    margin-left: 15px;
+    background-color: #f3f3f3;
+    padding: 4px 10px;
+    border-radius: 7px;
+    box-shadow: 0 0 5px #aaa;
+}
+
+.issue__addBulk-button span {
+    font-size: 30px;
+    color: #000;
+}
+
+.issue__filter-button {
+    background-color: #f3f3f3;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    border-radius: 7px;
+    padding:10px;
+    margin-left: 10px;
+    box-shadow: 0 0 5px #aaa;
+}
+
+.issue__filter a {
+    text-decoration: none;
+}
+
+.issue__filter-button:hover {
+    background-color: #e0e0e0;
+}
+
+.issue__filter-button span {
+    font-size: 20px;
+    color: #008aa8;
+    margin: 0;
+}
+.issue__filter-button p {
+    font-size: 20px;
+    color: #008aa8;
+    margin: 0;
+    margin-left: 10px;
+}
+
+/* Estilos para el Modal Filters */
+.modal-content-filters {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 50%;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.issue__filters {
+    display: flex;
+    flex-direction: column;
+}
+
+.issue__filters-field {
+    margin-bottom: 15px;
+}
+
+.issue__filters-field label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.issue__filters-field select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.issue__filters-submit {
+    background-color: #83eede;
+    color: #000;
+    padding: 10px;
+    border: none;
+    border-radius: 7px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.issue__filters-submit:hover {
+    background-color: #6be3d399;
+}
+
+.issue__filters-reset {
+    background-color: #f3f3f3;
+    color: #000;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 7px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-top: 10px;
+    display: inline-block;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.issue__filters-reset:hover {
+    background-color: #e0e0e0;
+}
+
+
+
+.modal--subgrup {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal--subgrup-2 {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.prueba {
+    flex: 1; /* Ocupan igual espacio */
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Espacio entre label y select */
+}
+
+
+
+
+/* Etiquetas */
+.modal-text {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+/* Selects */
+.prueba select {
+    width: 100%; /* Ocupa todo el ancho del contenedor */
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+}
+
+/* Ajuste específico para pantallas pequeñas */
+@media (max-width: 768px) {
+    .modal--subgrup,
+    .modal--subgrup-2 {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+
+
+
+.modal--subgrup {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal--subgrup-2 {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.prueba {
+    flex: 1; /* Ocupan igual espacio */
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Espacio entre label y select */
+}
+
+
+
+
+/* Etiquetas */
+.modal-text {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+/* Selects */
+.prueba select {
+    width: 100%; /* Ocupa todo el ancho del contenedor */
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+}
+
+/* Ajuste específico para pantallas pequeñas */
+@media (max-width: 768px) {
+    .modal--subgrup,
+    .modal--subgrup-2 {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+
+/* Animaciones para los modales de Issues */
+
+/* Base del modal - agregar animación de aparición */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Mostrar modal cuando se ancla el enlace */
+.modal:target {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Animación de fundido de entrada */
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+/* Animación para el contenido de los modales */
+.modal-content,
+.modal-content-bulk,
+.modal-content-filters {
+    animation: modalAppear 0.4s ease-out;
+    transform-origin: center;
+}
+
+/* Animación de aparición del modal */
+@keyframes modalAppear {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Animación para el botón de cerrar */
+.close {
+    transition: all 0.3s ease;
+}
+
+.close:hover {
+    color: #ff6b6b;
+    transform: rotate(90deg);
+}
+
+/* Animación para los botones dentro de los modales */
+.create-btn,
+.issue__filters-submit {
+    transition: all 0.3s ease;
+}
+
+.create-btn:hover,
+.issue__filters-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Animación para los campos del formulario */
+.modal__form-container input,
+.modal__form-container select,
+.modal__form-container textarea {
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.modal__form-container input:focus,
+.modal__form-container select:focus,
+.modal__form-container textarea:focus {
+    border-color: #83eede;
+    box-shadow: 0 0 5px rgba(131, 238, 222, 0.5);
+    outline: none;
+}
+
+/* Animación para selects en los filtros */
+.issue__filters-field select {
+    transition: all 0.3s ease;
+}
+
+.issue__filters-field select:focus {
+    border-color: #83eede;
+    box-shadow: 0 0 5px rgba(131, 238, 222, 0.5);
+}
+
+/* Efecto hover para items de filtro */
+.issue__filters-field:hover label {
+    color: #008aa8;
+}
+
+/* Animación para los botones de add y filter */
+.issue__add-button--container,
+.issue__filter-button,
+.issue__addBulk-button {
+    transition: all 0.3s ease;
+}
+
+.issue__add-button--container:hover,
+.issue__filter-button:hover,
+.issue__addBulk-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Animación para los botones de reset */
+.issue__filters-reset {
+    transition: all 0.3s ease;
+}
+
+.issue__filters-reset:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+
+/* Mejora para los attachments */
+.attachment-box {
+    border: 2px dashed #ddd;
+    padding: 15px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.attachment-box:hover {
+    border-color: #83eede;
+    background-color: rgba(131, 238, 222, 0.05);
+}
+
+/* Pequeña animación de pulso para destacar el modal al aparecer */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(131, 238, 222, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(131, 238, 222, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(131, 238, 222, 0);
+    }
+}
+
+/* Aplicar animación de pulso a los modales */
+.modal:target .modal-content,
+.modal:target .modal-content-bulk,
+.modal:target .modal-content-filters {
+    animation: modalAppear 0.4s ease-out, pulse 1.5s ease-out;
+}
+
+
+/* Estilos para el mensaje de alerta */
+.alert {
+    background-color: #fdecea; /* Color de fondo suave */
+    color: #d32f2f; /* Color de texto rojo */
+    font-weight: bold;
+    animation: fadeOut 5s ease forwards; /* Animación para desvanecer */
+    margin-left: 15px;
+}
+
+/* Animación de desvanecimiento */
+@keyframes fadeOut {
+    0%   { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { opacity: 0; height: 0; margin: 0; padding: 0; overflow: hidden; }
+}

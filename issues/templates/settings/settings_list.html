@@ -1,0 +1,454 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="settings__title"> Settings </h1>
+
+<!-- Sección: Status -->
+<div class="settings__container">
+    <div class="settings__bar">
+        <div class="settings__subtitle-container">
+            <h2 class="settings__subtitle">Status</h2>
+        </div>
+        <div class="settings__btn-container">
+            <a href="#modal-create-status" class="btn btn-primary">Add Status</a>
+        </div>
+    </div>
+    <div class="settings__list">
+        <ul class="settings__list-container">
+            {% for obj in data.status %}
+                <li class="settings__item-container">
+                    <div class="settings__item">
+                        <div class="settings__color-name">
+                            <div class="color">
+                                <div class="color__item" style="background-color: {{ obj.color }};"></div>
+                            </div>
+                            <span>{{ obj.nombre }}</span>
+                        </div>
+                        <div class="settings__item-edit">
+                            <!-- Botón editar -->
+                            <a href="#modal-edit-status-{{ obj.id }}">
+                                <span class="settings__edit-icon material-icons">edit</span>
+                            </a>
+                            <!-- Botón delete -->
+                            <a href="#modal-delete-status-{{ obj.id }}">
+                                <span class="settings__edit-icon material-icons">delete</span>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Modal para editar status -->
+                <div id="modal-edit-status-{{ obj.id }}" class="modal__settings__edit">
+                    <div class="modal__settings__content">
+                        <div class="modal__settings__header">
+                            <h2>Edit Status</h2>
+                            <a href="#" class="modal__settings__close">&times;</a>
+                        </div>
+                        <div class="modal__settings__body">
+                            <form method="post" action="{% url 'settings_edit' 'status' obj.id %}">
+                                {% csrf_token %}
+                                <div class="form__group">
+                                    <label for="nombre">Nombre:</label>
+                                    <input type="text" id="nombre" name="nombre" value="{{ obj.nombre }}" required>
+                                </div>
+                                <div class="form__group">
+                                    <label for="color">Color:</label>
+                                    <input type="color" id="color" name="color" value="{{ obj.color }}" required>
+                                </div>
+                                <div class="modal__settings__footer">
+                                    <button type="submit" class="btn btn-success">Guardar</button>
+                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal para eliminar status -->
+                <div id="modal-delete-status-{{ obj.id }}" class="modal__settings__edit">
+                    <div class="modal__settings__content">
+                        <div class="modal__settings__header">
+                            <h2>Eliminar Status</h2>
+                            <a href="#" class="modal__settings__close">&times;</a>
+                        </div>
+                        <div class="modal__settings__body">
+                            <p>¿Estás seguro de que deseas eliminar "{{ obj.nombre }}"?</p>
+                            <form method="post" action="{% url 'settings_delete' 'status' obj.id %}">
+                                {% csrf_token %}
+                                <div class="modal__settings__footer">
+                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<!-- Modal para crear status -->
+<div id="modal-create-status" class="modal__settings__edit">
+    <div class="modal__settings__content">
+        <div class="modal__settings__header">
+            <h2>Create Status</h2>
+            <a href="#" class="modal__settings__close">&times;</a>
+        </div>
+        <div class="modal__settings__body">
+            <form method="post" action="{% url 'settings_create' 'status' %}">
+                {% csrf_token %}
+                <div class="form__group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div class="form__group">
+                    <label for="color">Color:</label>
+                    <input type="color" id="color" name="color" required>
+                </div>
+                <div class="modal__settings__footer">
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Sección: Priorities -->
+<div class="settings__container">
+    <div class="settings__bar">
+        <div class="settings__subtitle-container">
+            <h2 class="settings__subtitle">Priorities</h2>
+        </div>
+        <div class="settings__btn-container">
+            <a href="#modal-create-priorities" class="btn btn-primary">Add Priority</a>
+        </div>
+    </div>
+    <div class="settings__list">
+        <ul class="settings__list-container">
+            {% for obj in data.priorities %}
+                <li class="settings__item-container">
+                    <div class="settings__item">
+                        <div class="settings__color-name">
+                            <div class="color">
+                                <div class="color__item" style="background-color: {{ obj.color }};"></div>
+                            </div>
+                            <span>{{ obj.nombre }}</span>
+                        </div>
+                        <div class="settings__item-edit">
+                            <!-- Botón editar -->
+                            <a href="#modal-edit-priorities-{{ obj.id }}">
+                                <span class="settings__edit-icon material-icons">edit</span>
+                            </a>
+                            <!-- Botón delete -->
+                            <a href="#modal-delete-priorities-{{ obj.id }}">
+                                <span class="settings__edit-icon material-icons">delete</span>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Modal para editar priorities -->
+                <div id="modal-edit-priorities-{{ obj.id }}" class="modal__settings__edit">
+                    <div class="modal__settings__content">
+                        <div class="modal__settings__header">
+                            <h2>Edit Priority</h2>
+                            <a href="#" class="modal__settings__close">&times;</a>
+                        </div>
+                        <div class="modal__settings__body">
+                            <form method="post" action="{% url 'settings_edit' 'priorities' obj.id %}">
+                                {% csrf_token %}
+                                <div class="form__group">
+                                    <label for="nombre">Nombre:</label>
+                                    <input type="text" id="nombre" name="nombre" value="{{ obj.nombre }}" required>
+                                </div>
+                                <div class="form__group">
+                                    <label for="color">Color:</label>
+                                    <input type="color" id="color" name="color" value="{{ obj.color }}" required>
+                                </div>
+                                <div class="modal__settings__footer">
+                                    <button type="submit" class="btn btn-success">Guardar</button>
+                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal para eliminar priorities -->
+                <div id="modal-delete-priorities-{{ obj.id }}" class="modal__settings__edit">
+                    <div class="modal__settings__content">
+                        <div class="modal__settings__header">
+                            <h2>Eliminar Priority</h2>
+                            <a href="#" class="modal__settings__close">&times;</a>
+                        </div>
+                        <div class="modal__settings__body">
+                            <p>¿Estás seguro de que deseas eliminar "{{ obj.nombre }}"?</p>
+                            <form method="post" action="{% url 'settings_delete' 'priorities' obj.id %}">
+                                {% csrf_token %}
+                                <div class="modal__settings__footer">
+                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<!-- Modal para crear priorities -->
+<div id="modal-create-priorities" class="modal__settings__edit">
+    <div class="modal__settings__content">
+        <div class="modal__settings__header">
+            <h2>Create Priority</h2>
+            <a href="#" class="modal__settings__close">&times;</a>
+        </div>
+        <div class="modal__settings__body">
+            <form method="post" action="{% url 'settings_create' 'priorities' %}">
+                {% csrf_token %}
+                <div class="form__group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div class="form__group">
+                    <label for="color">Color:</label>
+                    <input type="color" id="color" name="color" required>
+                </div>
+                <div class="modal__settings__footer">
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Sección: Types -->
+<div class="settings__container">
+    <div class="settings__bar">
+        <div class="settings__subtitle-container">
+            <h2 class="settings__subtitle">Types</h2>
+        </div>
+        <div class="settings__btn-container">
+            <a href="#modal-create-types" class="btn btn-primary">Add Type</a>
+        </div>
+    </div>
+    <div class="settings__list">
+        <ul class="settings__list-container">
+            {% for obj in data.types %}
+                <li class="settings__item-container">
+                    <div class="settings__item">
+                        <div class="settings__color-name">
+                            <div class="color">
+                                <div class="color__item" style="background-color: {{ obj.color }};"></div>
+                            </div>
+                            <span>{{ obj.nombre }}</span>
+                        </div>
+                        <div class="settings__item-edit">
+                            <!-- Botón editar -->
+                            <a href="#modal-edit-types-{{ obj.id }}">
+                                <span class="settings__edit-icon material-icons">edit</span>
+                            </a>
+                            <!-- Botón delete -->
+                            <a href="#modal-delete-types-{{ obj.id }}">
+                                <span class="settings__edit-icon material-icons">delete</span>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Modal para editar types -->
+                <div id="modal-edit-types-{{ obj.id }}" class="modal__settings__edit">
+                    <div class="modal__settings__content">
+                        <div class="modal__settings__header">
+                            <h2>Edit Type</h2>
+                            <a href="#" class="modal__settings__close">&times;</a>
+                        </div>
+                        <div class="modal__settings__body">
+                            <form method="post" action="{% url 'settings_edit' 'types' obj.id %}">
+                                {% csrf_token %}
+                                <div class="form__group">
+                                    <label for="nombre">Nombre:</label>
+                                    <input type="text" id="nombre" name="nombre" value="{{ obj.nombre }}" required>
+                                </div>
+                                <div class="form__group">
+                                    <label for="color">Color:</label>
+                                    <input type="color" id="color" name="color" value="{{ obj.color }}" required>
+                                </div>
+                                <div class="modal__settings__footer">
+                                    <button type="submit" class="btn btn-success">Guardar</button>
+                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal para eliminar types -->
+                <div id="modal-delete-types-{{ obj.id }}" class="modal__settings__edit">
+                    <div class="modal__settings__content">
+                        <div class="modal__settings__header">
+                            <h2>Eliminar Type</h2>
+                            <a href="#" class="modal__settings__close">&times;</a>
+                        </div>
+                        <div class="modal__settings__body">
+                            <p>¿Estás seguro de que deseas eliminar "{{ obj.nombre }}"?</p>
+                            <form method="post" action="{% url 'settings_delete' 'types' obj.id %}">
+                                {% csrf_token %}
+                                <div class="modal__settings__footer">
+                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<!-- Modal para crear types -->
+<div id="modal-create-types" class="modal__settings__edit">
+    <div class="modal__settings__content">
+        <div class="modal__settings__header">
+            <h2>Create Type</h2>
+            <a href="#" class="modal__settings__close">&times;</a>
+        </div>
+        <div class="modal__settings__body">
+            <form method="post" action="{% url 'settings_create' 'types' %}">
+                {% csrf_token %}
+                <div class="form__group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div class="form__group">
+                    <label for="color">Color:</label>
+                    <input type="color" id="color" name="color" required>
+                </div>
+                <div class="modal__settings__footer">
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Sección: Severities -->
+<div class="settings__container">
+    <div class="settings__bar">
+        <div class="settings__subtitle-container">
+            <h2 class="settings__subtitle">Severities</h2>
+        </div>
+        <div class="settings__btn-container">
+            <a href="#modal-create-severities" class="btn btn-primary">Add Severity</a>
+        </div>
+    </div>
+    <div class="settings__list">
+        <ul class="settings__list-container">
+            {% for obj in data.severities %}
+                <li class="settings__item-container">
+                    <div class="settings__item">
+                        <div class="settings__color-name">
+                            <div class="color">
+                                <div class="color__item" style="background-color: {{ obj.color }};"></div>
+                            </div>
+                            <span>{{ obj.nombre }}</span>
+                        </div>
+                        <div class="settings__item-edit">
+                            <!-- Botón editar -->
+                            <a href="#modal-edit-severities-{{ obj.id }}">
+                                <span class="settings__edit-icon material-icons">edit</span>
+                            </a>
+                            <!-- Botón delete -->
+                            <a href="#modal-delete-severities-{{ obj.id }}">
+                                <span class="settings__edit-icon material-icons">delete</span>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Modal para editar severities -->
+                <div id="modal-edit-severities-{{ obj.id }}" class="modal__settings__edit">
+                    <div class="modal__settings__content">
+                        <div class="modal__settings__header">
+                            <h2>Edit Severity</h2>
+                            <a href="#" class="modal__settings__close">&times;</a>
+                        </div>
+                        <div class="modal__settings__body">
+                            <form method="post" action="{% url 'settings_edit' 'severities' obj.id %}">
+                                {% csrf_token %}
+                                <div class="form__group">
+                                    <label for="nombre">Nombre:</label>
+                                    <input type="text" id="nombre" name="nombre" value="{{ obj.nombre }}" required>
+                                </div>
+                                <div class="form__group">
+                                    <label for="color">Color:</label>
+                                    <input type="color" id="color" name="color" value="{{ obj.color }}" required>
+                                </div>
+                                <div class="modal__settings__footer">
+                                    <button type="submit" class="btn btn-success">Guardar</button>
+                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal para eliminar severities -->
+                <div id="modal-delete-severities-{{ obj.id }}" class="modal__settings__edit">
+                    <div class="modal__settings__content">
+                        <div class="modal__settings__header">
+                            <h2>Eliminar Severity</h2>
+                            <a href="#" class="modal__settings__close">&times;</a>
+                        </div>
+                        <div class="modal__settings__body">
+                            <p>¿Estás seguro de que deseas eliminar "{{ obj.nombre }}"?</p>
+                            <form method="post" action="{% url 'settings_delete' 'severities' obj.id %}">
+                                {% csrf_token %}
+                                <div class="modal__settings__footer">
+                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<!-- Modal para crear severities -->
+<div id="modal-create-severities" class="modal__settings__edit">
+    <div class="modal__settings__content">
+        <div class="modal__settings__header">
+            <h2>Create Severity</h2>
+            <a href="#" class="modal__settings__close">&times;</a>
+        </div>
+        <div class="modal__settings__body">
+            <form method="post" action="{% url 'settings_create' 'severities' %}">
+                {% csrf_token %}
+                <div class="form__group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div class="form__group">
+                    <label for="color">Color:</label>
+                    <input type="color" id="color" name="color" required>
+                </div>
+                <div class="modal__settings__footer">
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
