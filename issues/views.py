@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.models import User
 
 from .forms import IssueForm
 from .models import Status, Priorities, Types, Severities
@@ -103,9 +104,19 @@ def issue_detail(request, issue_id):
     search_query = request.GET.get("q", "")
     due_date_form = IssueForm(instance=issue)
 
+    # Obtener la issue anterior ordenada por created_at
+    prev_issue = Issue.objects.filter(created_at__lt=issue.created_at).order_by('-created_at').first()
+
+    # Obtener la issue siguiente ordenada por created_at
+    next_issue = Issue.objects.filter(created_at__gt=issue.created_at).order_by('created_at').first()
+
     # Obtener todos los usuarios o filtrarlos por búsqueda
     users = Profile.objects.all()
     statuses = Status.objects.all()
+    severities = Severities.objects.all()
+    priorities = Priorities.objects.all()
+    types = Types.objects.all()
+
 
     if search_query:
         users = users.filter(username__icontains=search_query)
@@ -117,12 +128,17 @@ def issue_detail(request, issue_id):
 
     context = {
         'issue': issue,
+        'prev_issue': prev_issue,
+        'next_issue': next_issue,
         'attachments': attachments,
         'show_assign_form': show_assign_form,
         'users': users,
         'statuses': statuses,
         'attachment_error': attachment_error,  # <-- Añadido aquí
-        'due_date_form': due_date_form
+        'due_date_form': due_date_form,
+        'severities': severities,
+        'priorities': priorities,
+        'types': types
     }
 
     return render(request, 'issues/issue_detail.html', context)
@@ -436,15 +452,15 @@ def issue_info_add_watcher(request,issue_id):
 
 
 @login_required
-def issue_info_remove_watcher(request, issue_id):
+def issue_info_remove_watcher(request, issue_id, ):
     issue = get_object_or_404(Issue, id=issue_id)
 
-    # Eliminar al usuario actual de los watchers
-    if request.user in issue.watchers.all():
-        issue.watchers.remove(request.user)
-
-    return redirect('issue_detail', issue_id=issue.id)
-
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        if user_id:
+            user = get_object_or_404(User, id=user_id)
+            issue.watchers.remove(user)
+    return redirect('issue_detail', issue_id=issue_id)
 @login_required
 def issue_info_add_multiple_watchers(request, issue_id):
     issue = get_object_or_404(Issue, pk=issue_id)
@@ -455,6 +471,35 @@ def issue_info_add_multiple_watchers(request, issue_id):
             issue.watchers.add(profile.user) # Añadimos el User asociado al Profile
         return redirect('issue_detail', issue_id=issue_id)
     return redirect('issue_detail', issue_id=issue_id)
+
+@login_required
+def issue_info_add_assigned_user(request,issue_id):
+    issue = get_object_or_404(Issue, pk=issue_id)
+    if request.method == 'POST':
+        selected_profile_ids = request.POST.getlist('users')
+        if selected_profile_ids:  # Verifica si se seleccionó al menos un usuario
+            profile_id = selected_profile_ids[0]  # Toma el primer usuario seleccionado
+            profile = get_object_or_404(Profile, pk=profile_id)
+            issue.assigned_to = profile.user  # Asigna el usuario a la issue
+            issue.save()
+        return redirect('issue_detail', issue_id=issue_id)
+    return redirect('issue_detail',issue_id=issue_id)
+
+@login_required
+def issue_info_assign_to_current_user(request, issue_id):
+    issue = get_object_or_404(Issue, pk=issue_id)
+    if request.method == "POST":
+        issue.assigned_to = request.user
+        issue.save()
+    return redirect('issue_detail', issue_id=issue_id)
+
+@login_required
+def issue_info_remove_assigned(request,issue_id):
+    issue = get_object_or_404(Issue,id=issue_id)
+    if request.method=="POST":
+        issue.assigned_to = None
+        issue.save()
+    return redirect('issue_detail',issue_id=issue_id)
 
 @login_required
 @login_required
@@ -478,6 +523,35 @@ def issue_info_remove_due_date(request, issue_id):
     issue = get_object_or_404(Issue, id=issue_id)
     issue.due_date = None
     issue.save()
+    return redirect('issue_detail', issue_id=issue_id)
+
+@login_required
+def issue_info_edit_comment(request, issue_id, comment_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    comment = get_object_or_404(Comment, id=comment_id)
+    if request.method == 'POST':
+        comment.text = request.POST.get('text')
+        comment.save()
+        return redirect('issue_detail', issue_id=issue_id)
+    return render(request, 'issues/issue_detail.html', {'issue': issue, 'edit_comment_id': comment_id})
+
+@login_required
+def issue_info_edit_properties(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    if request.method == 'POST':
+        issue.severity = get_object_or_404(Severities, id=request.POST.get('severity'))
+        issue.priority = get_object_or_404(Priorities, id=request.POST.get('priority'))
+        issue.issue_type = get_object_or_404(Types, id=request.POST.get('issue_type'))
+        issue.save()
+        return redirect('issue_detail', issue_id=issue_id)
+    return redirect('issue_detail', issue_id=issue_id)
+
+@login_required
+def issue_info_delete_issue(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    if request.method == 'POST':
+        issue.delete()
+        return redirect('issue_list')
     return redirect('issue_detail', issue_id=issue_id)
 
 

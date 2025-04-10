@@ -71,12 +71,33 @@ flex: 3;
       border-radius: 5px;
       text-align: center;
       font-size: 15px;
-      padding: 5px;
+      padding: 7px;
       border-color: #83eede;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.2);
 }
 
 .info-issue-saveButton:hover {
       background-color: #6be3d399;
+}
+
+.cancel-edit-comment {
+    background-color: #e0e0e0; /* Gris claro */
+    border-radius: 5px;
+    text-align: center;
+    font-size: 15px;
+    padding: 7px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.2);
+    text-decoration: none; /* Elimina el subrayado del enlace */
+    color: #333; /* Color del texto gris oscuro */
+    margin-left: 5px; /* Añade un pequeño margen a la izquierda */
+}
+
+.cancel-edit-comment:hover {
+    background-color: #d0d0d0; /* Gris ligeramente más oscuro al pasar el ratón */
 }
 
 .issue-info-status {
@@ -100,32 +121,64 @@ display:flex;
 }
 
 .issue-info-status-assigned {
-       font-size: 12px;
+      margin-bottom: 10px;
 }
 
 .issue-info-status-assigned-list {
-display:flex;
+      display:flex;
+      font-size: 14px;
+      flex-direction: column;
+      gap:20px;
+      justify-content: left;
+}
+
+.issue-info-status-assigned-buttons {
+      display:flex;
       flex-direction: row;
       gap: 20px;
-justify-content: left;
+      justify-content: center;
+      align-items: center;
 }
 
 .issue-info-status-assigned-button {
-      display: flex;
-      flex-direction: row;
-      background-color: #ffffff;
-      font-size: 12px;
-      align-items: center;
-      padding: 5px;
-      border-radius: 10px;
-      text-align: center;
-      justify-content: center;
-      box-shadow: 0 0 5px 1px #ccc;
-      color: #008aa8;
+    display: flex;
+    flex-direction: row;
+    background-color: #ffffff;
+    font-size: 14px;
+    align-items: center;
+    padding: 5px;
+    border-radius: 10px;
+    text-align: center;
+    justify-content: center;
+    box-shadow: 0 0 5px 1px #ccc;
+    text-decoration: none;
+    color: #008aa8;
+    border: none; /* Añadido para eliminar el borde predeterminado del botón */
+    cursor: pointer; /* Añadido para que el cursor se vea como un puntero al pasar por encima */
+}
+
+
+
+.issue-info-status-assigned-button span {
+      font-size: 22px;
 }
 
 .issue-info-status-assigned-button:hover {
       background-color: #eee;
+}
+
+.issue-info-assigned-item {
+      margin-bottom: 10px;
+      gap:15px;
+    position: relative;
+    display: flex;
+
+    align-items: center;
+    padding: 5px; /* Añadimos padding para mejor interacción */
+}
+
+.issue-info-assigned-item:hover .issue-info-delete-form {
+    display: inline-block;
 }
 
 .issue-info-status-buttons {
@@ -171,21 +224,21 @@ justify-content: left;
 }
 
 .issue-info-status-watchers {
-      font-size: 12px;
+      margin-bottom: 10px;
 }
 
 .issue-info-status-watchers-buttons {
       display: flex;
       flex-direction: row;
       gap: 10px;
-
+      justify-content: center;
 }
 
 .issue-info-status-watchers-list {
 display:flex;
       flex-direction: row;
       gap: 20px;
-      font-size: 12px;
+      font-size: 14px;
       justify-content: left;
 }
 
@@ -195,7 +248,7 @@ display:flex;
       background-color: #ffffff;
       align-items: center;
       padding: 10px;
-      font-size: 12px;
+      font-size: 14px;
       border-radius: 10px;
       text-align: center;
       box-shadow: 0 0 5px 1px #ccc;
@@ -205,6 +258,8 @@ display:flex;
       justify-content: space-between;
 
 }
+
+
 
 .issue-info-status-watchers-button span{
       font-size: 22px;
@@ -218,7 +273,6 @@ display:flex;
 display:flex;
       flex-direction: row;
       font-size: 5px;
-      gap: 10px;
 }
 
 .issue-info-description {
@@ -294,6 +348,8 @@ display:flex;
       margin-bottom: 10px;
       display: flex;
       flex-direction: row;
+      justify-content: center;
+        align-items: center;
 }
 
 .issue-info-comment:hover .issue-info-comment-buttons {
@@ -312,18 +368,20 @@ display:flex;
       opacity: 0;
       pointer-events: none;
       align-items: center;
-      gap: 5px;
+      gap: 10px;
       transition: opacity 0.3s ease, pointer-events 0.3s ease;
 }
 
 .issue-info-status-buttons-comment-edit span{
       color: #6e9197;
       font-size: 25px;
+      margin-right:7px;
 }
 
 .issue-info-status-buttons-comment-delete span{
       color: #b84444;
       font-size: 25px;
+      margin-left:7px;
 }
 
 .issue-info-title {
@@ -412,8 +470,11 @@ display:flex;
       border-radius: 5px;
       text-align: center;
       font-size: 15px;
-      padding: 5px;
+      padding: 7px;
       border-color: #83eede;
+      border: none;
+      box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
 }
 
 .issue-info-hidden-upload-button:hover {
@@ -422,6 +483,7 @@ display:flex;
 
 .issue-info-watcher-item {
       gap:15px;
+      margin-bottom: 10px;
     position: relative;
     display: flex;
     justify-content: space-between; /* Alinea el nombre y el botón con espacio entre ellos */
@@ -487,12 +549,110 @@ display:flex;
     font-size: 27px;
 }
 
+.sutil-select {
+    padding: 3px 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 14px;
+    background-color: #fff;
+      cursor: pointer;
+      margin-top: 20px;
+}
 
-/*No lo borres en el merge */
+.sutil-select:focus {
+    outline: none;
+    border-color: #008aa8;
+    box-shadow: 0 0 3px rgba(0, 138, 168, 0.5);
+}
 
-.issue-info-comment-main a{
-      text-decoration: none;
-      color: #2d5fbb; /* Cambiale el color si no te gusta */
+.issue-info-status-properties-type {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      align-items: center;
+}
 
+.issue-info-status-properties-priority {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      align-items: center;
+}
+
+.issue-info-status-properties-severity {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      align-items: center;
+}
+
+.issue-info-title-title {
+    display: flex;
+    justify-content: space-between; /* Alinea los elementos a los extremos */
+    align-items: center; /* Centra verticalmente los elementos */
+}
+
+.issue-info-title-title h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.issue-info-title-title input[type="text"] {
+    border: 1px solid #ccc;
+    padding: 5px;
+    font-size: inherit;
+    vertical-align: middle;
+}
+
+.issue-info-title-saveButton {
+    background-color: #83eede;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 15px;
+    padding: 7px;
+    border-color: #83eede;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.2);
+    vertical-align: middle;
+}
+
+.issue-info-title-saveButton:hover {
+    background-color: #6be3d399;
+}
+
+.issue-info-title-cancel-edit {
+    text-decoration: none;
+    color: red;
+    margin-left: 5px;
+    vertical-align: middle;
+    display: inline-flex; /* Añadimos para centrar el icono */
+    align-items: center; /* Centramos el icono verticalmente */
+}
+
+.issue-info-title-cancel-edit span {
+      font-size: 30px;
+      color: red;
+}
+
+.issue-info-title-cancel-edit span:hover {
+    color: #b84444;
+}
+
+.issue-info-goToOtherIssue {
+    display: flex;
+    align-items: center;
+}
+
+.issue-info-goToOtherIssue-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+}
+
+.issue-info-comment img {
+    margin-right: 15px;
 
 }
