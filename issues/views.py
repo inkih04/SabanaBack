@@ -62,7 +62,7 @@ def issue_list(request, attachment_error=None):
         'types': types,
         'severities': severities,
         'priorities': priorities,
-        'attachment_error': attachment_error,  # 👉 Pasamos el error aquí
+        'attachment_error': attachment_error,
     })
 
 
@@ -84,7 +84,7 @@ def issue_create(request):
                 try:
                     Attachment.objects.create(issue=issue, file=file)
                 except ClientError:
-                    # En lugar de redirigir, renderiza issue_list con un error
+
                     return issue_list(request, attachment_error="The bucket is currently disabled. Please try again later.")
 
             return redirect('issue_list')
@@ -99,18 +99,17 @@ def issue_detail(request, issue_id):
     """ Muestra los detalles de un issue específico """
     issue = get_object_or_404(Issue, id=issue_id)
 
-    # Si estás mostrando el pop-up para asignar
     show_assign_form = request.GET.get("show_assign_form") == "1"
     search_query = request.GET.get("q", "")
     due_date_form = IssueForm(instance=issue)
 
-    # Obtener la issue anterior ordenada por created_at
+
     prev_issue = Issue.objects.filter(created_at__lt=issue.created_at).order_by('-created_at').first()
 
-    # Obtener la issue siguiente ordenada por created_at
+
     next_issue = Issue.objects.filter(created_at__gt=issue.created_at).order_by('created_at').first()
 
-    # Obtener todos los usuarios o filtrarlos por búsqueda
+
     users = Profile.objects.all()
     statuses = Status.objects.all()
     severities = Severities.objects.all()
@@ -123,7 +122,7 @@ def issue_detail(request, issue_id):
 
     attachments = Attachment.objects.filter(issue=issue)
 
-    # Leer y eliminar el mensaje de error de la sesión si existe
+
     attachment_error = request.session.pop('attachment_error', None)
 
     context = {
@@ -134,7 +133,7 @@ def issue_detail(request, issue_id):
         'show_assign_form': show_assign_form,
         'users': users,
         'statuses': statuses,
-        'attachment_error': attachment_error,  # <-- Añadido aquí
+        'attachment_error': attachment_error,
         'due_date_form': due_date_form,
         'severities': severities,
         'priorities': priorities,
@@ -163,9 +162,8 @@ def update_issue_status(request, issue_id):
             issue.status = new_status
             issue.save()
         except Status.DoesNotExist:
-            pass  # Manejar el caso donde el estado no exista
+            pass
 
-    # Obtener la URL de retorno enviada en el formulario
     next_url = request.POST.get("next")
     if next_url:
         return redirect(next_url)
@@ -181,8 +179,6 @@ def update_issue_description(request, issue_id):
         if new_description:
             issue.description = new_description
             issue.save()
-
-    # Ontener la URL de retorno enviada en el formaulario
     next_url = request.POST.get("next")
     if next_url:
         return redirect(next_url)
@@ -211,7 +207,7 @@ def update_issue_assignee(request, issue_id):
             except get_user_model().DoesNotExist:
                 issue.assigned_to = None
         else:
-            issue.assigned_to = None  # Desasignar si el valor está vacío
+            issue.assigned_to = None
 
         issue.save()
 
@@ -224,30 +220,29 @@ def update_issue_metadata(request, issue_id):
 
     if request.method == "POST":
         try:
-            # Actualizar tipo
+
             new_type_id = request.POST.get("type")
             if new_type_id:
                 new_type = Types.objects.get(id=new_type_id)
                 issue.issue_type = new_type
 
-            # Actualizar prioridad
+
             new_priority_id = request.POST.get("priority")
             if new_priority_id:
                 new_priority = Priorities.objects.get(id=new_priority_id)
                 issue.priority = new_priority
 
-            # Actualizar severidad
+
             new_severity_id = request.POST.get("severity")
             if new_severity_id:
                 new_severity = Severities.objects.get(id=new_severity_id)
                 issue.severity = new_severity
 
-            # Guardar cambios en el modelo Issue
+
             issue.save()
 
         except (Types.DoesNotExist, Priorities.DoesNotExist, Severities.DoesNotExist):
-            pass  # Manejar errores si no se encuentran valores válidos
-
+            pass
     return redirect('issue_list')
 
 
@@ -260,13 +255,13 @@ def issue_bulk_create(request):
                 Issue(
                     subject=line.strip(),
                     description="Bulk created issue",
-                    created_by=request.user  # Asigna el usuario creador
+                    created_by=request.user
                 )
                 for line in issues_text.split("\n") if line.strip()
             ]
             Issue.objects.bulk_create(issues)
             return redirect('issue_list')
-    return redirect('issue_list')  # Redirigir a la lista de issues
+    return redirect('issue_list')
 
 
 
@@ -290,7 +285,7 @@ def settings_edit(request, model_name, pk=None):
     """Añade o edita un objeto de configuración."""
     model_data = MODEL_FORM_MAP.get(model_name)
     if not model_data:
-        return redirect('settings_list')  # Redirige si el modelo no es válido
+        return redirect('settings_list')
 
     model, form_class = model_data
     instance = get_object_or_404(model, pk=pk) if pk else None
@@ -299,7 +294,6 @@ def settings_edit(request, model_name, pk=None):
         form = form_class(request.POST, instance=instance)
         if form.is_valid():
             obj = form.save(commit=False)
-            # Generar automáticamente el slug si es necesario (solo para Status)
             if model_name == 'status' and not obj.slug:
                 from django.utils.text import slugify
                 obj.slug = slugify(obj.nombre)
@@ -313,31 +307,28 @@ def settings_edit(request, model_name, pk=None):
 @login_required
 def settings_delete(request, model_name, pk):
     """Elimina un objeto de configuración."""
-    model_data = MODEL_FORM_MAP.get(model_name)  # Obtiene el modelo y formulario correspondiente
+    model_data = MODEL_FORM_MAP.get(model_name)
     if not model_data:
-        return redirect('settings_list')  # Redirige si el modelo no es válido
+        return redirect('settings_list')
 
-    model, _ = model_data  # Solo necesitamos el modelo, no el formulario
-    instance = get_object_or_404(model, pk=pk)  # Obtiene la instancia del objeto a eliminar
+    model, _ = model_data
+    instance = get_object_or_404(model, pk=pk)
 
     if request.method == 'POST':
-        instance.delete()  # Elimina el objeto de la base de datos
-        return redirect('settings_list')  # Redirige a la lista de configuraciones
+        instance.delete()
+        return redirect('settings_list')
 
     return render(request, 'settings/settings_confirm_delete.html', {'instance': instance})
 
 
 @login_required
 def profile(request, username=None):
-    # Si no se proporciona un username, mostrar el perfil del usuario actual
     if username is None:
         user = request.user
     else:
-        # Obtener el usuario por nombre de usuario o devolver 404 si no existe
         User = get_user_model()
         user = get_object_or_404(User, username=username)
 
-    # Ahora usamos el usuario determinado (user) en lugar de request.user
     assigned_issues = Issue.objects.filter(assigned_to=user).order_by('-created_at')
     total_issues = assigned_issues.count()
 
@@ -357,11 +348,10 @@ def profile(request, username=None):
 
     all_statuses = Status.objects.all().order_by('nombre')
 
-    # Variable para saber si es el perfil del usuario logueado o de otro usuario
     is_own_profile = user == request.user
 
     context = {
-        'profile_user': user,  # Renombramos para evitar conflictos
+        'profile_user': user,
         'issues': issues_to_display,
         'user_comments': user_comments,
         'total_issues': total_issues,
@@ -371,7 +361,7 @@ def profile(request, username=None):
         'view_mode': view_mode,
         'attachment_error': attachment_error,
         'statuses': all_statuses,
-        'is_own_profile': is_own_profile,  # Indica si es el perfil propio o no
+        'is_own_profile': is_own_profile,
     }
     return render(request, 'BaseProfile.html', context)
 
@@ -430,7 +420,6 @@ def update_avatar(request):
             profile.avatar.save(avatar_file.name, avatar_file)
             profile.save()
         except Exception:
-            # Guardar en la sesión el mensaje de error para luego mostrarlo en el template
             request.session['attachment_error'] = "The bucket is currently disabled. Please try again later."
     return redirect('profile')
 
@@ -465,10 +454,10 @@ def issue_info_remove_watcher(request, issue_id, ):
 def issue_info_add_multiple_watchers(request, issue_id):
     issue = get_object_or_404(Issue, pk=issue_id)
     if request.method == 'POST':
-        selected_profile_ids = request.POST.getlist('users') # users es el name del select en el html
+        selected_profile_ids = request.POST.getlist('users')
         for profile_id in selected_profile_ids:
             profile = get_object_or_404(Profile, pk=profile_id)
-            issue.watchers.add(profile.user) # Añadimos el User asociado al Profile
+            issue.watchers.add(profile.user)
         return redirect('issue_detail', issue_id=issue_id)
     return redirect('issue_detail', issue_id=issue_id)
 
@@ -477,10 +466,10 @@ def issue_info_add_assigned_user(request,issue_id):
     issue = get_object_or_404(Issue, pk=issue_id)
     if request.method == 'POST':
         selected_profile_ids = request.POST.getlist('users')
-        if selected_profile_ids:  # Verifica si se seleccionó al menos un usuario
-            profile_id = selected_profile_ids[0]  # Toma el primer usuario seleccionado
+        if selected_profile_ids:
+            profile_id = selected_profile_ids[0]
             profile = get_object_or_404(Profile, pk=profile_id)
-            issue.assigned_to = profile.user  # Asigna el usuario a la issue
+            issue.assigned_to = profile.user
             issue.save()
         return redirect('issue_detail', issue_id=issue_id)
     return redirect('issue_detail',issue_id=issue_id)
@@ -507,7 +496,7 @@ def issue_info_set_due_date(request, issue_id):
     issue = get_object_or_404(Issue, id=issue_id)
     if request.method == 'POST':
         due_date_form = IssueForm(request.POST, instance=issue)
-        if 'due_date' in request.POST and len(request.POST) == 2: #Verifica si solo se envía due_date y csrf
+        if 'due_date' in request.POST and len(request.POST) == 2:
             if due_date_form['due_date'].errors:
                 print(due_date_form.errors)
             else:
@@ -557,11 +546,11 @@ def issue_info_delete_issue(request, issue_id):
 
 @login_required
 def user_directory(request):
-    # Obtener todos los usuarios con sus perfiles
+
     User = get_user_model()
     users = User.objects.all()
 
-    # Procesar la búsqueda si existe
+
     search_query = request.GET.get('search', '').strip()
     if search_query:
         users = users.filter(
@@ -569,20 +558,19 @@ def user_directory(request):
             Q(profile__biography__icontains=search_query)
         )
 
-    # Lista para almacenar información de cada usuario
+
     user_data = []
 
     for user in users:
-        # Contar issues asignados
+
         assigned_issues_count = Issue.objects.filter(assigned_to=user).count()
 
-        # Contar issues observados
+
         watched_issues_count = Issue.objects.filter(watchers=user).count()
 
-        # Contar comentarios
+
         comments_count = Comment.objects.filter(user=user).count()
 
-        # Añadir toda la información a la lista
         user_data.append({
             'user': user,
             'assigned_issues_count': assigned_issues_count,
@@ -592,5 +580,5 @@ def user_directory(request):
 
     return render(request, 'issues/user_directory.html', {
         'user_data': user_data,
-        'search_query': search_query  # Pasar la consulta de búsqueda al template
+        'search_query': search_query  
     })
