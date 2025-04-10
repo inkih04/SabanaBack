@@ -5,7 +5,8 @@ from .views import issue_list, issue_create, delete_issue, update_issue_status, 
 from .views import (issue_list, issue_create, delete_issue, update_issue_status, issue_detail, issue_bulk_create, login, \
     update_issue_assignee, profile, update_bio, update_issue_description, add_comment_to_issue, update_issue_info_title,
                     issue_info_delete_comment, info_issue_upload_attachment, issue_info_delete_attachment,
-                    issue_info_remove_watcher, issue_info_add_watcher, issue_info_add_multiple_watchers)
+                    issue_info_remove_watcher, issue_info_add_watcher, issue_info_add_multiple_watchers,
+                    issue_info_set_due_date,issue_info_remove_due_date)
 
 urlpatterns = [
     path('', issue_list, name='issue_list'),
@@ -31,6 +32,10 @@ urlpatterns = [
     path('issue/<int:issue_id>/watch',issue_info_add_watcher, name='issue_info_add_watcher'),
 
     path('issue_info_add_multiple_watchers/<int:issue_id>/',issue_info_add_multiple_watchers,name='issue_info_add_multiple_watchers'),
+
+    path('issue/<int:issue_id>/issue_info_set_due_date/', issue_info_set_due_date, name='issue_info_set_due_date'),
+
+    path('issue/<int:issue_id>/issue_info_remove_due_date/', issue_info_remove_due_date, name='issue_info_remove_due_date'),
 
     path('<int:issue_id>/', issue_detail, name='issue_detail'),
 
