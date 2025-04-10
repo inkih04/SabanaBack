@@ -130,7 +130,9 @@
                         <div class="issue-info-comment">
                         <p>{{ comment.user.avatar }}</p>
                             <div class="issue-info-comment-main">
-                                <p><strong>{{ comment.user.username }}</strong></p>
+                                <a href="{% url 'user_profile' username=comment.user.username %}">
+                                    <p><strong>{{ comment.user.username }}</strong></p>
+                                </a>
                                 <p>{{ comment.text }}</p>
                                 <p class="issue-info-comment-date">{{ comment.published_at }}</p>
                             </div>

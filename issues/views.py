@@ -312,14 +312,23 @@ def settings_delete(request, model_name, pk):
 
 
 @login_required
-def profile(request):
-    assigned_issues = Issue.objects.filter(assigned_to=request.user).order_by('-created_at')
+def profile(request, username=None):
+    # Si no se proporciona un username, mostrar el perfil del usuario actual
+    if username is None:
+        user = request.user
+    else:
+        # Obtener el usuario por nombre de usuario o devolver 404 si no existe
+        User = get_user_model()
+        user = get_object_or_404(User, username=username)
+
+    # Ahora usamos el usuario determinado (user) en lugar de request.user
+    assigned_issues = Issue.objects.filter(assigned_to=user).order_by('-created_at')
     total_issues = assigned_issues.count()
 
-    watched_issues_qs = Issue.objects.filter(watchers=request.user).order_by('-created_at')
+    watched_issues_qs = Issue.objects.filter(watchers=user).order_by('-created_at')
     watched_count = watched_issues_qs.count()
 
-    user_comments = Comment.objects.filter(user=request.user).order_by('-published_at')
+    user_comments = Comment.objects.filter(user=user).order_by('-published_at')
     comment_count = user_comments.count()
 
     view_mode = request.GET.get('view', 'issues')
@@ -330,19 +339,23 @@ def profile(request):
     else:
         issues_to_display = assigned_issues
 
-    # 👇 Aquí añadimos todos los estatus
     all_statuses = Status.objects.all().order_by('nombre')
 
+    # Variable para saber si es el perfil del usuario logueado o de otro usuario
+    is_own_profile = user == request.user
+
     context = {
+        'profile_user': user,  # Renombramos para evitar conflictos
         'issues': issues_to_display,
         'user_comments': user_comments,
         'total_issues': total_issues,
         'watched_issues': watched_count,
         'comment_count': comment_count,
-        'users': {request.user},
+        'users': {user},
         'view_mode': view_mode,
         'attachment_error': attachment_error,
-        'statuses': all_statuses,  # ✅ Aquí está la clave
+        'statuses': all_statuses,
+        'is_own_profile': is_own_profile,  # Indica si es el perfil propio o no
     }
     return render(request, 'BaseProfile.html', context)
 
@@ -466,3 +479,44 @@ def issue_info_remove_due_date(request, issue_id):
     issue.due_date = None
     issue.save()
     return redirect('issue_detail', issue_id=issue_id)
+
+
+@login_required
+def user_directory(request):
+    # Obtener todos los usuarios con sus perfiles
+    User = get_user_model()
+    users = User.objects.all()
+
+    # Procesar la búsqueda si existe
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        users = users.filter(
+            Q(username__icontains=search_query) |
+            Q(profile__biography__icontains=search_query)
+        )
+
+    # Lista para almacenar información de cada usuario
+    user_data = []
+
+    for user in users:
+        # Contar issues asignados
+        assigned_issues_count = Issue.objects.filter(assigned_to=user).count()
+
+        # Contar issues observados
+        watched_issues_count = Issue.objects.filter(watchers=user).count()
+
+        # Contar comentarios
+        comments_count = Comment.objects.filter(user=user).count()
+
+        # Añadir toda la información a la lista
+        user_data.append({
+            'user': user,
+            'assigned_issues_count': assigned_issues_count,
+            'watched_issues_count': watched_issues_count,
+            'comments_count': comments_count
+        })
+
+    return render(request, 'issues/user_directory.html', {
+        'user_data': user_data,
+        'search_query': search_query  # Pasar la consulta de búsqueda al template
+    })

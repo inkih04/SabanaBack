@@ -486,3 +486,13 @@ display:flex;
       color: #ea7c0e;
     font-size: 27px;
 }
+
+
+/*No lo borres en el merge */
+
+.issue-info-comment-main a{
+      text-decoration: none;
+      color: #2d5fbb; /* Cambiale el color si no te gusta */
+
+
+}
