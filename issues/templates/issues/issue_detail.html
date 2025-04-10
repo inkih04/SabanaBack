@@ -8,7 +8,14 @@
     <div class="issue-info-principal">
     <div class="issue-info-title">
         <div class="issue-info-title-title">
-            <h1>#{{ issue.id }} {{ issue.subject }}</h1>
+            <h1>
+                #{{ issue.id }} {{ issue.subject }}
+                {% if issue.due_date %}
+                    <div class="issue-info-due-date-title">
+                        <span class="material-icons">schedule</span>
+                    </div>
+                {% endif %}
+            </h1>
             <div class="issue-info-title-edit">
                 <a href="?edit=true">
                     <span class="material-icons">edit</span>
@@ -269,7 +276,9 @@
                                 {% endif %}
                             {% endfor %}
                         </select>
-                        <button type="submit">Add Selected</button>
+                        <div class="issue-info-saveButtons">
+                            <button type="submit" class="info-issue-saveButton">Add Selected</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -278,9 +287,38 @@
 
             </div>
             <div class="issue-info-status-buttons">
-                <div class="issue-info-status-buttons-icon">
-                    <span class="material-icons">schedule</span>
+
+
+                <div class="issue-info-status-buttons-icon {% if issue.due_date %}issue-info-due-date-set{% endif %}">
+                    <a href="#infoIssueSetDueDateModal">
+                        <span class="material-icons">schedule</span>
+                    </a>
                 </div>
+
+                <div id="infoIssueSetDueDateModal" class="modal">
+                    <div class="modal-content">
+                        <a href="." class="close">&times;</a>
+                        <h2>Set Due Date</h2>
+                        <form method="POST" action="{% url 'issue_info_set_due_date' issue.id %}">
+                            {% csrf_token %}
+                            <div class="form-group profile__modal-due-date-group profile__modal-due-date-inline">
+                                <label for="{{ due_date_form.due_date.id_for_label }}">Due Date</label>
+                                {{ due_date_form.due_date }}
+                            </div>
+                            <div class="issue-info-saveButtonsDueDate">
+                                <button type="submit"  class="info-issue-saveButton">Set Due Date</button>
+                                {% if issue.due_date %}
+                                   <button type="button" class="info-issue-deleteDueDateButton" onclick="location.href='{% url 'issue_info_remove_due_date' issue.id %}'">
+                                        <span class="material-icons">delete</span>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+
                 <div class="issue-info-status-buttons-icon">
                     <span class="material-icons">delete</span>
                 </div>

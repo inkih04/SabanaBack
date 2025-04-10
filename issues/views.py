@@ -101,6 +101,7 @@ def issue_detail(request, issue_id):
     # Si estás mostrando el pop-up para asignar
     show_assign_form = request.GET.get("show_assign_form") == "1"
     search_query = request.GET.get("q", "")
+    due_date_form = IssueForm(instance=issue)
 
     # Obtener todos los usuarios o filtrarlos por búsqueda
     users = Profile.objects.all()
@@ -121,6 +122,7 @@ def issue_detail(request, issue_id):
         'users': users,
         'statuses': statuses,
         'attachment_error': attachment_error,  # <-- Añadido aquí
+        'due_date_form': due_date_form
     }
 
     return render(request, 'issues/issue_detail.html', context)
@@ -439,4 +441,28 @@ def issue_info_add_multiple_watchers(request, issue_id):
             profile = get_object_or_404(Profile, pk=profile_id)
             issue.watchers.add(profile.user) # Añadimos el User asociado al Profile
         return redirect('issue_detail', issue_id=issue_id)
+    return redirect('issue_detail', issue_id=issue_id)
+
+@login_required
+@login_required
+def issue_info_set_due_date(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    if request.method == 'POST':
+        due_date_form = IssueForm(request.POST, instance=issue)
+        if 'due_date' in request.POST and len(request.POST) == 2: #Verifica si solo se envía due_date y csrf
+            if due_date_form['due_date'].errors:
+                print(due_date_form.errors)
+            else:
+                issue.due_date = due_date_form.cleaned_data['due_date']
+                issue.save()
+        elif due_date_form.is_valid():
+            issue.due_date = due_date_form.cleaned_data['due_date']
+            issue.save()
+    return redirect('issue_detail', issue_id=issue_id)
+
+@login_required
+def issue_info_remove_due_date(request, issue_id):
+    issue = get_object_or_404(Issue, id=issue_id)
+    issue.due_date = None
+    issue.save()
     return redirect('issue_detail', issue_id=issue_id)
