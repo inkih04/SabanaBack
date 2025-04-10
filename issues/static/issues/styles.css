@@ -4,6 +4,7 @@
 @import "info_issue.css";
 @import "profile.css";
 @import "Settings.css";
+@import "user_directory.css";
 
 *{
     box-sizing: border-box;

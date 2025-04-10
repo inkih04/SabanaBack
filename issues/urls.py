@@ -1,7 +1,8 @@
 from django.urls import path, include
 from .views import issue_list, issue_create, delete_issue, update_issue_status, issue_detail, issue_bulk_create, login, \
-    update_issue_assignee, profile, update_bio, update_issue_description, add_comment_to_issue, update_issue_info_title, issue_info_delete_comment,settings_list,settings_edit,settings_delete, \
-    update_avatar
+    update_issue_assignee, profile, update_bio, update_issue_description, add_comment_to_issue, update_issue_info_title, \
+    issue_info_delete_comment, settings_list, settings_edit, settings_delete, \
+    update_avatar, user_directory
 from .views import (issue_list, issue_create, delete_issue, update_issue_status, issue_detail, issue_bulk_create, login, \
     update_issue_assignee, profile, update_bio, update_issue_description, add_comment_to_issue, update_issue_info_title,
                     issue_info_delete_comment, info_issue_upload_attachment, issue_info_delete_attachment,
@@ -67,8 +68,11 @@ urlpatterns = [
 
 
     path('profile/', profile, name='profile'),
+    path('profile/<str:username>/', profile, name='user_profile'),  # Para el perfil de otro usuario
 
     path('update_bio/', update_bio, name='update_bio'),
 
     path('update-avatar/', update_avatar, name='update_avatar'),
+
+    path('users/', user_directory, name='user_directory'),
 ]

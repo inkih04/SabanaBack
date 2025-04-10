@@ -348,6 +348,8 @@ display:flex;
       margin-bottom: 10px;
       display: flex;
       flex-direction: row;
+      justify-content: center;
+        align-items: center;
 }
 
 .issue-info-comment:hover .issue-info-comment-buttons {
@@ -648,4 +650,9 @@ display:flex;
     align-items: center;
     justify-content: center;
     margin-left: 5px;
+}
+
+.issue-info-comment img {
+    margin-right: 15px;
+
 }
