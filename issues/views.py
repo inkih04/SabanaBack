@@ -1,7 +1,7 @@
+from django.utils import timezone
 from botocore.exceptions import ClientError
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
@@ -116,6 +116,7 @@ def issue_detail(request, issue_id):
     severities = Severities.objects.all()
     priorities = Priorities.objects.all()
     types = Types.objects.all()
+    today = timezone.now().date()
 
 
     if search_query:
@@ -138,7 +139,8 @@ def issue_detail(request, issue_id):
         'due_date_form': due_date_form,
         'severities': severities,
         'priorities': priorities,
-        'types': types
+        'types': types,
+        'today': today,
     }
 
     return render(request, 'issues/issue_detail.html', context)
