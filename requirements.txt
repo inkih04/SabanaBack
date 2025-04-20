@@ -11,6 +11,7 @@ whitenoise
 django-storages
 django-storages[boto3]==1.14.6
 boto3
+drf-yasg
 
 
 views~=0.3

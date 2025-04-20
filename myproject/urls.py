@@ -17,13 +17,26 @@ Including another URLconf
 from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import path, include
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
+
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Mi API de Issues",
+        default_version='v1',
+        description="Documentación OpenAPI",
+    ),
+    public=True,
+)
 
 urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('issues/', include('issues.urls')),
     path('accounts/', include('allauth.urls')),
-
-    path('', lambda request: redirect('issue_list', permanent=True), name='home')
+    path('swagger.yaml', schema_view.without_ui(cache_timeout=0), name='schema-yaml'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('', lambda request: redirect('issue_list', permanent=True), name='home'),
 ]
