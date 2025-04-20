@@ -12,6 +12,7 @@ django-storages
 django-storages[boto3]==1.14.6
 boto3
 drf-yasg
+django-filter>=23.1
 
 
 views~=0.3

@@ -55,9 +55,16 @@ INSTALLED_APPS = [
     'storages',
     'rest_framework',
     'corsheaders',
+    'drf_yasg',
+    'api.apps.ApiConfig',
+    'django_filters',
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+}
 
 
 MIDDLEWARE = [
@@ -128,6 +135,32 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+}
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    # Configuración de servidores para OpenAPI 3
+    'SERVERS': [
+        {
+            'url': 'https://api.example.com/api/v1',
+            'description': 'Servidor de producción'
+        },
+        {
+            'url': 'https://staging-api.example.com/api/v1',
+            'description': 'Servidor de staging'
+        },
+        {
+            'url': 'http://localhost:8000/api/v1',
+            'description': 'Servidor de desarrollo local'
+        },
+    ],
 }
 
 
