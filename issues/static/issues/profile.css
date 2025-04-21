@@ -83,7 +83,7 @@
     margin-top: 35px;
     font-size: 25px;
     padding: 10px 30px;
-    background-color: #83eede;
+    background-color: #43eede;;
     border: none;
     border-radius: 5px;
     box-shadow: 0 0 5px #aaa;
@@ -123,7 +123,7 @@
 .pageChanger {
     padding: 20px 30px;
     font-size: 20px;
-    background-color: #83eede;
+    background-color: #43eede;
     border: none;
     border-radius: 5px;
     box-shadow: 0 0 5px #aaa;
@@ -142,6 +142,43 @@
     background-color: #008aa8;
     color: white;
     cursor: pointer;
+}
+
+
+.pageChangerSchema {
+    display: flex;
+    align-items: center;
+    padding-right: 10px;
+    padding-left: 10px;
+    font-size: 20px;
+    background-color: #43eede;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #aaa;
+    text-decoration: none; /* Elimina el subrayado */
+    color: #000;
+    gap: 15px;
+}
+.pageChangerSchema p {
+    color: #fff;
+    text-shadow: 0 0px 5px rgba(0,0,0,0.3);
+}
+
+.unstyled-link {
+    text-decoration: none; /* Elimina el subrayado */
+    color: inherit; /* Mantiene el color del texto original, o puedes poner un color específico */
+}
+
+.pageChangerSchema:hover {
+    background-color: #008aa8;
+    cursor: pointer;
+}
+
+.pageChangerSchema:hover p{
+    color: #000;
+}
+.pageChangerSchema:hover span{
+    color: #fff;
 }
 
 .content--profile {

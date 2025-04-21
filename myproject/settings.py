@@ -58,13 +58,20 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'api.apps.ApiConfig',
     'django_filters',
-    'drf_spectacular_sidecar'
+    'drf_spectacular_sidecar',
+    'rest_framework.authtoken',
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'api.authentication.CustomAuthorizationHeaderTokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # Require authentication for all endpoints
+    ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
@@ -143,10 +150,11 @@ DATABASES = {
 SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
     'SECURITY_DEFINITIONS': {
-        'Bearer': {
+        'Token': {
             'type': 'apiKey',
             'name': 'Authorization',
-            'in': 'header'
+            'in': 'header',
+            'description': 'Introduce tu token en formato:25e188f92af552bbfab5d262dc50ed47b5b242df'
         }
     },
     # Configuración de servidores para OpenAPI 3
@@ -168,20 +176,26 @@ SWAGGER_SETTINGS = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Mi API de Issues',
-    'DESCRIPTION': 'Documentación generada con drf-spectacular y OpenAPI 3.0',
+    'DESCRIPTION': 'Documentación generada con drf-spectacular y OpenAPI 3.0',
     'VERSION': 'v1',
     'SERVE_INCLUDE_SCHEMA': False,
-    'SCHEMA_PATH_PREFIX': r'/api/v1',      # Filtra sólo tus rutas de API
-    'COMPONENT_SPLIT_REQUEST': True,       # separados request/response
-    'SWAGGER_UI_DIST': 'SIDECAR',          # si usas swagger-ui-bundle
-
+    'SCHEMA_PATH_PREFIX': r'/api/v1',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SWAGGER_UI_DIST': 'SIDECAR',
     'SORT_OPERATION_PARAMETERS': False,
+    # Configuración de seguridad para tu token personalizado
+    'SECURITY': [
+        {'ApiToken': []}
+    ],
+    'SECURITY_DEFINITIONS': {
+        'ApiToken': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization',
+            'description': 'Introduce tu token directamente sin ningún prefijo'
+        }
+    },
 }
-
-
-
-
-
 
 
 # Password validation
