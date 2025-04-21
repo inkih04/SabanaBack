@@ -107,6 +107,12 @@
             <a href="{% url 'profile' %}?view=issues" class="pageChanger">Open Assigned Issues</a>
             <a href="{% url 'profile' %}?view=watched" class="pageChanger">Watched Issues</a>
             <a href="{% url 'profile' %}?view=comments" class="pageChanger">Comments</a>
+            <div  class="pageChangerSchema">
+                <a href="{% url 'swagger-ui' %}" class="unstyled-link">
+                    <p>API Token:</p>
+                </a>
+                <span>{{profile_user.profile.api_token}}</span>
+            </div>
         {% else %}
             <a href="{% url 'user_profile' username=profile_user.username %}?view=issues" class="pageChanger">Open Assigned Issues</a>
             <a href="{% url 'user_profile' username=profile_user.username %}?view=watched" class="pageChanger">Watched Issues</a>

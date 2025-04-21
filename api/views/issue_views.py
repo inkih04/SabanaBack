@@ -1,5 +1,6 @@
 from absl.testing.parameterized import parameters
 from django.db.models import Q
+from django.http import QueryDict
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
@@ -13,7 +14,7 @@ from drf_spectacular.utils import (
 )
 
 from issues.models import Issue, Attachment
-from ..serializers import IssueSerializer, AttachmentSerializer, IssueBulkCreateSerializer
+from ..serializers import IssueSerializer, AttachmentSerializer, IssueBulkCreateSerializer, IssueCreateSerializer
 from ..serializers.issueBulk_serializer import IssueBulkResponseSerializer
 
 
@@ -63,8 +64,8 @@ class AttachmentUploadSerializer(serializers.Serializer):
         summary="Crear un nuevo issue",
         description="Crea un nuevo issue. Se pueden adjuntar archivos usando el campo 'files'.",
         tags=["Issues"],
-        request=IssueSerializer,
-        responses=IssueSerializer,
+        request=IssueCreateSerializer,
+        responses={201: IssueSerializer},
         examples=[
             OpenApiExample(
                 'Ejemplo Request Create',
@@ -88,7 +89,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
         description="Actualiza campos de un issue existente (parcial o completo)."
                     "Se pueden subir nuevos archivos con 'files'.",
         tags=["Issues"],
-        request=IssueSerializer,
+        request=IssueCreateSerializer,
         responses=IssueSerializer,
         examples=[
             OpenApiExample(
@@ -164,45 +165,142 @@ class IssueViewSet(viewsets.ModelViewSet):
         return super().retrieve(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
-        issue_data = request.data.copy()
-        if 'watchers_usernames' in issue_data and isinstance(issue_data['watchers_usernames'], str):
-            issue_data['watchers_usernames'] = [u.strip() for u in issue_data['watchers_usernames'].split(',') if u.strip()]
-        serializer = self.get_serializer(data=issue_data)
+        # --- 1) Copiamos y hacemos mutables los datos si vienen como QueryDict
+        from django.http import QueryDict
+        if isinstance(request.data, QueryDict):
+            qd = request.data.copy()
+            qd._mutable = True
+            print("DEBUG CREATE: data era QueryDict, copy mutable")
+        else:
+            qd = request.data.copy()
+            print("DEBUG CREATE: data NO era QueryDict, copy normal")
+        print(f"DEBUG CREATE: QueryDict initial lists -> {qd.lists()}")
+
+        # --- 2) Procesamos watchers_usernames usando getlist para lista plana
+        if hasattr(request.data, 'getlist'):
+            raw = request.data.getlist('watchers_usernames')
+            print(f"DEBUG CREATE: raw watchers_usernames -> {raw}")
+            if raw:
+                qd.setlist('watchers_usernames', [u.strip() for u in raw if isinstance(u, str) and u.strip()])
+                print(f"DEBUG CREATE: setlist watchers_usernames -> {qd.getlist('watchers_usernames')}")
+            else:
+                qd.pop('watchers_usernames', None)
+                print("DEBUG CREATE: eliminado watchers_usernames vacío")
+
+        # --- 3) Eliminamos 'files' si no hay archivos adjuntos reales
+        if 'files' in qd and not request.FILES:
+            qd.pop('files')
+            print("DEBUG CREATE: eliminado 'files' porque no hay archivos en request.FILES")
+
+        # --- 4) Convertimos a dict puro y aplanamos valores simples
+        clean_data = {}
+        for key, vals in qd.lists():
+            # Mantener listas para campos multi-valor
+            if key in ('watchers_usernames', 'watchers_ids', 'files'):
+                clean_data[key] = vals
+            else:
+                clean_data[key] = vals[0] if len(vals) == 1 else vals
+        print(f"DEBUG CREATE: clean_data antes de depuración -> {clean_data}")
+
+        # --- 5) Eliminamos campos write_only vacíos para evitar error 'may not be blank'
+        for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username']:
+            if k in clean_data and clean_data[k] in (None, ''):
+                clean_data.pop(k)
+                print(f"DEBUG CREATE: eliminado campo vacío {k}")
+
+        # --- 6) Serializamos y validamos
+        serializer = self.get_serializer(data=clean_data)
         serializer.is_valid(raise_exception=True)
-        issue = serializer.save()
-        for f in request.data.getlist('files', []):
+        print(f"DEBUG CREATE: validated_data -> {serializer.validated_data}")
+
+        # --- 7) Creamos el Issue y procesamos adjuntos
+        issue = serializer.save(created_by=request.user)
+        for f in request.FILES.getlist('files', []):
+            print(f"DEBUG CREATE: creando Attachment para file: {getattr(f, 'name', f)}")
             Attachment.objects.create(issue=issue, file=f)
-        return Response(self.get_serializer(issue).data, status=status.HTTP_201_CREATED)
+
+        response_data = self.get_serializer(issue).data
+        print(f"DEBUG CREATE: respuesta final -> {response_data}")
+        from rest_framework.response import Response
+        from rest_framework import status
+        return Response(response_data, status=status.HTTP_201_CREATED)
+
 
     def update(self, request, *args, **kwargs):
-        issue_data = request.data.copy()
-        if 'watchers_usernames' in issue_data and isinstance(issue_data['watchers_usernames'], str):
-            issue_data['watchers_usernames'] = [u.strip() for u in issue_data['watchers_usernames'].split(',') if u.strip()]
+        print("\n==== SUPER DEBUG: UPDATE START ====")
+        from django.http import QueryDict
+        # 1) Copiamos y hacemos mutables los datos si vienen como QueryDict
+        if isinstance(request.data, QueryDict):
+            qd = request.data.copy()
+            qd._mutable = True
+            print("DEBUG: data era QueryDict, copy mutable")
+        else:
+            qd = request.data.copy()
+            print("DEBUG: data NO era QueryDict, copy normal")
+        print(f"Initial QueryDict lists -> {qd.lists()}")
+
+        # 2) Procesamos watchers_usernames usando getlist para lista plana
+        if hasattr(request.data, 'getlist'):
+            raw = request.data.getlist('watchers_usernames')
+            print(f"DEBUG: raw watchers_usernames -> {raw}")
+            if raw:
+                qd.setlist('watchers_usernames', [u.strip() for u in raw if isinstance(u, str) and u.strip()])
+                print(f"DEBUG: setlist watchers_usernames -> {qd.getlist('watchers_usernames')}")
+            else:
+                qd.pop('watchers_usernames', None)
+                print("DEBUG: eliminado watchers_usernames vacío")
+
+        # 3) Eliminamos 'files' si no hay archivos adjuntos reales
+        print(f"DEBUG: files en request.FILES -> {request.FILES}")
+        if 'files' in qd and not request.FILES:
+            qd.pop('files')
+            print("DEBUG: eliminado 'files' porque no hay archivos en request.FILES")
+
+        # 4) Convertimos a dict puro y aplanamos valores simples
+        clean_data = {}
+        for key, vals in qd.lists():
+            if key in ('watchers_usernames', 'watchers_ids', 'files'):
+                clean_data[key] = vals
+            else:
+                clean_data[key] = vals[0] if len(vals) == 1 else vals
+        print(f"DEBUG: clean_data inicial -> {clean_data}")
+
+        # 5) Eliminamos campos write-only vacíos para evitar errores de blank
+        for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username']:
+            if k in clean_data and clean_data[k] in (None, ''):
+                clean_data.pop(k)
+                print(f"DEBUG: eliminado campo vacío {k}")
+
+        # 6) Serializamos y validamos
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=issue_data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        issue = serializer.save()
-        for f in request.data.getlist('files', []):
-            Attachment.objects.create(issue=issue, file=f)
-        return Response(self.get_serializer(issue).data)
-
-    @action(detail=True, methods=['post'], url_path='attachments')
-    def add_attachment(self, request, pk=None):
-        issue = self.get_object()
-        serializer = AttachmentUploadSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        attachments = [Attachment.objects.create(issue=issue, file=f) for f in serializer.validated_data['file']]
-        return Response(AttachmentSerializer(attachments, many=True).data, status=status.HTTP_201_CREATED)
-
-    @action(detail=True, methods=['delete'], url_path='attachments/(?P<attachment_id>[^/.]+)')
-    def remove_attachment(self, request, pk=None, attachment_id=None):
+        print(f"DEBUG: instancia a actualizar -> {instance} (ID={instance.pk})")
+        serializer = self.get_serializer(instance, data=clean_data, partial=partial)
+        print("DEBUG: serializer instanciado")
         try:
-            attachment = Attachment.objects.get(id=attachment_id, issue_id=pk)
-            attachment.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Attachment.DoesNotExist:
-            return Response({"error": "Attachment not found"}, status=status.HTTP_404_NOT_FOUND)
+            serializer.is_valid(raise_exception=True)
+            print(f"DEBUG: validated_data -> {serializer.validated_data}")
+        except Exception as e:
+            print("ERROR during serializer.is_valid():", e)
+            raise
+
+        # 7) Guardamos y procesamos attachments
+        print("DEBUG: guardando instancia...")
+        issue = serializer.save()
+        if request.FILES:
+            for f in request.FILES.getlist('files'):
+                print(f"DEBUG: creando Attachment para file: {getattr(f, 'name', f)}")
+                Attachment.objects.create(issue=issue, file=f)
+        else:
+            print("DEBUG: no hay archivos para adjuntar")
+
+        # 8) Respuesta final
+        response_data = self.get_serializer(issue).data
+        print(f"DEBUG: response_data -> {response_data}")
+        print("==== SUPER DEBUG: UPDATE END ====\n")
+        from rest_framework.response import Response
+        from rest_framework import status
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 
