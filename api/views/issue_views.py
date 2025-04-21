@@ -1,4 +1,5 @@
 from absl.testing.parameterized import parameters
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
@@ -13,6 +14,7 @@ from drf_spectacular.utils import (
 
 from issues.models import Issue, Attachment
 from ..serializers import IssueSerializer, AttachmentSerializer, IssueBulkCreateSerializer
+from ..serializers.issueBulk_serializer import IssueBulkResponseSerializer
 
 
 class AttachmentUploadSerializer(serializers.Serializer):
@@ -46,7 +48,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
         description="Recupera los detalles de un issue específico por su ID.",
         tags=["Issues"],
         parameters=[
-            OpenApiParameter('pk', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
         ],
         responses=IssueSerializer,
         examples=[
@@ -212,6 +214,31 @@ class IssueViewSet(viewsets.ModelViewSet):
         request=IssueBulkCreateSerializer,
         responses={201: IssueSerializer(many=True)},
         filters=False,
+        examples=[
+            OpenApiExample(
+                name="Bulk Create Request",
+                summary="Ejemplo de petición para crear dos issues",
+                description="Se envía una lista de objetos con el campo 'subject'.",
+                value={
+                    "issues": [
+                        {"subject": "Error al guardar perfil"},
+                        {"subject": "Mejorar rendimiento API"}
+                    ]
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                name="Bulk Create Response",
+                summary="Respuesta tras crear issues",
+                description="Se devuelven los datos de los issues recién creados, incluyendo el 'id'.",
+                value=[
+                    {"id": 10, "subject": "Error al guardar perfil"},
+                    {"id": 11, "subject": "Mejorar rendimiento API"}
+                ],
+                response_only=True,
+                status_codes=["201"],
+            ),
+        ],
     )
     @action(
         detail=False,
@@ -220,12 +247,100 @@ class IssueViewSet(viewsets.ModelViewSet):
         parser_classes=[JSONParser],
         filter_backends=[],      # Anula backends de filtro
         pagination_class=None,
+        serializer_class=IssueBulkResponseSerializer
     )
     def bulk_create(self, request):
-        serializer = IssueBulkCreateSerializer(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        created_qs = serializer.save()
-        return Response(IssueSerializer(created_qs, many=True).data, status=status.HTTP_201_CREATED)
+        # 1) Validamos con el serializer de entrada
+        in_serializer = IssueBulkCreateSerializer(data=request.data, context={'request': request})
+        in_serializer.is_valid(raise_exception=True)
+        created_qs = in_serializer.save()
+
+        # 2) Serializamos la respuesta con el serializer de salida
+        out_serializer = self.get_serializer(created_qs, many=True)
+        return Response(out_serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        summary="Buscar issues por texto",
+        description="Devuelve todos los issues cuyo subject o description contienen el término dado.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter(
+                name="term",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description="Texto a buscar en subject o description",
+            )
+        ],
+        responses=IssueSerializer(many=True),
+        examples=[
+            OpenApiExample(
+                name="Búsqueda con resultados",
+                summary="Buscar issues que incluyan 'login'",
+                description="Devuelve una lista de issues que contienen la palabra 'login' en subject o description.",
+                value=[
+                    {
+                        "id": 1,
+                        "subject": "Error de login en app móvil",
+                        "description": "Al intentar iniciar sesión desde la app, se lanza un error 500.",
+                        "created_at": "2025-04-18T12:34:56Z",
+                        "due_date": "2025-04-25",
+                        "status": {"id": 2, "nombre": "Abierto"},
+                        "priority": {"id": 3, "nombre": "Alta"},
+                        "severity": {"id": 1, "nombre": "Crítica"},
+                        "issue_type": {"id": 4, "nombre": "Bug"},
+                        "assigned_to": {"id": 7, "username": "developer_juan", "email": "juan@example.com"},
+                        "created_by": {"id": 1, "username": "admin", "email": "admin@example.com"},
+                        "watchers": [
+                            {"id": 8, "username": "qa_maria", "email": "maria@example.com"},
+                            {"id": 9, "username": "lead_pedro", "email": "pedro@example.com"}
+                        ],
+                        "attachment": [
+                            {"id": 101, "file": "/media/attachments/log-error-20250418.txt"}
+                        ],
+                        "comments": [
+                            {
+                                "id": 201,
+                                "user": {"id": 8, "username": "qa_maria"},
+                                "text": "Este error se produce solo en Android",
+                                "created_at": "2025-04-19T09:00:00Z"
+                            }
+                        ]
+                    },
+                    {
+                        "id": 2,
+                        "subject": "Login lento en portal web",
+                        "description": "El inicio de sesión tarda más de 10 segundos.",
+                        "created_at": "2025-04-17T10:00:00Z",
+                        "due_date": "2025-04-22",
+                        "status": {"id": 2, "nombre": "Abierto"},
+                        "priority": {"id": 2, "nombre": "Media"},
+                        "severity": {"id": 2, "nombre": "Alta"},
+                        "issue_type": {"id": 5, "nombre": "Performance"},
+                        "assigned_to": {"id": 10, "username": "backend_luis", "email": "luis@example.com"},
+                        "created_by": {"id": 1, "username": "admin", "email": "admin@example.com"},
+                        "watchers": [],
+                        "attachment": [],
+                        "comments": []
+                    }
+                ],
+                response_only=True,
+                status_codes=["200"]
+            )]
+    )
+    @action(detail=False, methods=['get'], url_path=r'search/(?P<term>[^/.]+)')
+    def search(self, request, term=None):
+        qs = self.get_queryset().filter(
+            Q(subject__icontains=term) |
+            Q(description__icontains=term)
+        )
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+
+
 
     def filter_queryset(self, queryset):
         if self.action == 'bulk_create':

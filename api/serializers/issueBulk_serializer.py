@@ -6,6 +6,11 @@ from issues.models import Issue, Status, Priorities, Severities, Types
 class IssueBulkItemSerializer(serializers.Serializer):
     subject     = serializers.CharField(max_length=200)
 
+class IssueBulkResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Issue
+        fields = ['id', 'subject']
+
 
 @extend_schema_serializer(exclude_fields=['status', 'priority', 'severity', 'issue_type', 'created_by', 'assigned_to'])
 class IssueBulkCreateSerializer(serializers.Serializer):
@@ -13,7 +18,7 @@ class IssueBulkCreateSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         #Para probarlo sin token
-       # user = self.context['request'].user
+        user = self.context['request'].user
         items = validated_data['issues']
 
         #todo : Aqui iran los valores por defecto
@@ -33,7 +38,7 @@ class IssueBulkCreateSerializer(serializers.Serializer):
                     priority    = None,
                     severity    = None,
                     issue_type  = None,
-                    created_by  = User.objects.get(username='victor'),
+                    created_by  = user,
                 )
             )
 
