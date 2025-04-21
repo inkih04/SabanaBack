@@ -1,4 +1,6 @@
 import os
+import secrets
+
 import requests
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
@@ -41,3 +43,16 @@ def update_avatar_on_login(sender, request, user, **kwargs):
             print("El usuario no tiene cuenta social de Google vinculada.")
     except Exception as e:
         print(f"Error al actualizar el avatar en login: {e}")
+
+
+@receiver(user_logged_in)
+def ensure_api_token(sender, user, request, **kwargs):
+    profile = user.profile
+    if not profile.api_token:
+        print("Token generado")
+        # Genera un token de 40 hexadecimales
+        profile.api_token = secrets.token_hex(20)
+        profile.save()
+
+
+

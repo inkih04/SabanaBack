@@ -93,6 +93,12 @@ class Profile(models.Model):
     # Campo para guardar la biografía o descripción breve
     biography = models.TextField(blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', storage=S3Boto3Storage(), blank=True, null=True)
+    api_token = models.CharField(
+        max_length=40,
+        unique=True,
+        blank=True,
+        help_text="Token de acceso a la API, se genera al primer login."
+    )
 
     def __str__(self):
         return f'Perfil de {self.user.username}'
