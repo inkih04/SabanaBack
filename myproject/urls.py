@@ -17,42 +17,18 @@ Including another URLconf
 from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import path, include
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-from rest_framework import permissions
-
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Sabana API  (Hay que hacer la descripción bien luego)",
-        default_version='v1.0.0',
-        description="""
-      Esta es una API de seguimiento de problemas (issues) que permite gestionar tareas y problemas de manera eficiente.
-
-      ## Características principales
-
-      * Creación y gestión de issues con diferentes estados, prioridades y tipos
-      * Asignación de issues a usuarios específicos
-      * Seguimiento del progreso mediante estados personalizables
-      * Filtros avanzados para encontrar issues específicos
-      * Sistema de comentarios para la comunicación del equipo
-
-      ## Guía de uso
-
-      Para comenzar, puedes listar todos los issues o aplicar filtros para encontrar issues específicos.
-
-      """,
-    ),
-    public=True,
-    permission_classes=(permissions.AllowAny,),
-)
+from drf_spectacular.views import SpectacularSwaggerView, SpectacularAPIView
+from drf_spectacular.views import SpectacularYAMLAPIView
 
 urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('issues/', include('issues.urls')),
     path('accounts/', include('allauth.urls')),
-    path('swagger.yaml', schema_view.without_ui(cache_timeout=0), name='schema-yaml'),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('swagger.yaml', SpectacularYAMLAPIView.as_view(), name='schema-yaml'),
+    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+
     path('api/', include('api.urls')),
     path('', lambda request: redirect('issue_list', permanent=True), name='home'),
 ]

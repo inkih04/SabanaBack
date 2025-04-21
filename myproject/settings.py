@@ -55,17 +55,20 @@ INSTALLED_APPS = [
     'storages',
     'rest_framework',
     'corsheaders',
-    'drf_yasg',
+    'drf_spectacular',
     'api.apps.ApiConfig',
     'django_filters',
+    'drf_spectacular_sidecar'
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
 }
-
 
 MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
@@ -162,6 +165,23 @@ SWAGGER_SETTINGS = {
         },
     ],
 }
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Mi API de Issues',
+    'DESCRIPTION': 'Documentación generada con drf-spectacular y OpenAPI 3.0',
+    'VERSION': 'v1',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX': r'/api/v1',      # Filtra sólo tus rutas de API
+    'COMPONENT_SPLIT_REQUEST': True,       # separados request/response
+    'SWAGGER_UI_DIST': 'SIDECAR',          # si usas swagger-ui-bundle
+
+    'SORT_OPERATION_PARAMETERS': False,
+}
+
+
+
+
+
 
 
 # Password validation

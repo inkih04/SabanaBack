@@ -1,177 +1,226 @@
+from absl.testing.parameterized import parameters
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
-from rest_framework import viewsets, filters
-from issues.models import Issue
-from ..serializers import IssueSerializer
+from rest_framework import viewsets, filters, status
+from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.response import Response
+from rest_framework import serializers
 
+from drf_spectacular.utils import (
+    extend_schema_view, extend_schema,
+    OpenApiParameter, OpenApiTypes, OpenApiExample
+)
+
+from issues.models import Issue, Attachment
+from ..serializers import IssueSerializer, AttachmentSerializer, IssueBulkCreateSerializer
+
+
+class AttachmentUploadSerializer(serializers.Serializer):
+    file = serializers.ListField(
+        child=serializers.FileField(),
+        required=True,
+        allow_empty=False,
+        help_text="Lista de archivos a adjuntar"
+    )
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="Listar issues",
+        description="Devuelve una lista de issues con filtros opcionales ('status', 'priority', etc.) y ordenación.",
+        tags=["Issues"],
+        responses=IssueSerializer(many=True),
+        examples=[
+            OpenApiExample(
+                'Respuesta Ejemplo Lista',
+                value=[
+                    {"id": 1, "title": "Bug login", "status": 2, },
+                    {"id": 2, "title": "Añadir tests", "status": 1, }
+                ],
+                response_only=True
+            )
+        ]
+    ),
+    retrieve=extend_schema(
+        summary="Obtener issue por ID",
+        description="Recupera los detalles de un issue específico por su ID.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter('pk', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
+        ],
+        responses=IssueSerializer,
+        examples=[
+            OpenApiExample(
+                'Respuesta Ejemplo Retrieve',
+                value={"id": 1, "title": "Bug login", "description": "Error 500 al hacer login", },
+                response_only=True
+            )
+        ]
+    ),
+    create=extend_schema(
+        summary="Crear un nuevo issue",
+        description="Crea un nuevo issue. Se pueden adjuntar archivos usando el campo 'files'.",
+        tags=["Issues"],
+        request=IssueSerializer,
+        responses=IssueSerializer,
+        examples=[
+            OpenApiExample(
+                'Ejemplo Request Create',
+                value={
+                    "title": "Bug registro",
+                    "description": "Al registrarse con email, muestra error.",
+                    "priority": 3,
+                    "status": 1
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                'Respuesta Ejemplo Create',
+                value={"id": 3, "title": "Bug registro", "status": 1, },
+                response_only=True
+            )
+        ]
+    ),
+    update=extend_schema(
+        summary="Actualizar un issue",
+        description="Actualiza campos de un issue existente (parcial o completo)."
+                    "Se pueden subir nuevos archivos con 'files'.",
+        tags=["Issues"],
+        request=IssueSerializer,
+        responses=IssueSerializer,
+        examples=[
+            OpenApiExample(
+                'Ejemplo Request Update',
+                value={"title": "Bug login corregido", "status": 2},
+                request_only=True
+            )
+        ]
+    ),
+    destroy=extend_schema(
+        summary="Eliminar un issue",
+        description="Elimina un issue por su ID.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter(
+                name='id',
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="ID del issue a eliminar"
+            ),
+        ],
+        responses={204: None},
+    ),
+    add_attachment=extend_schema(
+        summary="Añadir archivos a un issue",
+        description="Adjunta uno o varios archivos a un issue existente.",
+        tags=["Issues"],
+        request=AttachmentUploadSerializer,
+        responses=AttachmentSerializer(many=True),
+        examples=[
+            OpenApiExample(
+                'Ejemplo Request Add Attachment',
+                value={"file": ["<file1>", "<file2>"]},
+                request_only=True
+            )
+        ]
+    ),
+    remove_attachment=extend_schema(
+        summary="Eliminar un archivo adjunto",
+        description="Elimina un attachment específico de un issue.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
+            OpenApiParameter('attachment_id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del attachment"),
+        ],
+        responses={204: None}
+    ),
+    bulk_create=extend_schema(
+        summary="Permite crear muchos issues a la vez",
+        description="Crea múltiples issues a partir de una lista de nombres de issue y les asigna valores por defecto.",
+        tags=["Issues"],
+        request=IssueBulkCreateSerializer,
+        responses={201: IssueSerializer(many=True)},
+        parameters=None
+    )
+)
 class IssueViewSet(viewsets.ModelViewSet):
+    http_method_names = ['get', 'post', 'put', 'delete']
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['status', 'priority', 'severity', 'issue_type', 'created_by', 'assigned_to']
-
-    ordering_fields = ['created_at', 'updated_at', 'priority', 'status', 'severity', 'issue_type', 'created_by',
-                       'assigned_to']
+    ordering_fields = [
+        'created_at', 'updated_at', 'priority', 'status', 'severity',
+        'issue_type', 'created_by', 'assigned_to'
+    ]
     ordering = ['-created_at']
 
-    @swagger_auto_schema(
-        manual_parameters=[
-            # Documentación de los filterset_fields
-            openapi.Parameter(
-                'ordering',
-                openapi.IN_QUERY,
-                description=(
-                        "Campo(s) por los que ordenar. Se admiten varios "
-                        "separados por coma. Para orden descendente, "
-                        "anteponer “-”.\n\n"
-                        "**Campos válidos:** created_at, updated_at, priority, status, "
-                        "severity, issue_type, created_by, assigned_to\n\n"
-                        "Ejemplo: `ordering=-priority,created_at` \n\n"
-                ),
-                type=openapi.TYPE_STRING
-            ),
-            openapi.Parameter(
-                'status',
-                openapi.IN_QUERY,
-                description="Filtrar por ID de estado",
-                type=openapi.TYPE_INTEGER
-            ),
-            openapi.Parameter(
-                'priority',
-                openapi.IN_QUERY,
-                description="Filtrar por ID de prioridad",
-                type=openapi.TYPE_INTEGER
-            ),
-            openapi.Parameter(
-                'severity',
-                openapi.IN_QUERY,
-                description ="Filtrar por ID de severidad",
-                type = openapi.TYPE_INTEGER
-            ),
-            openapi.Parameter(
-                'issue_type',
-                openapi.IN_QUERY,
-                description="Filtrar por ID de tipo de issue",
-                type=openapi.TYPE_INTEGER
-            ),
-            openapi.Parameter(
-                'created_by',
-                openapi.IN_QUERY,
-                description="Filtrar por ID del usuario creador",
-                type=openapi.TYPE_INTEGER
-            ),
-            openapi.Parameter(
-                'assigned_to',
-                openapi.IN_QUERY,
-                description="Filtrar por ID del usuario asignado",
-                type=openapi.TYPE_INTEGER
-            ),
-            openapi.Parameter(
-                'unassigned',
-                openapi.IN_QUERY,
-                description="Filtrar issues sin asignar",
-                type=openapi.TYPE_BOOLEAN
-            ),
-            ]
-            )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-    @swagger_auto_schema(
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'subject': openapi.Schema(type=openapi.TYPE_STRING, description='Asunto del issue'),
-                'description': openapi.Schema(type=openapi.TYPE_STRING, description='Descripción detallada'),
-                'due_date': openapi.Schema(type=openapi.TYPE_STRING, format='date',
-                                           description='Fecha límite (YYYY-MM-DD)'),
-                # Campos simplificados por nombre
-                'status_name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre del status'),
-                'priority_name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre de la prioridad'),
-                'severity_name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre de la severidad'),
-                'issue_type_name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre del tipo de issue'),
-                'assigned_to_username': openapi.Schema(type=openapi.TYPE_STRING,
-                                                       description='Nombre de usuario asignado'),
-                'watchers_usernames': openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(type=openapi.TYPE_STRING),
-                    description='Lista de nombres de usuario observadores'
-                ),
-            },
-            required=['subject', 'description']  # Solo estos campos son realmente obligatorios
-        )
-    )
+
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
     def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+        issue_data = request.data.copy()
+        if 'watchers_usernames' in issue_data and isinstance(issue_data['watchers_usernames'], str):
+            issue_data['watchers_usernames'] = [u.strip() for u in issue_data['watchers_usernames'].split(',') if
+                                                u.strip()]
+        serializer = self.get_serializer(data=issue_data)
+        serializer.is_valid(raise_exception=True)
+        issue = serializer.save()
+        for f in request.data.getlist('files', []):
+            Attachment.objects.create(issue=issue, file=f)
+        return Response(self.get_serializer(issue).data, status=status.HTTP_201_CREATED)
 
-        # Documentación para el método UPDATE (PUT)
-
-    @swagger_auto_schema(
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'subject': openapi.Schema(type=openapi.TYPE_STRING, description='Asunto del issue'),
-                'description': openapi.Schema(type=openapi.TYPE_STRING, description='Descripción detallada'),
-                'due_date': openapi.Schema(type=openapi.TYPE_STRING, format='date',
-                                           description='Fecha límite (YYYY-MM-DD)'),
-                # Campos simplificados por nombre
-                'status_name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre del status'),
-                'priority_name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre de la prioridad'),
-                'severity_name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre de la severidad'),
-                'issue_type_name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre del tipo de issue'),
-                'assigned_to_username': openapi.Schema(type=openapi.TYPE_STRING,
-                                                       description='Nombre de usuario asignado'),
-                'watchers_usernames': openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(type=openapi.TYPE_STRING),
-                    description='Lista de nombres de usuario observadores'
-                ),
-            },
-            required=['subject', 'description']  # En un PUT normalmente todos los campos son requeridos
-        )
-    )
     def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
+        issue_data = request.data.copy()
+        if 'watchers_usernames' in issue_data and isinstance(issue_data['watchers_usernames'], str):
+            issue_data['watchers_usernames'] = [u.strip() for u in issue_data['watchers_usernames'].split(',') if
+                                                u.strip()]
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=issue_data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        issue = serializer.save()
+        for f in request.data.getlist('files', []):
+            Attachment.objects.create(issue=issue, file=f)
+        return Response(self.get_serializer(issue).data)
 
-        # Documentación para el método PARTIAL_UPDATE (PATCH)
+    @action(detail=True, methods=['post'], url_path='attachments')
+    def add_attachment(self, request, pk=None):
+        issue = self.get_object()
+        serializer = AttachmentUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        attachments = [Attachment.objects.create(issue=issue, file=f) for f in serializer.validated_data['file']]
+        return Response(AttachmentSerializer(attachments, many=True).data, status=status.HTTP_201_CREATED)
 
-    @swagger_auto_schema(
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'subject': openapi.Schema(type=openapi.TYPE_STRING, description='Asunto del issue'),
-                'description': openapi.Schema(type=openapi.TYPE_STRING, description='Descripción detallada'),
-                'due_date': openapi.Schema(type=openapi.TYPE_STRING, format='date',
-                                           description='Fecha límite (YYYY-MM-DD)'),
-                # Campos simplificados por nombre
-                'status_name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre del status'),
-                'priority_name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre de la prioridad'),
-                'severity_name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre de la severidad'),
-                'issue_type_name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre del tipo de issue'),
-                'assigned_to_username': openapi.Schema(type=openapi.TYPE_STRING,
-                                                       description='Nombre de usuario asignado'),
-                'watchers_usernames': openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(type=openapi.TYPE_STRING),
-                    description='Lista de nombres de usuario observadores'
-                ),
-            },
-            # En PATCH ningún campo es requerido, ya que es para actualizaciones parciales
-        )
-    )
-    def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
+    @action(detail=True, methods=['delete'], url_path='attachments/(?P<attachment_id>[^/.]+)')
+    def remove_attachment(self, request, pk=None, attachment_id=None):
+        try:
+            attachment = Attachment.objects.get(id=attachment_id, issue_id=pk)
+            attachment.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Attachment.DoesNotExist:
+            return Response({"error": "Attachment not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=False, methods=['post'], url_path='bulk-create', parser_classes=[JSONParser])
+    def bulk_create(self, request):
+        # Desactivar temporalmente los filtros para esta acción específica
+        self.filter_backends = []
+        self.pagination_class = None
+
+        serializer = IssueBulkCreateSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+
+        created_qs = serializer.save()
+        output = IssueSerializer(created_qs, many=True, context={'request': request})
+        return Response(output.data, status=status.HTTP_201_CREATED)
 
     def get_queryset(self):
-        queryset = Issue.objects.all()
-
-
-        # Filtro para issues sin asignar
-        unassigned = self.request.query_params.get('unassigned')
-        if unassigned == 'true':
-            queryset = queryset.filter(assigned_to=None)
-
-
-
-        return queryset
+        qs = Issue.objects.all()
+        if self.request.query_params.get('unassigned') == 'true':
+            qs = qs.filter(assigned_to=None)
+        return qs

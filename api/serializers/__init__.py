@@ -9,6 +9,7 @@ from .PrioritiesSerializer import PrioritiesSerializer
 from .TypesSerializer import TypesSerializer
 from .SeveritiesSerializer import SeveritiesSerializer
 from .ProfileSerializer import ProfileSerializer
+from .issueBulk_serializer import IssueBulkItemSerializer, IssueBulkCreateSerializer
 
 __all__ = [
     'StatusSerializer',
@@ -20,4 +21,6 @@ __all__ = [
     'UserSerializer',
     'AttachmentSerializer',
     'CommentSerializer',
+    'IssueBulkItemSerializer',
+    'IssueBulkCreateSerializer',
 ]
