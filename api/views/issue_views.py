@@ -52,7 +52,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
         examples=[
             OpenApiExample(
                 'Respuesta Ejemplo Retrieve',
-                value={"id": 1, "title": "Bug login", "description": "Error 500 al hacer login", },
+                value={"id": 1, "title": "Bug login", "description": "Error 500 al hacer login",},
                 response_only=True
             )
         ]
@@ -76,7 +76,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
             ),
             OpenApiExample(
                 'Respuesta Ejemplo Create',
-                value={"id": 3, "title": "Bug registro", "status": 1, },
+                value={"id": 3, "title": "Bug registro", "status": 1,},
                 response_only=True
             )
         ]
@@ -134,14 +134,6 @@ class AttachmentUploadSerializer(serializers.Serializer):
         ],
         responses={204: None}
     ),
-    bulk_create=extend_schema(
-        summary="Permite crear muchos issues a la vez",
-        description="Crea múltiples issues a partir de una lista de nombres de issue y les asigna valores por defecto.",
-        tags=["Issues"],
-        request=IssueBulkCreateSerializer,
-        responses={201: IssueSerializer(many=True)},
-        parameters=None
-    )
 )
 class IssueViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'put', 'delete']
@@ -157,6 +149,12 @@ class IssueViewSet(viewsets.ModelViewSet):
     ]
     ordering = ['-created_at']
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action == 'bulk_create':
+            return qs.none()  # o cualquier lógica que impida aplicar filtros
+        return qs
+
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -166,8 +164,7 @@ class IssueViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         issue_data = request.data.copy()
         if 'watchers_usernames' in issue_data and isinstance(issue_data['watchers_usernames'], str):
-            issue_data['watchers_usernames'] = [u.strip() for u in issue_data['watchers_usernames'].split(',') if
-                                                u.strip()]
+            issue_data['watchers_usernames'] = [u.strip() for u in issue_data['watchers_usernames'].split(',') if u.strip()]
         serializer = self.get_serializer(data=issue_data)
         serializer.is_valid(raise_exception=True)
         issue = serializer.save()
@@ -178,8 +175,7 @@ class IssueViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         issue_data = request.data.copy()
         if 'watchers_usernames' in issue_data and isinstance(issue_data['watchers_usernames'], str):
-            issue_data['watchers_usernames'] = [u.strip() for u in issue_data['watchers_usernames'].split(',') if
-                                                u.strip()]
+            issue_data['watchers_usernames'] = [u.strip() for u in issue_data['watchers_usernames'].split(',') if u.strip()]
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=issue_data, partial=partial)
@@ -206,21 +202,32 @@ class IssueViewSet(viewsets.ModelViewSet):
         except Attachment.DoesNotExist:
             return Response({"error": "Attachment not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    @action(detail=False, methods=['post'], url_path='bulk-create', parser_classes=[JSONParser])
-    def bulk_create(self, request):
-        # Desactivar temporalmente los filtros para esta acción específica
-        self.filter_backends = []
-        self.pagination_class = None
 
+
+
+    @extend_schema(
+        summary="Permite crear muchos issues a la vez",
+        description="Crea múltiples issues sin aplicar filtros ni paginación.",
+        tags=["Issues"],
+        request=IssueBulkCreateSerializer,
+        responses={201: IssueSerializer(many=True)},
+        filters=False,
+    )
+    @action(
+        detail=False,
+        methods=['post'],
+        url_path='bulk-create',
+        parser_classes=[JSONParser],
+        filter_backends=[],      # Anula backends de filtro
+        pagination_class=None,
+    )
+    def bulk_create(self, request):
         serializer = IssueBulkCreateSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-
         created_qs = serializer.save()
-        output = IssueSerializer(created_qs, many=True, context={'request': request})
-        return Response(output.data, status=status.HTTP_201_CREATED)
+        return Response(IssueSerializer(created_qs, many=True).data, status=status.HTTP_201_CREATED)
 
-    def get_queryset(self):
-        qs = Issue.objects.all()
-        if self.request.query_params.get('unassigned') == 'true':
-            qs = qs.filter(assigned_to=None)
-        return qs
+    def filter_queryset(self, queryset):
+        if self.action == 'bulk_create':
+            return queryset
+        return super().filter_queryset(queryset)

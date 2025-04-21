@@ -28,7 +28,7 @@ class IssueBulkCreateSerializer(serializers.Serializer):
             to_create.append(
                 Issue(
                     subject     = it['subject'],
-                    description = None,
+                    description = "Bulk created issue",
                     status      = None,
                     priority    = None,
                     severity    = None,
