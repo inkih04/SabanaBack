@@ -49,9 +49,8 @@ def create_initial_statuses(apps, schema_editor):
         Priorities.objects.create(**priority)
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('issues', '0001_initial'),
+        ('issues', '0002_initial'),
     ]
 
     operations = [
