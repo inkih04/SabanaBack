@@ -14,3 +14,4 @@ drf-spectacular[sidecar]
 django-filter>=23.1
 views~=0.3
 requests~=2.25.1
+absl-py
