@@ -34,10 +34,10 @@ class IssueBulkCreateSerializer(serializers.Serializer):
                 Issue(
                     subject     = it['subject'],
                     description = "Bulk created issue",
-                    status      = None,
-                    priority    = None,
-                    severity    = None,
-                    issue_type  = None,
+                    status      = Status.objects.get(nombre='New'),
+                    priority    = Priorities.objects.get(nombre='Medium'),
+                    severity    = Severities.objects.get(nombre='Normal'),
+                    issue_type  = Types.objects.get(nombre='Bug'),
                     created_by  = user,
                 )
             )
