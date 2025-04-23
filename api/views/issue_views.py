@@ -14,6 +14,7 @@ from drf_spectacular.utils import (
 )
 
 from issues.models import Issue, Attachment
+from ..filters import IssueFilter
 from ..serializers import IssueSerializer, AttachmentSerializer, IssueBulkCreateSerializer, IssueCreateSerializer
 from ..serializers.issueBulk_serializer import IssueBulkResponseSerializer
 
@@ -33,6 +34,14 @@ class AttachmentUploadSerializer(serializers.Serializer):
         description="Devuelve una lista de issues con filtros opcionales ('status', 'priority', etc.) y ordenación.",
         tags=["Issues"],
         responses=IssueSerializer(many=True),
+        parameters=[
+                OpenApiParameter('status',   OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by status id"),
+                OpenApiParameter('priority', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by priority id"),
+                OpenApiParameter('severity', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by severity id"),
+                OpenApiParameter('status_name',   OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by status name"),
+                OpenApiParameter('priority_name', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by priority name"),
+                OpenApiParameter('severity_name', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by severity name"),
+                ],
         examples=[
             OpenApiExample(
                 'Respuesta Ejemplo Lista',
@@ -145,7 +154,7 @@ class IssueViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['status', 'priority', 'severity', 'issue_type', 'created_by', 'assigned_to']
+    filterset_class = IssueFilter
     ordering_fields = [
         'created_at', 'updated_at', 'priority', 'status', 'severity',
         'issue_type', 'created_by', 'assigned_to'

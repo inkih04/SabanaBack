@@ -262,7 +262,11 @@ def issue_bulk_create(request):
                 Issue(
                     subject=line.strip(),
                     description="Bulk created issue",
-                    created_by=request.user  # Asigna el usuario creador
+                    created_by=request.user,
+                    status = Status.objects.get(nombre='New'),
+                    priority = Priorities.objects.get(nombre='Medium'),
+                    severity = Severities.objects.get(nombre='Normal'),
+                    issue_type = Types.objects.get(nombre='Bug'),
                 )
                 for line in issues_text.split("\n") if line.strip()
             ]

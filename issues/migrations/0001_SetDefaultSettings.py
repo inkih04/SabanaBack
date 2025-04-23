@@ -32,7 +32,7 @@ def create_initial_statuses(apps, schema_editor):
     severities = [
         {'nombre': 'Critical', 'color': '#FF0000'},
         {'nombre': 'Important', 'color': '#FFA500'},
-        {'nombre': 'Normal', 'color': '#FFFF00'},
+        {'nombre': 'Normal', 'color': '#DDDD22'},
         {'nombre': 'Minor', 'color': '#00FF00'},
     ]
     for severity in severities:
@@ -42,7 +42,7 @@ def create_initial_statuses(apps, schema_editor):
     priorities = [
         {'nombre': 'Urgent', 'color': '#FF0000'},
         {'nombre': 'High', 'color': '#FFA500'},
-        {'nombre': 'Medium', 'color': '#FFFF00'},
+        {'nombre': 'Medium', 'color': '#BB5816'},
         {'nombre': 'Low', 'color': '#00FF00'},
     ]
     for priority in priorities:
