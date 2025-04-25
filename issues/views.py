@@ -33,6 +33,33 @@ def issue_list(request, attachment_error=None):
 
     issues = Issue.objects.all()
 
+    # Determinar el campo de ordenación y dirección
+    sort_param = request.GET.get('sort', '-created_at')  # Default: created_at descendente
+    sort_direction = ''
+
+    # Si hay un prefijo de dirección, extraerlo
+    if sort_param.startswith('-'):
+        sort_direction = '-'
+        sort_field = sort_param[1:]  # Quitar el prefijo '-'
+    else:
+        sort_field = sort_param
+
+    # Mapear campos de ordenación a sus correspondientes en la base de datos
+    sort_mapping = {
+        'issue_type': 'issue_type__nombre',
+        'severity': 'severity__nombre',
+        'priority': 'priority__nombre',
+        'status': 'status__nombre',
+        'assigned_to': 'assigned_to__username',
+    }
+
+    # Obtener el campo real de ordenación
+    db_sort_field = sort_mapping.get(sort_field, sort_field)
+
+    # Construir el campo de ordenación con su dirección
+    order_by_field = f"{sort_direction}{db_sort_field}"
+
+    # Aplica los filtros
     search_query = request.GET.get('search', '').strip()
     if search_query:
         issues = issues.filter(
@@ -52,7 +79,14 @@ def issue_list(request, attachment_error=None):
     if request.GET.get('created_by'):
         issues = issues.filter(created_by_id=request.GET.get('created_by'))
 
-    issues = issues.order_by('-created_at')
+    # Aplicar ordenación
+    issues = issues.order_by(order_by_field)
+
+    # Guardar la información de ordenación actual
+    current_sort = {
+        'field': sort_field,
+        'direction': sort_direction
+    }
 
     return render(request, './issues/issues_list.html', {
         'issues': issues,
@@ -62,7 +96,8 @@ def issue_list(request, attachment_error=None):
         'types': types,
         'severities': severities,
         'priorities': priorities,
-        'attachment_error': attachment_error,  # 👉 Pasamos el error aquí
+        'attachment_error': attachment_error,
+        'current_sort': current_sort,  # Enviar la información de ordenación
     })
 
 
