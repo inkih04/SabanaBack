@@ -107,12 +107,10 @@
             <a href="{% url 'profile' %}?view=issues" class="pageChanger">Open Assigned Issues</a>
             <a href="{% url 'profile' %}?view=watched" class="pageChanger">Watched Issues</a>
             <a href="{% url 'profile' %}?view=comments" class="pageChanger">Comments</a>
-            <div  class="pageChangerSchema">
-                <a href="{% url 'swagger-ui' %}" class="unstyled-link">
-                    <p>API Token:</p>
-                </a>
-                <span>{{profile_user.profile.api_token}}</span>
-            </div>
+            <a href="#modal-api-token" class="pageChangerSchema">
+                <p>API Token:</p>
+                <span>View token</span>
+            </a>
         {% else %}
             <a href="{% url 'user_profile' username=profile_user.username %}?view=issues" class="pageChanger">Open Assigned Issues</a>
             <a href="{% url 'user_profile' username=profile_user.username %}?view=watched" class="pageChanger">Watched Issues</a>
@@ -148,6 +146,26 @@
                 <textarea id="biography" name="biography" rows="6">{% if profile_user.profile.biography %}{{ profile_user.profile.biography }}{% else %}Enter a bio for your profile{% endif %}</textarea>
                 <button type="submit">Save</button>
             </form>
+        </div>
+    </div>
+
+    <!-- New API Token Modal -->
+    <div id="modal-api-token" class="profile__modal">
+        <div class="profile__modal-content">
+            <div class="profile__modal-header">
+                <h1>Your API Token</h1>
+                <a href="#" class="profile__modal-close">&times;</a>
+            </div>
+            <div class="token-display">
+                <label>API Token:</label>
+                <div class="token-value">
+                    <span>{{profile_user.profile.api_token}}</span>
+                </div>
+                <p class="token-info">Use this token for API authentication in the Swagger UI.</p>
+                <div class="token-actions">
+                    <a href="{% url 'swagger-ui' %}" class="token-action-button">Open Swagger UI</a>
+                </div>
+            </div>
         </div>
     </div>
     {% endif %}
