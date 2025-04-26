@@ -451,4 +451,21 @@
     </div>
 </div>
 
+
+<!-- Modal para mostrar errores -->
+<div id="modal-error" class="modal__settings__edit {% if error_message %}modal-show{% endif %}">
+    <div class="modal__settings__content">
+        <div class="modal__settings__header">
+            <h2>Error</h2>
+            <a href="{% url 'settings_list' %}" class="modal__settings__close">&times;</a>
+        </div>
+        <div class="modal__settings__body">
+            <p>{{ error_message }}</p>
+            <div class="modal__settings__footer">
+                <a href="{% url 'settings_list' %}" class="btn btn-primary">Aceptar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

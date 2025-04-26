@@ -351,38 +351,112 @@ def settings_edit(request, model_name, pk=None):
 
     return render(request, 'settings/settings_form.html', {'form': form})
 
+
 @login_required
 def settings_delete(request, model_name, pk):
     """Elimina un objeto de configuración."""
-    model_data = MODEL_FORM_MAP.get(model_name)  # Obtiene el modelo y formulario correspondiente
+    model_data = MODEL_FORM_MAP.get(model_name)
     if not model_data:
-        return redirect('settings_list')  # Redirige si el modelo no es válido
+        return redirect('settings_list')
 
-    model, _ = model_data  # Solo necesitamos el modelo, no el formulario
-    instance = get_object_or_404(model, pk=pk)  # Obtiene la instancia del objeto a eliminar
+    model, _ = model_data
+    instance = get_object_or_404(model, pk=pk)
+
+    # Check if the instance is one of the non-deletable defaults
+    non_deletable = {
+        'status': 'New',
+        'priorities': 'Medium',
+        'types': 'Bug',
+        'severities': 'Normal'
+    }
+
+    # If this is a non-deletable item, pass error message to settings_list view
+    if model_name in non_deletable and instance.nombre == non_deletable[model_name]:
+        error_message = f"No se puede eliminar {instance.nombre}, es un valor predeterminado del sistema."
+
+        # Get all data needed for settings_list
+        data = {
+            'status': Status.objects.all(),
+            'priorities': Priorities.objects.all(),
+            'types': Types.objects.all(),
+            'severities': Severities.objects.all(),
+        }
+
+        return render(request, 'settings/settings_list.html', {'data': data, 'error_message': error_message})
 
     if request.method == 'POST':
-        instance.delete()  # Elimina el objeto de la base de datos
-        return redirect('settings_list')  # Redirige a la lista de configuraciones
+        # Find the default item to reassign issues to
+        default_item = model.objects.filter(nombre=non_deletable.get(model_name)).first()
+
+        # Reassign all issues that use this item to the default
+        if model_name == 'status':
+            issues = Issue.objects.filter(status=instance)
+            for issue in issues:
+                issue.status = default_item
+                issue.save()
+        elif model_name == 'priorities':
+            issues = Issue.objects.filter(priority=instance)
+            for issue in issues:
+                issue.priority = default_item
+                issue.save()
+        elif model_name == 'types':
+            issues = Issue.objects.filter(issue_type=instance)
+            for issue in issues:
+                issue.issue_type = default_item
+                issue.save()
+        elif model_name == 'severities':
+            issues = Issue.objects.filter(severity=instance)
+            for issue in issues:
+                issue.severity = default_item
+                issue.save()
+
+        instance.delete()
+        return redirect('settings_list')
 
     return render(request, 'settings/settings_confirm_delete.html', {'instance': instance})
 
-
 @login_required
 def profile(request, username=None):
-    # Si no se proporciona un username, mostrar el perfil del usuario actual
+    # If no username is provided, show the current user's profile
     if username is None:
         user = request.user
     else:
-        # Obtener el usuario por nombre de usuario o devolver 404 si no existe
+        # Get the user by username or return 404 if it doesn't exist
         User = get_user_model()
         user = get_object_or_404(User, username=username)
 
-    # Ahora usamos el usuario determinado (user) en lugar de request.user
-    assigned_issues = Issue.objects.filter(assigned_to=user).order_by('-created_at')
+    # Determine the sort field and direction
+    sort_param = request.GET.get('sort', '-created_at')  # Default: created_at descending
+    sort_direction = ''
+
+    # Extract direction prefix if present
+    if sort_param.startswith('-'):
+        sort_direction = '-'
+        sort_field = sort_param[1:]  # Remove the '-' prefix
+    else:
+        sort_field = sort_param
+
+    # Map sorting fields to their database counterparts
+    sort_mapping = {
+        'issue_type': 'issue_type__nombre',
+        'severity': 'severity__nombre',
+        'priority': 'priority__nombre',
+        'status': 'status__nombre',
+        'assigned_to': 'assigned_to__username',
+    }
+
+    # Get the actual sort field
+    db_sort_field = sort_mapping.get(sort_field, sort_field)
+
+    # Build the order by field with direction
+    order_by_field = f"{sort_direction}{db_sort_field}"
+
+    # Get assigned issues and apply sorting
+    assigned_issues = Issue.objects.filter(assigned_to=user).order_by(order_by_field)
     total_issues = assigned_issues.count()
 
-    watched_issues_qs = Issue.objects.filter(watchers=user).order_by('-created_at')
+    # Get watched issues and apply sorting
+    watched_issues_qs = Issue.objects.filter(watchers=user).order_by(order_by_field)
     watched_count = watched_issues_qs.count()
 
     user_comments = Comment.objects.filter(user=user).order_by('-published_at')
@@ -398,11 +472,17 @@ def profile(request, username=None):
 
     all_statuses = Status.objects.all().order_by('nombre')
 
-    # Variable para saber si es el perfil del usuario logueado o de otro usuario
+    # Variable to know if it's the logged in user's profile or another user's
     is_own_profile = user == request.user
 
+    # Save current sort information
+    current_sort = {
+        'field': sort_field,
+        'direction': sort_direction
+    }
+
     context = {
-        'profile_user': user,  # Renombramos para evitar conflictos
+        'profile_user': user,  # Renamed to avoid conflicts
         'issues': issues_to_display,
         'user_comments': user_comments,
         'total_issues': total_issues,
@@ -412,7 +492,8 @@ def profile(request, username=None):
         'view_mode': view_mode,
         'attachment_error': attachment_error,
         'statuses': all_statuses,
-        'is_own_profile': is_own_profile,  # Indica si es el perfil propio o no
+        'is_own_profile': is_own_profile,  # Indicates if it's the user's own profile
+        'current_sort': current_sort,  # Send sorting information to the template
     }
     return render(request, 'BaseProfile.html', context)
 
