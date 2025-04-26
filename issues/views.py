@@ -372,7 +372,7 @@ def settings_delete(request, model_name, pk):
 
     # If this is a non-deletable item, pass error message to settings_list view
     if model_name in non_deletable and instance.nombre == non_deletable[model_name]:
-        error_message = f"No se puede eliminar {instance.nombre}, es un valor predeterminado del sistema."
+        error_message = f"Can not delete {instance.nombre}, is a system default."
 
         # Get all data needed for settings_list
         data = {
