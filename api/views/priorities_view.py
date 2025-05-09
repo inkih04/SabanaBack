@@ -2,7 +2,7 @@ from django.db import IntegrityError
 from rest_framework import viewsets, filters, status
 from drf_spectacular.utils import (
     extend_schema, extend_schema_view,
-    OpenApiParameter, OpenApiTypes, OpenApiExample
+    OpenApiParameter, OpenApiTypes, OpenApiExample, OpenApiResponse
 )
 
 from rest_framework.decorators import action
@@ -58,13 +58,18 @@ from ..serializers import PrioritiesSerializer
         description="Crea una nueva prioridad con los parametros recibidos.",
         tags=['Priorities'],
         request=PrioritiesSerializer,
-        responses={
+        responses = {
             201: PrioritiesSerializer,
-            400: OpenApiExample(
-                'BadRequest',
-                summary="Parámetros inválidos",
-                value={"nombre": ["This field is required."]},
-                response_only=True,
+            400: OpenApiResponse(
+                description="Parámetros inválidos",
+                examples=[
+                    OpenApiExample(
+                        'BadRequest',
+                        summary="Parámetros inválidos",
+                        value={"nombre": ["This field is required."]},
+                        response_only=True,
+                    ),
+                ],
             ),
         },
         examples=[
@@ -95,13 +100,18 @@ from ..serializers import PrioritiesSerializer
                 description='ID de la prioridad a obtener'
             ),
         ],
-        responses={
+        responses = {
             200: PrioritiesSerializer,
-            404: OpenApiExample(
-                'NotFound',
-                summary="Prioridad no encontrado",
-                value={"detail": "No Priorities matches the given query."},
-                response_only=True,
+            404: OpenApiResponse(
+                description="Prioridad no encontrado",
+                examples=[
+                    OpenApiExample(
+                        'NotFound',
+                        summary="Prioridad no encontrado",
+                        value={"detail": "No Priorities matches the given query."},
+                        response_only=True,
+                    ),
+                ],
             ),
         },
         examples=[
@@ -118,19 +128,29 @@ from ..serializers import PrioritiesSerializer
         description="Actualiza campos de una prioridad existente.",
         tags=['Priorities'],
         request=PrioritiesSerializer,
-        responses={
+        responses = {
             200: PrioritiesSerializer,
-            400: OpenApiExample(
-                'BadRequest',
-                summary="Parámetros inválidos",
-                value={ "nombre": ["This field is required." ]},
-                response_only=True,
+            400: OpenApiResponse(
+                description="Parámetros inválidos",
+                examples=[
+                    OpenApiExample(
+                        'BadRequest',
+                        summary="Parámetros inválidos",
+                        value={"nombre": ["This field is required."]},
+                        response_only=True,
+                    ),
+                ],
             ),
-            404: OpenApiExample(
-                'NotFound',
-                summary="No encontrado",
-                value={"detail": "No Priorities matches the given query."},
-                response_only=True,
+            404: OpenApiResponse(
+                description="No encontrado",
+                examples=[
+                    OpenApiExample(
+                        'NotFound',
+                        summary="No encontrado",
+                        value={"detail": "No Priorities matches the given query."},
+                        response_only=True,
+                    ),
+                ],
             ),
         },
         examples=[
@@ -152,13 +172,18 @@ from ..serializers import PrioritiesSerializer
         summary="Eliminar una prioridad",
         description="Elimina una prioridad dado su id.",
         tags=['Priorities'],
-        responses={
-            204: None,
-            404: OpenApiExample(
-                'NotFound',
-                summary="No encontrado",
-                value={"detail": "No Priorities matches the given query."},
-                response_only=True,
+        responses = {
+            204: OpenApiResponse(description="Eliminado correctamente"),
+            404: OpenApiResponse(
+                description="No encontrado",
+                examples=[
+                    OpenApiExample(
+                        'NotFound',
+                        summary="No encontrado",
+                        value={"detail": "No Priorities matches the given query."},
+                        response_only=True,
+                    ),
+                ],
             ),
         },
         examples=[

@@ -2,7 +2,7 @@ from django.db import IntegrityError
 from rest_framework import viewsets, filters, status
 from drf_spectacular.utils import (
     extend_schema, extend_schema_view,
-    OpenApiParameter, OpenApiTypes, OpenApiExample
+    OpenApiParameter, OpenApiTypes, OpenApiExample, OpenApiResponse
 )
 
 from rest_framework.decorators import action
@@ -57,13 +57,18 @@ from ..serializers import TypesSerializer
         description="Crea un nuevo tipo con los parametros recibidos.",
         tags=['Types'],
         request=TypesSerializer,
-        responses={
+        responses = {
             201: TypesSerializer,
-            400: OpenApiExample(
-                'BadRequest',
-                summary="Parámetros inválidos",
-                value={"nombre": ["This field is required."]},
-                response_only=True,
+            400: OpenApiResponse(
+                description="Parámetros inválidos",
+                examples=[
+                    OpenApiExample(
+                        'BadRequest',
+                        summary="Parámetros inválidos",
+                        value={"nombre": ["This field is required."]},
+                        response_only=True,
+                    ),
+                ],
             ),
         },
         examples=[
@@ -94,13 +99,18 @@ from ..serializers import TypesSerializer
                 description='ID del tipo a obtener'
             ),
         ],
-        responses={
+        responses = {
             200: TypesSerializer,
-            404: OpenApiExample(
-                'NotFound',
-                summary="Tipo no encontrado",
-                value={"detail": "No Types matches the given query."},
-                response_only=True,
+            404: OpenApiResponse(
+                description="Tipo no encontrado",
+                examples=[
+                    OpenApiExample(
+                        'NotFound',
+                        summary="Tipo no encontrado",
+                        value={"detail": "No Types matches the given query."},
+                        response_only=True,
+                    ),
+                ],
             ),
         },
         examples=[
@@ -117,19 +127,29 @@ from ..serializers import TypesSerializer
         description="Actualiza campos de un tipo existente.",
         tags=['Types'],
         request=TypesSerializer,
-        responses={
+        responses = {
             200: TypesSerializer,
-            400: OpenApiExample(
-                'BadRequest',
-                summary="Parámetros inválidos",
-                value={ "nombre": ["This field is required." ]},
-                response_only=True,
+            400: OpenApiResponse(
+                description="Parámetros inválidos",
+                examples=[
+                    OpenApiExample(
+                        'BadRequest',
+                        summary="Parámetros inválidos",
+                        value={"nombre": ["This field is required."]},
+                        response_only=True,
+                    ),
+                ],
             ),
-            404: OpenApiExample(
-                'NotFound',
-                summary="No encontrado",
-                value={"detail": "No Types matches the given query."},
-                response_only=True,
+            404: OpenApiResponse(
+                description="No encontrado",
+                examples=[
+                    OpenApiExample(
+                        'NotFound',
+                        summary="No encontrado",
+                        value={"detail": "No Types matches the given query."},
+                        response_only=True,
+                    ),
+                ],
             ),
         },
         examples=[
@@ -152,12 +172,18 @@ from ..serializers import TypesSerializer
         description="Elimina un tipo dado su id.",
         tags=['Types'],
         responses={
-            204: None,
-            404: OpenApiExample(
-                'NotFound',
-                summary="No encontrado",
-                value={"detail": "No Types matches the given query."},
-                response_only=True,
+            204: OpenApiResponse(description="Eliminado correctamente"),
+            404: OpenApiResponse(
+                description="No encontrado",
+                examples=[
+                    OpenApiExample(
+                        'NotFound',
+                        summary="No encontrado",
+                        value={"detail": "No Types matches the given query."},
+                        response_only=True,
+                        status_codes=['404'],
+                    ),
+                ],
             ),
         },
         examples=[
