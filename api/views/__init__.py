@@ -5,6 +5,7 @@ from .severities_view import SeverityViewSet
 from .comments_views import CommentViewSet
 from .types_view import TypesViewSet
 from .priorities_view import PrioritiesViewSet
+from .user_views import UserViewSet
 
 __all__ = [
     'IssueViewSet',
@@ -13,5 +14,6 @@ __all__ = [
     'SeverityViewSet',
     'CommentViewSet',
     'TypesViewSet',
-    'PrioritiesViewSet'
+    'PrioritiesViewSet',
+    'UserViewSet'
 ]
