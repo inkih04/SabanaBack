@@ -3,11 +3,13 @@ from .status_views import StatusViewSet
 from .profile_views import ProfileViewSet
 from .severities_view import SeverityViewSet
 from .comments_views import CommentViewSet
+from .types_view import TypesViewSet
 
 __all__ = [
     'IssueViewSet',
     'StatusViewSet',
     'ProfileViewSet',
     'SeverityViewSet',
-    'CommentViewSet'
+    'CommentViewSet',
+    'TypesViewSet'
 ]
