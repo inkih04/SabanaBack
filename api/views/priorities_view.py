@@ -9,56 +9,57 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status as drf_status
 from django.shortcuts import get_object_or_404
-from issues.models import Types
-from ..serializers import TypesSerializer
+from issues.models import Priorities
+from ..serializers import PrioritiesSerializer
 
 
 
 @extend_schema_view(
     list=extend_schema(
-        summary="Listar tipos",
-        description="Devuelve una lista de tipos i filtra por nombres similares al parametro name.",
-        tags=['Types'],
+        summary="Listar prioridades",
+        description="Devuelve una lista de prioridades i filtra por nombres similares al parametro name.",
+        tags=['Priorities'],
         parameters=[
             OpenApiParameter(
                 name='name',
                 type=OpenApiTypes.STR,
                 location=OpenApiParameter.QUERY,
-                description="Filtro para que solo aparezcan los tipos que contengan 'name' en su nombre, és insensible a mayúsculas/minúsculas.",
+                description="Filtro para que solo aparezcan las prioridades que contengan 'name' en su nombre, és insensible a mayúsculas/minúsculas.",
                 required=False
             ),
         ],
-        responses=TypesSerializer(many=True),
+        responses=PrioritiesSerializer(many=True),
         examples=[
             OpenApiExample(
                 'TypeListExample',
-                summary="Listado de tipos",
-                description="Respuesta con todos los tipos",
+                summary="Listado de prioridades",
+                description="Respuesta con todas las prioridades",
                 value=[
-                    {"id": 3,"nombre": "Improvement","color": "#3357FF"},
-                    {"id": 5,"nombre": "Question","color": "#1eff00"},
-                    {"id": 7,"nombre": "Bug","color": "#FF0000"},
+                    {"id": 1,"nombre": "Urgent", "color": "#FF0000"},
+                    {"id": 2,"nombre": "High", "color": "#FFA500" },
+                    {"id": 3,"nombre": "Medium","color": "#bb5816"},
+                    {"id": 4,"nombre": "Low", "color": "#00FF00"}
                 ],
                 response_only=True,
             ),
             OpenApiExample(
                 'TypeListFilterResponse',
                 summary="Respuesta al filtrar por nombre",
-                description="Ejemplo de respuesta al filtrar por nombre 'Bug'.",
+                description="Ejemplo de respuesta al filtrar por nombre 'Low'.",
                 value=[
-                    {"id": 7, "nombre": "Bug", "color": "#FF0000"}
+                    {"id": 4,"nombre": "Low", "color": "#00FF00"}
                 ],
                 response_only=True
             ),
         ],
     ),
     create=extend_schema(
-        summary="Crea un nuevo tipo",
-        description="Crea un nuevo tipo con los parametros recibidos.",
-        tags=['Types'],
-        request=TypesSerializer,
+        summary="Crea una nueva prioridad",
+        description="Crea una nueva prioridad con los parametros recibidos.",
+        tags=['Priorities'],
+        request=PrioritiesSerializer,
         responses={
-            201: TypesSerializer,
+            201: PrioritiesSerializer,
             400: OpenApiExample(
                 'BadRequest',
                 summary="Parámetros inválidos",
@@ -71,54 +72,54 @@ from ..serializers import TypesSerializer
                 'CreateTypeRequest',
                 summary="Body para crear",
                 request_only=True,
-                value={"nombre": "Bug", "color": "#FF0000"}
+                value={"nombre": "Low", "color": "#00FF00"}
             ),
             OpenApiExample(
                 'CreateTypeResponse',
                 summary="Respuesta al crear",
                 response_only=True,
-                value={"id": 7, "nombre": "Bug", "color": "#FF0000"}
+                value={"id": 4,"nombre": "Low", "color": "#00FF00"}
             ),
         ],
     ),
     retrieve=extend_schema(
-        summary="Obtener un tipo dado su id",
-        description="Devuelve un tipo dado su id.",
-        tags=['Types'],
+        summary="Obtener una prioridad dado su id",
+        description="Devuelve una prioridad dado su id.",
+        tags=['Priorities'],
         parameters=[
             OpenApiParameter(
                 name='id',
                 type=OpenApiTypes.INT,
                 location=OpenApiParameter.PATH,
                 required=True,
-                description='ID del tipo a obtener'
+                description='ID de la prioridad a obtener'
             ),
         ],
         responses={
-            200: TypesSerializer,
+            200: PrioritiesSerializer,
             404: OpenApiExample(
                 'NotFound',
-                summary="Tipo no encontrado",
-                value={"detail": "No Types matches the given query."},
+                summary="Prioridad no encontrado",
+                value={"detail": "No Priorities matches the given query."},
                 response_only=True,
             ),
         },
         examples=[
             OpenApiExample(
                 'RetrieveTypeExample',
-                summary="Obtener un tipo",
+                summary="Obtener una prioridad",
                 response_only=True,
-                value={"id": 7, "nombre": "Bug", "color": "#FF0000"}
+                value={"id": 4,"nombre": "Low", "color": "#00FF00"}
             ),
         ],
     ),
     update=extend_schema(
-        summary="Actualizar un tipo",
-        description="Actualiza campos de un tipo existente.",
-        tags=['Types'],
-        request=TypesSerializer,
+        summary="Actualizar una prioridad",
+        description="Actualiza campos de una prioridad existente.",
+        tags=['Priorities'],
+        request=PrioritiesSerializer,
         responses={
-            200: TypesSerializer,
+            200: PrioritiesSerializer,
             400: OpenApiExample(
                 'BadRequest',
                 summary="Parámetros inválidos",
@@ -128,7 +129,7 @@ from ..serializers import TypesSerializer
             404: OpenApiExample(
                 'NotFound',
                 summary="No encontrado",
-                value={"detail": "No Types matches the given query."},
+                value={"detail": "No Priorities matches the given query."},
                 response_only=True,
             ),
         },
@@ -137,33 +138,33 @@ from ..serializers import TypesSerializer
                 'UpdateTypeRequest',
                 summary="Body para actualizar",
                 request_only=True,
-                value={"nombre": "Bug", "color": "#FF0000"}
+                value={"nombre": "Low", "color": "#00FF00"}
             ),
             OpenApiExample(
                 'UpdateTypeResponse',
                 summary="Respuesta al actualizar",
                 response_only=True,
-                value={"id": 7, "nombre": "Bug", "color": "#FF0000"}
+                value={"id": 4,"nombre": "Low", "color": "#00FF00"}
             ),
         ],
     ),
     destroy=extend_schema(
-        summary="Eliminar un tipo",
-        description="Elimina un tipo dado su id.",
-        tags=['Types'],
+        summary="Eliminar una prioridad",
+        description="Elimina una prioridad dado su id.",
+        tags=['Priorities'],
         responses={
             204: None,
             404: OpenApiExample(
                 'NotFound',
                 summary="No encontrado",
-                value={"detail": "No Types matches the given query."},
+                value={"detail": "No Priorities matches the given query."},
                 response_only=True,
             ),
         },
         examples=[
             OpenApiExample(
                 'DeleteTypeExample',
-                summary="Eliminar un tipo",
+                summary="Eliminar una prioridad",
                 description="Respuesta vacía con código 204",
                 response_only=True,
                 value=None
@@ -171,10 +172,10 @@ from ..serializers import TypesSerializer
         ],
     ),
 )
-class TypesViewSet(viewsets.ModelViewSet):
+class PrioritiesViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'put', 'delete']
-    queryset = Types.objects.all()
-    serializer_class = TypesSerializer
+    queryset = Priorities.objects.all()
+    serializer_class = PrioritiesSerializer
 
     def get_queryset(self):
         queryset = super().get_queryset()
