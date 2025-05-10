@@ -25,6 +25,13 @@ from drf_spectacular.utils import (
                 description="Filtro para buscar usuarios a traves de su nombre de usuario.",
                 required=False
             ),
+            OpenApiParameter(
+                name='bio',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="Filtro para buscar usuarios por su biografía.",
+                required=False
+            ),
         ],
         responses=ExtendedUserSerializer(many=True),
         examples=[
@@ -154,6 +161,9 @@ class UserViewSet(
     def get_queryset(self):
         queryset = super().get_queryset()
         name = self.request.query_params.get('username')
+        bio = self.request.query_params.get('bio')
         if name:
             queryset = queryset.filter(username__icontains=name)
+        if bio:
+            queryset = queryset.filter(profile__biography__icontains=bio)
         return queryset
