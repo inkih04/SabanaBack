@@ -1,5 +1,5 @@
 
-from .UserSerializer import UserSerializer
+from .UserSerializer import UserSerializer, ExtendedUserSerializer
 from .AttachmentSerializer import AttachmentSerializer
 from .CommentSerializer import CommentSerializer
 from .issue_serializer import IssueSerializer
@@ -20,6 +20,7 @@ __all__ = [
     'SeveritiesSerializer',
     'IssueSerializer',
     'UserSerializer',
+    'ExtendedUserSerializer',
     'AttachmentSerializer',
     'CommentSerializer',
     'IssueBulkItemSerializer',
