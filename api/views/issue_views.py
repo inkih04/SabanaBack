@@ -35,13 +35,16 @@ class AttachmentUploadSerializer(serializers.Serializer):
         tags=["Issues"],
         responses=IssueSerializer(many=True),
         parameters=[
-                OpenApiParameter('status',   OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by status id"),
-                OpenApiParameter('priority', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by priority id"),
-                OpenApiParameter('severity', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by severity id"),
-                OpenApiParameter('status_name',   OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by status name"),
-                OpenApiParameter('priority_name', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by priority name"),
-                OpenApiParameter('severity_name', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by severity name"),
-                ],
+            OpenApiParameter('status', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by status id"),
+            OpenApiParameter('priority', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by priority id"),
+            OpenApiParameter('severity', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by severity id"),
+            OpenApiParameter('status_name', OpenApiTypes.STR, OpenApiParameter.QUERY,
+                             description="Filter by status name"),
+            OpenApiParameter('priority_name', OpenApiTypes.STR, OpenApiParameter.QUERY,
+                             description="Filter by priority name"),
+            OpenApiParameter('severity_name', OpenApiTypes.STR, OpenApiParameter.QUERY,
+                             description="Filter by severity name"),
+        ],
         examples=[
             OpenApiExample(
                 'Respuesta Ejemplo Lista',
@@ -64,7 +67,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
         examples=[
             OpenApiExample(
                 'Respuesta Ejemplo Retrieve',
-                value={"id": 1, "title": "Bug login", "description": "Error 500 al hacer login",},
+                value={"id": 1, "title": "Bug login", "description": "Error 500 al hacer login", },
                 response_only=True
             )
         ]
@@ -88,7 +91,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
             ),
             OpenApiExample(
                 'Respuesta Ejemplo Create',
-                value={"id": 3, "title": "Bug registro", "status": 1,},
+                value={"id": 3, "title": "Bug registro", "status": 1, },
                 response_only=True
             )
         ]
@@ -150,7 +153,6 @@ class AttachmentUploadSerializer(serializers.Serializer):
 class IssueViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'put', 'delete']
     queryset = Issue.objects.all()
-    serializer_class = IssueSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -161,10 +163,19 @@ class IssueViewSet(viewsets.ModelViewSet):
     ]
     ordering = ['-created_at']
 
+    serializer_class = IssueSerializer
+
+    def get_serializer_class(self):
+        if self.action in ('create', 'update', 'partial_update'):
+            return IssueCreateSerializer
+        elif self.action == 'bulk_create':
+            return IssueBulkCreateSerializer
+        return IssueSerializer
+
     def get_queryset(self):
         qs = super().get_queryset()
         if self.action == 'bulk_create':
-            return qs.none()  # o cualquier lógica que impida aplicar filtros
+            return qs.none()
         return qs
 
     def list(self, request, *args, **kwargs):
@@ -174,143 +185,104 @@ class IssueViewSet(viewsets.ModelViewSet):
         return super().retrieve(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
-        # --- 1) Copiamos y hacemos mutables los datos si vienen como QueryDict
-        from django.http import QueryDict
+
         if isinstance(request.data, QueryDict):
             qd = request.data.copy()
             qd._mutable = True
-            print("DEBUG CREATE: data era QueryDict, copy mutable")
         else:
             qd = request.data.copy()
-            print("DEBUG CREATE: data NO era QueryDict, copy normal")
-        print(f"DEBUG CREATE: QueryDict initial lists -> {qd.lists()}")
 
-        # --- 2) Procesamos watchers_usernames usando getlist para lista plana
         if hasattr(request.data, 'getlist'):
             raw = request.data.getlist('watchers_usernames')
-            print(f"DEBUG CREATE: raw watchers_usernames -> {raw}")
             if raw:
                 qd.setlist('watchers_usernames', [u.strip() for u in raw if isinstance(u, str) and u.strip()])
-                print(f"DEBUG CREATE: setlist watchers_usernames -> {qd.getlist('watchers_usernames')}")
             else:
                 qd.pop('watchers_usernames', None)
-                print("DEBUG CREATE: eliminado watchers_usernames vacío")
 
-        # --- 3) Eliminamos 'files' si no hay archivos adjuntos reales
         if 'files' in qd and not request.FILES:
             qd.pop('files')
-            print("DEBUG CREATE: eliminado 'files' porque no hay archivos en request.FILES")
 
-        # --- 4) Convertimos a dict puro y aplanamos valores simples
         clean_data = {}
         for key, vals in qd.lists():
-            # Mantener listas para campos multi-valor
             if key in ('watchers_usernames', 'watchers_ids', 'files'):
                 clean_data[key] = vals
             else:
                 clean_data[key] = vals[0] if len(vals) == 1 else vals
-        print(f"DEBUG CREATE: clean_data antes de depuración -> {clean_data}")
 
-        # --- 5) Eliminamos campos write_only vacíos para evitar error 'may not be blank'
+
         for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username']:
             if k in clean_data and clean_data[k] in (None, ''):
                 clean_data.pop(k)
-                print(f"DEBUG CREATE: eliminado campo vacío {k}")
 
-        # --- 6) Serializamos y validamos
-        serializer = self.get_serializer(data=clean_data)
-        serializer.is_valid(raise_exception=True)
-        print(f"DEBUG CREATE: validated_data -> {serializer.validated_data}")
 
-        # --- 7) Creamos el Issue y procesamos adjuntos
-        issue = serializer.save(created_by=request.user)
-        for f in request.FILES.getlist('files', []):
-            print(f"DEBUG CREATE: creando Attachment para file: {getattr(f, 'name', f)}")
-            Attachment.objects.create(issue=issue, file=f)
+        create_serializer = self.get_serializer(data=clean_data)
+        create_serializer.is_valid(raise_exception=True)
 
-        response_data = self.get_serializer(issue).data
-        print(f"DEBUG CREATE: respuesta final -> {response_data}")
-        from rest_framework.response import Response
-        from rest_framework import status
-        return Response(response_data, status=status.HTTP_201_CREATED)
 
+        issue = create_serializer.save(created_by=request.user)
+
+
+        response_serializer = IssueSerializer(issue)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
-        print("\n==== SUPER DEBUG: UPDATE START ====")
-        from django.http import QueryDict
-        # 1) Copiamos y hacemos mutables los datos si vienen como QueryDict
         if isinstance(request.data, QueryDict):
             qd = request.data.copy()
             qd._mutable = True
-            print("DEBUG: data era QueryDict, copy mutable")
         else:
             qd = request.data.copy()
-            print("DEBUG: data NO era QueryDict, copy normal")
-        print(f"Initial QueryDict lists -> {qd.lists()}")
 
-        # 2) Procesamos watchers_usernames usando getlist para lista plana
+
         if hasattr(request.data, 'getlist'):
             raw = request.data.getlist('watchers_usernames')
-            print(f"DEBUG: raw watchers_usernames -> {raw}")
             if raw:
                 qd.setlist('watchers_usernames', [u.strip() for u in raw if isinstance(u, str) and u.strip()])
-                print(f"DEBUG: setlist watchers_usernames -> {qd.getlist('watchers_usernames')}")
             else:
                 qd.pop('watchers_usernames', None)
-                print("DEBUG: eliminado watchers_usernames vacío")
 
-        # 3) Eliminamos 'files' si no hay archivos adjuntos reales
-        print(f"DEBUG: files en request.FILES -> {request.FILES}")
+
         if 'files' in qd and not request.FILES:
             qd.pop('files')
-            print("DEBUG: eliminado 'files' porque no hay archivos en request.FILES")
 
-        # 4) Convertimos a dict puro y aplanamos valores simples
+
         clean_data = {}
         for key, vals in qd.lists():
             if key in ('watchers_usernames', 'watchers_ids', 'files'):
                 clean_data[key] = vals
             else:
                 clean_data[key] = vals[0] if len(vals) == 1 else vals
-        print(f"DEBUG: clean_data inicial -> {clean_data}")
 
-        # 5) Eliminamos campos write-only vacíos para evitar errores de blank
+
         for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username']:
             if k in clean_data and clean_data[k] in (None, ''):
                 clean_data.pop(k)
-                print(f"DEBUG: eliminado campo vacío {k}")
 
-        # 6) Serializamos y validamos
+
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        print(f"DEBUG: instancia a actualizar -> {instance} (ID={instance.pk})")
-        serializer = self.get_serializer(instance, data=clean_data, partial=partial)
-        print("DEBUG: serializer instanciado")
-        try:
-            serializer.is_valid(raise_exception=True)
-            print(f"DEBUG: validated_data -> {serializer.validated_data}")
-        except Exception as e:
-            print("ERROR during serializer.is_valid():", e)
-            raise
+        update_serializer = self.get_serializer(instance, data=clean_data, partial=partial)
+        update_serializer.is_valid(raise_exception=True)
 
-        # 7) Guardamos y procesamos attachments
-        print("DEBUG: guardando instancia...")
-        issue = serializer.save()
+
+        issue = update_serializer.save()
         if request.FILES:
             for f in request.FILES.getlist('files'):
-                print(f"DEBUG: creando Attachment para file: {getattr(f, 'name', f)}")
                 Attachment.objects.create(issue=issue, file=f)
-        else:
-            print("DEBUG: no hay archivos para adjuntar")
 
-        # 8) Respuesta final
-        response_data = self.get_serializer(issue).data
-        print(f"DEBUG: response_data -> {response_data}")
-        print("==== SUPER DEBUG: UPDATE END ====\n")
-        from rest_framework.response import Response
-        from rest_framework import status
+
+        response_serializer = IssueSerializer(issue)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+
+        response_data = IssueSerializer(instance).data
+
+        self.perform_destroy(instance)
+
+
         return Response(response_data, status=status.HTTP_200_OK)
-
 
 
 
@@ -352,18 +324,16 @@ class IssueViewSet(viewsets.ModelViewSet):
         methods=['post'],
         url_path='bulk-create',
         parser_classes=[JSONParser],
-        filter_backends=[],      # Anula backends de filtro
+        filter_backends=[],
         pagination_class=None,
         serializer_class=IssueBulkResponseSerializer
     )
     def bulk_create(self, request):
-        # 1) Validamos con el serializer de entrada
         in_serializer = IssueBulkCreateSerializer(data=request.data, context={'request': request})
         in_serializer.is_valid(raise_exception=True)
         created_qs = in_serializer.save()
 
-        # 2) Serializamos la respuesta con el serializer de salida
-        out_serializer = self.get_serializer(created_qs, many=True)
+        out_serializer = IssueSerializer(created_qs, many=True)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
@@ -446,8 +416,6 @@ class IssueViewSet(viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
-
-
 
     def filter_queryset(self, queryset):
         if self.action == 'bulk_create':

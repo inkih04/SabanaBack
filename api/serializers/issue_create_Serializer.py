@@ -1,5 +1,8 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
-from issues.models import Issue
+from issues.models import (
+    Issue, Status, Priorities, Severities, Types, Attachment
+)
 
 class IssueCreateSerializer(serializers.ModelSerializer):
     subject = serializers.CharField(required=True)
@@ -28,3 +31,58 @@ class IssueCreateSerializer(serializers.ModelSerializer):
             'status_name', 'priority_name', 'severity_name', 'issue_type_name',
             'assigned_to_username', 'watchers_usernames', 'files'
         ]
+
+    def create(self, validated_data):
+        # Extraemos y eliminamos los campos "name" / "usernames" / "files"
+        status_name = validated_data.pop('status_name', None) or 'New'
+        priority_name = validated_data.pop('priority_name', None) or 'Medium'
+        severity_name = validated_data.pop('severity_name', None) or 'Normal'
+        issue_type_name = validated_data.pop('issue_type_name', None) or 'Bug'
+        assigned_username = validated_data.pop('assigned_to_username', None)
+        watchers_usernames = validated_data.pop('watchers_usernames', [])
+        files = validated_data.pop('files', [])
+
+        # Resolvemos o creamos instancias relacionales
+        status_obj = Status.objects.get(nombre=status_name)
+        priority_obj = Priorities.objects.get(nombre=priority_name)
+        severity_obj = Severities.objects.get(nombre=severity_name)
+        type_obj = Types.objects.get(nombre=issue_type_name)
+
+        # Creamos el Issue
+        issue = Issue.objects.create(
+            subject=validated_data['subject'],
+            description=validated_data['description'],
+            status=status_obj,
+            priority=priority_obj,
+            severity=severity_obj,
+            issue_type=type_obj,
+            created_by=self.context['request'].user,
+            # assigned_to puede quedarse en null si no viene
+        )
+
+        # Asignar "assigned_to" si se pasó username
+        if assigned_username:
+            try:
+                user = User.objects.get(username=assigned_username)
+                issue.assigned_to = user
+                issue.save()
+            except User.DoesNotExist:
+                raise serializers.ValidationError({
+                    'assigned_to_username': f"El usuario '{assigned_username}' no existe."
+                })
+
+        # Asignar watchers
+        for username in watchers_usernames:
+            try:
+                watcher = User.objects.get(username=username)
+                issue.watchers.add(watcher)
+            except User.DoesNotExist:
+                raise serializers.ValidationError({
+                    'watchers_usernames': f"El usuario '{username}' no existe."
+                })
+
+        # Adjuntar ficheros
+        for f in files:
+            Attachment.objects.create(issue=issue, file=f)
+
+        return issue
