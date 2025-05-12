@@ -1,18 +1,15 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, filters, status
+from rest_framework import viewsets, filters, status as drf_status
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import (
     extend_schema, extend_schema_view,
     OpenApiParameter, OpenApiTypes, OpenApiExample
 )
 
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import status as drf_status
-from django.shortcuts import get_object_or_404
-from issues.models import Severities
+from issues.models import Severities, Issue
 from ..serializers import SeveritiesSerializer
-
-
 
 @extend_schema_view(
     list=extend_schema(
@@ -104,7 +101,7 @@ from ..serializers import SeveritiesSerializer
         tags=['Severities'],
         responses={204: None},
         summary="Eliminar una severidad",
-        description="Elimina una severidad dado su id.",
+        description="Elimina una severidad dado su id, reasignando sus issues a 'Normal'.",
         examples=[
             OpenApiExample(
                 'DeleteSeverityExample',
@@ -125,6 +122,7 @@ class SeverityViewSet(viewsets.ModelViewSet):
     ordering_fields = ['id', 'nombre', 'created_at']
     ordering = ['id']
 
+    # Listar
     @extend_schema(
         parameters=[
             OpenApiParameter(
@@ -140,6 +138,29 @@ class SeverityViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    # Sobrecarga de update por ID
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.nombre == "Normal":
+            return Response(
+                {"detail": "La severidad 'Normal' no se puede editar."},
+                status=drf_status.HTTP_403_FORBIDDEN
+            )
+        return super().update(request, *args, **kwargs)
+
+    # Sobrecarga de destroy por ID: reasigna issues y luego elimina
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.nombre == "Normal":
+            return Response(
+                {"detail": "La severidad 'Normal' no se puede eliminar."},
+                status=drf_status.HTTP_403_FORBIDDEN
+            )
+        normal = get_object_or_404(Severities, nombre="Normal")
+        Issue.objects.filter(severity=instance).update(severity=normal)
+        return super().destroy(request, *args, **kwargs)
+
+    # Obtener por nombre
     @extend_schema(
         summary="Obtener una severidad por nombre",
         description="Devuelve una severidad usando su nombre como parámetro.",
@@ -168,6 +189,7 @@ class SeverityViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(severity_obj)
         return Response(serializer.data)
 
+    # Actualizar por nombre
     @extend_schema(
         summary="Actualizar una severidad por nombre",
         description="Actualiza una severidad existente identificada por su nombre.",
@@ -187,7 +209,7 @@ class SeverityViewSet(viewsets.ModelViewSet):
                 'UpdateByNameRequest',
                 summary="Payload para actualizar por nombre",
                 request_only=True,
-                value={"name": "Highest", "color": "#8B0000"}
+                value={"nombre": "Highest", "color": "#8B0000"}
             ),
             OpenApiExample(
                 'UpdateByNameResponse',
@@ -200,14 +222,20 @@ class SeverityViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['put'], url_path='Put-by-name/(?P<name>[^/.]+)')
     def update_by_name(self, request, name):
         severity_obj = get_object_or_404(Severities, nombre=name)
+        if severity_obj.nombre == "Normal":
+            return Response(
+                {"detail": "La severidad 'Normal' no se puede editar."},
+                status=drf_status.HTTP_403_FORBIDDEN
+            )
         serializer = self.get_serializer(severity_obj, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
+    # Eliminar por nombre: reasigna issues y luego elimina
     @extend_schema(
         summary="Eliminar una severidad por nombre",
-        description="Elimina una severidad usando su nombre como parámetro.",
+        description="Elimina una severidad usando su nombre como parámetro, reasignando sus issues a 'Normal'.",
         tags=["Severities"],
         parameters=[
             OpenApiParameter(
@@ -231,5 +259,12 @@ class SeverityViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['delete'], url_path='Delete-by-name/(?P<name>[^/.]+)')
     def destroy_by_name(self, request, name):
         severity_obj = get_object_or_404(Severities, nombre=name)
+        if severity_obj.nombre == "Normal":
+            return Response(
+                {"detail": "La severidad 'Normal' no se puede eliminar."},
+                status=drf_status.HTTP_403_FORBIDDEN
+            )
+        normal = get_object_or_404(Severities, nombre="Normal")
+        Issue.objects.filter(severity=severity_obj).update(severity=normal)
         severity_obj.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=drf_status.HTTP_204_NO_CONTENT)
