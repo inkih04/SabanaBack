@@ -33,10 +33,10 @@ from drf_spectacular.utils import (
     ),
     edit_bio=extend_schema(
         summary="Editar biografía",
-        description="Actualiza la biografía del perfil del usuario. Enviar como formulario simple.",
+        description="Actualiza la biografía del perfil del usuario actual.",
         tags=["Profile"],
         request={
-            'application/x-www-form-urlencoded': {
+            'application/json': {
                 'type': 'object',
                 'properties': {
                     'biography': {'type': 'string'}
@@ -48,7 +48,7 @@ from drf_spectacular.utils import (
     ),
     edit_profile_picture=extend_schema(
         summary="Editar imagen de perfil",
-        description="Actualiza la imagen de perfil del usuario. Usa un formulario multipart para subir la imagen.",
+        description="Actualiza la imagen de perfil del usuario actual. Usa un formulario multipart para subir la imagen.",
         tags=["Profile"],
         request={
             'multipart/form-data': {
@@ -119,15 +119,23 @@ class ProfileViewSet(viewsets.GenericViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-    @action(detail=True, methods=['put'], url_path='edit-bio', parser_classes=[FormParser, JSONParser])
-    def edit_bio(self, request, pk=None):
-        profile = self.get_object()
-
-        # Verificar que el usuario es dueño del perfil o es staff
-        if request.user != profile.user and not request.user.is_staff:
+    @action(detail=False, methods=['put'], url_path='edit-bio', parser_classes=[JSONParser])
+    def edit_bio(self, request):
+        """
+        Actualiza la biografía del usuario actual.
+        """
+        if not request.user.is_authenticated:
             return Response(
-                {"detail": "No tienes permiso para editar este perfil."},
-                status=status.HTTP_403_FORBIDDEN
+                {"detail": "No estás autenticado."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            return Response(
+                {"detail": "No se encontró el perfil."},
+                status=status.HTTP_404_NOT_FOUND
             )
 
         if 'biography' not in request.data:
@@ -142,15 +150,23 @@ class ProfileViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(profile)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['put'], url_path='edit-picture', parser_classes=[MultiPartParser])
-    def edit_profile_picture(self, request, pk=None):
-        profile = self.get_object()
-
-        # Verificar que el usuario es dueño del perfil o es staff
-        if request.user != profile.user and not request.user.is_staff:
+    @action(detail=False, methods=['put'], url_path='edit-picture', parser_classes=[MultiPartParser])
+    def edit_profile_picture(self, request):
+        """
+        Actualiza la imagen de perfil del usuario actual.
+        """
+        if not request.user.is_authenticated:
             return Response(
-                {"detail": "No tienes permiso para editar este perfil."},
-                status=status.HTTP_403_FORBIDDEN
+                {"detail": "No estás autenticado."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            return Response(
+                {"detail": "No se encontró el perfil."},
+                status=status.HTTP_404_NOT_FOUND
             )
 
         if 'avatar' not in request.FILES:
