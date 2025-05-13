@@ -1,18 +1,14 @@
-from django.db import IntegrityError
-from rest_framework import viewsets, filters, status
+from rest_framework import viewsets
 from drf_spectacular.utils import (
     extend_schema, extend_schema_view,
     OpenApiParameter, OpenApiTypes, OpenApiExample, OpenApiResponse
 )
 
-from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status as drf_status
-from django.shortcuts import get_object_or_404
-from issues.models import Priorities
+from issues.models import Priorities, Issue
 from ..serializers import PrioritiesSerializer
 
-
+DEFAULT_PRIORITY_NAME = "medium"
 
 @extend_schema_view(
     list=extend_schema(
@@ -185,6 +181,17 @@ from ..serializers import PrioritiesSerializer
                     ),
                 ],
             ),
+            409: OpenApiResponse(
+                description="No Puedes Borrar la prioridad por defecto",
+                examples=[
+                    OpenApiExample(
+                        'CantDelete',
+                        summary="No se puede borrar esta prioridad",
+                        value={"detail": f"No puedes borrar el tipo por defecto '{DEFAULT_PRIORITY_NAME}'."},
+                        response_only=True,
+                    ),
+                ],
+            ),
         },
         examples=[
             OpenApiExample(
@@ -208,3 +215,24 @@ class PrioritiesViewSet(viewsets.ModelViewSet):
         if name:
             queryset = queryset.filter(nombre__icontains=name)
         return queryset
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.nombre.lower() == DEFAULT_PRIORITY_NAME.lower():
+            return Response(
+                {"detail": f"No puedes borrar el tipo por defecto '{DEFAULT_PRIORITY_NAME}'."},
+                status=409
+            )
+
+        try:
+            default_type = Priorities.objects.get(nombre__iexact=DEFAULT_PRIORITY_NAME)
+        except Priorities.DoesNotExist:
+            return Response(
+                {"detail": f"No existe el tipo por defecto '{DEFAULT_PRIORITY_NAME}'."},
+                status=500
+            )
+
+        Issue.objects.filter(priority=instance).update(priority=default_type)
+
+        return super().destroy(request, *args, **kwargs)
