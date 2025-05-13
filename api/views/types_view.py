@@ -9,10 +9,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status as drf_status
 from django.shortcuts import get_object_or_404
-from issues.models import Types
+from issues.models import Types, Issue
 from ..serializers import TypesSerializer
 
-
+DEFAULT_TYPE_NAME = "bug"
 
 @extend_schema_view(
     list=extend_schema(
@@ -185,6 +185,17 @@ from ..serializers import TypesSerializer
                     ),
                 ],
             ),
+            409: OpenApiResponse(
+                description="No Puedes Borrar el tipo por defecto",
+                examples=[
+                    OpenApiExample(
+                        'CantDelete',
+                        summary="No se puede borrar este tipo",
+                        value={"detail": f"No puedes borrar el tipo por defecto '{DEFAULT_TYPE_NAME}'."},
+                        response_only=True,
+                    ),
+                ],
+            ),
         },
         examples=[
             OpenApiExample(
@@ -208,3 +219,24 @@ class TypesViewSet(viewsets.ModelViewSet):
         if name:
             queryset = queryset.filter(nombre__icontains=name)
         return queryset
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.nombre.lower() == DEFAULT_TYPE_NAME.lower():
+            return Response(
+                {"detail": f"No puedes borrar el tipo por defecto '{DEFAULT_TYPE_NAME}'."},
+                status=409
+            )
+
+        try:
+            default_type = Types.objects.get(nombre__iexact=DEFAULT_TYPE_NAME)
+        except Types.DoesNotExist:
+            return Response(
+                {"detail": f"No existe el tipo por defecto '{DEFAULT_TYPE_NAME}'."},
+                status=500
+            )
+
+        Issue.objects.filter(issue_type=instance).update(issue_type=default_type)
+
+        return super().destroy(request, *args, **kwargs)
