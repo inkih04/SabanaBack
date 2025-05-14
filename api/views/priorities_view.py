@@ -148,6 +148,17 @@ DEFAULT_PRIORITY_NAME = "medium"
                     ),
                 ],
             ),
+            409: OpenApiResponse(
+                description="No puedes modificar el nombre de la prioridad por defecto",
+                examples=[
+                    OpenApiExample(
+                        'CantUpdateDefault',
+                        summary="No se puede modificar el nombre de la prioridad por defecto",
+                        value={"detail": f"No puedes modificar el nombre de la prioridad por defecto '{DEFAULT_PRIORITY_NAME}'."},
+                        response_only=True,
+                    ),
+                ],
+            ),
         },
         examples=[
             OpenApiExample(
@@ -215,6 +226,19 @@ class PrioritiesViewSet(viewsets.ModelViewSet):
         if name:
             queryset = queryset.filter(nombre__icontains=name)
         return queryset
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        nombre_actual = instance.nombre
+        nombre_nuevo = request.data.get('nombre')
+
+        if nombre_actual.lower() == DEFAULT_PRIORITY_NAME.lower() and nombre_nuevo and nombre_nuevo.lower() != DEFAULT_PRIORITY_NAME.lower():
+            return Response(
+                {"detail": f"No puedes modificar el nombre del tipo por defecto '{DEFAULT_PRIORITY_NAME}'."},
+                status=409
+            )
+
+        return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
