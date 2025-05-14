@@ -1,7 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, filters, status as drf_status
+from rest_framework import viewsets, status as drf_status
 from rest_framework.response import Response
-from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import (
     extend_schema, extend_schema_view,
@@ -14,14 +13,14 @@ from ..serializers import StatusSerializer
 @extend_schema_view(
     list=extend_schema(
         summary="Listar statuses",
-        description="Devuelve una lista de status con ordenación.",
+        description="Devuelve una lista de statuses con filtrado por nombre.",
         tags=['Statuses'],
         parameters=[
             OpenApiParameter(
-                name='ordering',
+                name='nombre',
                 type=OpenApiTypes.STR,
                 location=OpenApiParameter.QUERY,
-                description="Campos por los que ordenar, ej. `-nombre`",
+                description="Filtra los statuses cuyo nombre contenga el valor dado",
                 required=False
             ),
         ],
@@ -30,7 +29,7 @@ from ..serializers import StatusSerializer
             OpenApiExample(
                 'StatusListExample',
                 summary="Listado de estados",
-                description="Respuesta con todos los estados ordenados por `id`",
+                description="Respuesta con todos los estados",
                 value=[
                     {"id": 1, "nombre": "Open",   "slug": "open",   "color": "#00FF00"},
                     {"id": 2, "nombre": "Closed", "slug": "closed", "color": "#FF0000"},
@@ -64,7 +63,7 @@ from ..serializers import StatusSerializer
         tags=['Statuses'],
         responses=StatusSerializer,
         summary="Obtener un status dado su id",
-        description="Devuelve una status dado su id.",
+        description="Devuelve un status dado su id.",
         examples=[
             OpenApiExample(
                 'RetrieveStatusExample',
@@ -115,18 +114,17 @@ class StatusViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'put', 'delete']
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
-    filter_backends   = [DjangoFilterBackend, filters.OrderingFilter]
-    ordering_fields   = ['id', 'nombre', 'created_at']
-    ordering          = ['id']
 
-    # Listar
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['nombre']
+
     @extend_schema(
         parameters=[
             OpenApiParameter(
-                name='ordering',
+                name='nombre',
                 type=OpenApiTypes.STR,
                 location=OpenApiParameter.QUERY,
-                description="Campos por los que ordenar, ej. `-nombre`",
+                description="Filtra los statuses cuyo nombre contenga el valor dado",
                 required=False
             ),
         ],
@@ -135,7 +133,6 @@ class StatusViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    # Sobrecarga de update por ID
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.nombre == "New":
@@ -145,7 +142,6 @@ class StatusViewSet(viewsets.ModelViewSet):
             )
         return super().update(request, *args, **kwargs)
 
-    # Sobrecarga de destroy por ID: reasigna issues y luego elimina
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.nombre == "New":
@@ -153,116 +149,6 @@ class StatusViewSet(viewsets.ModelViewSet):
                 {"detail": "El status 'New' no se puede eliminar."},
                 status=drf_status.HTTP_403_FORBIDDEN
             )
-        # Reasignar todos los issues de este status a "New"
         new_status = get_object_or_404(Status, nombre="New")
         Issue.objects.filter(status=instance).update(status=new_status)
         return super().destroy(request, *args, **kwargs)
-
-    # Obtener por nombre
-    @extend_schema(
-        summary="Obtener un status por nombre",
-        description="Devuelve un status usando su nombre como parámetro.",
-        tags=["Statuses"],
-        parameters=[
-            OpenApiParameter(
-                name="name",
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
-                description="Nombre único del status"
-            )
-        ],
-        responses=StatusSerializer,
-        examples=[
-            OpenApiExample(
-                'RetrieveByNameExample',
-                summary="Obtener status por nombre",
-                response_only=True,
-                value={"id": 1, "nombre": "Open", "slug": "open", "color": "#00FF00"}
-            )
-        ]
-    )
-    @action(detail=False, methods=['get'], url_path='Get-by-name/(?P<name>[^/.]+)')
-    def retrieve_by_name(self, request, name):
-        status_obj = get_object_or_404(Status, nombre=name)
-        serializer = self.get_serializer(status_obj)
-        return Response(serializer.data)
-
-    # Actualizar por nombre
-    @extend_schema(
-        summary="Actualizar un status por nombre",
-        description="Actualiza un status existente identificado por su nombre.",
-        tags=["Statuses"],
-        parameters=[
-            OpenApiParameter(
-                name="name",
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
-                description="Nombre único del status"
-            )
-        ],
-        request=StatusSerializer,
-        responses=StatusSerializer,
-        examples=[
-            OpenApiExample(
-                'UpdateByNameRequest',
-                summary="Payload para actualizar por nombre",
-                request_only=True,
-                value={"nombre": "En revisión", "color": "#123456"}
-            ),
-            OpenApiExample(
-                'UpdateByNameResponse',
-                summary="Respuesta al actualizar por nombre",
-                response_only=True,
-                value={"id": 4, "nombre": "En revisión", "slug": "en-revision", "color": "#123456"}
-            ),
-        ]
-    )
-    @action(detail=False, methods=['put'], url_path='Put-by-name/(?P<name>[^/.]+)')
-    def update_by_name(self, request, name):
-        status_obj = get_object_or_404(Status, nombre=name)
-        if status_obj.nombre == "New":
-            return Response(
-                {"detail": "El status 'New' no se puede editar."},
-                status=drf_status.HTTP_403_FORBIDDEN
-            )
-        serializer = self.get_serializer(status_obj, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
-    # Eliminar por nombre: reasigna issues y luego elimina
-    @extend_schema(
-        summary="Eliminar un status por nombre",
-        description="Elimina un status usando su nombre como parámetro, reasignando sus issues a 'New'.",
-        tags=["Statuses"],
-        parameters=[
-            OpenApiParameter(
-                name="name",
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
-                description="Nombre único del status"
-            )
-        ],
-        responses={204: None},
-        examples=[
-            OpenApiExample(
-                'DeleteByNameExample',
-                summary="Eliminar por nombre",
-                description="Respuesta vacía con código 204 al eliminar por nombre",
-                response_only=True,
-                value=None
-            )
-        ]
-    )
-    @action(detail=False, methods=['delete'], url_path='Delete-by-name/(?P<name>[^/.]+)')
-    def destroy_by_name(self, request, name):
-        status_obj = get_object_or_404(Status, nombre=name)
-        if status_obj.nombre == "New":
-            return Response(
-                {"detail": "El status 'New' no se puede eliminar."},
-                status=drf_status.HTTP_403_FORBIDDEN
-            )
-        new_status = get_object_or_404(Status, nombre="New")
-        Issue.objects.filter(status=status_obj).update(status=new_status)
-        status_obj.delete()
-        return Response(status=drf_status.HTTP_204_NO_CONTENT)

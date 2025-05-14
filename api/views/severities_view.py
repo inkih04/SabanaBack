@@ -1,12 +1,11 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, filters, status as drf_status
+from rest_framework import viewsets, status as drf_status
 from rest_framework.response import Response
-from rest_framework.decorators import action
-from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import (
     extend_schema, extend_schema_view,
     OpenApiParameter, OpenApiTypes, OpenApiExample
 )
+from django.shortcuts import get_object_or_404
 
 from issues.models import Severities, Issue
 from ..serializers import SeveritiesSerializer
@@ -14,14 +13,14 @@ from ..serializers import SeveritiesSerializer
 @extend_schema_view(
     list=extend_schema(
         summary="Listar severidades",
-        description="Devuelve una lista de severidades con ordenación.",
+        description="Devuelve una lista de severidades con filtrado por nombre.",
         tags=['Severities'],
         parameters=[
             OpenApiParameter(
-                name='ordering',
+                name='nombre',
                 type=OpenApiTypes.STR,
                 location=OpenApiParameter.QUERY,
-                description="Campos por los que ordenar, ej. `-nombre`",
+                description="Filtra las severidades cuyo nombre contenga el valor dado",
                 required=False
             ),
         ],
@@ -30,7 +29,7 @@ from ..serializers import SeveritiesSerializer
             OpenApiExample(
                 'SeverityListExample',
                 summary="Listado de severidades",
-                description="Respuesta con todas las severidades ordenadas por `id`",
+                description="Respuesta con todas las severidades",
                 value=[
                     {"id": 1, "nombre": "Critical", "slug": "critical", "color": "#FF0000"},
                     {"id": 2, "nombre": "High",     "slug": "high",     "color": "#FFA500"},
@@ -118,18 +117,16 @@ class SeverityViewSet(viewsets.ModelViewSet):
     queryset = Severities.objects.all()
     serializer_class = SeveritiesSerializer
 
-    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    ordering_fields = ['id', 'nombre', 'created_at']
-    ordering = ['id']
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['nombre']
 
-    # Listar
     @extend_schema(
         parameters=[
             OpenApiParameter(
-                name='ordering',
+                name='nombre',
                 type=OpenApiTypes.STR,
                 location=OpenApiParameter.QUERY,
-                description="Campos por los que ordenar, ej. `-nombre`",
+                description="Filtra las severidades cuyo nombre contenga el valor dado",
                 required=False
             ),
         ],
@@ -138,7 +135,6 @@ class SeverityViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    # Sobrecarga de update por ID
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.nombre == "Normal":
@@ -148,7 +144,6 @@ class SeverityViewSet(viewsets.ModelViewSet):
             )
         return super().update(request, *args, **kwargs)
 
-    # Sobrecarga de destroy por ID: reasigna issues y luego elimina
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.nombre == "Normal":
@@ -159,112 +154,3 @@ class SeverityViewSet(viewsets.ModelViewSet):
         normal = get_object_or_404(Severities, nombre="Normal")
         Issue.objects.filter(severity=instance).update(severity=normal)
         return super().destroy(request, *args, **kwargs)
-
-    # Obtener por nombre
-    @extend_schema(
-        summary="Obtener una severidad por nombre",
-        description="Devuelve una severidad usando su nombre como parámetro.",
-        tags=["Severities"],
-        parameters=[
-            OpenApiParameter(
-                name="name",
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
-                description="Nombre único de la severidad"
-            )
-        ],
-        responses=SeveritiesSerializer,
-        examples=[
-            OpenApiExample(
-                'RetrieveByNameExample',
-                summary="Obtener severidad por nombre",
-                response_only=True,
-                value={"id": 1, "nombre": "Critical", "slug": "critical", "color": "#FF0000"}
-            )
-        ]
-    )
-    @action(detail=False, methods=['get'], url_path='Get-by-name/(?P<name>[^/.]+)')
-    def retrieve_by_name(self, request, name):
-        severity_obj = get_object_or_404(Severities, nombre=name)
-        serializer = self.get_serializer(severity_obj)
-        return Response(serializer.data)
-
-    # Actualizar por nombre
-    @extend_schema(
-        summary="Actualizar una severidad por nombre",
-        description="Actualiza una severidad existente identificada por su nombre.",
-        tags=["Severities"],
-        parameters=[
-            OpenApiParameter(
-                name="name",
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
-                description="Nombre único de la severidad"
-            )
-        ],
-        request=SeveritiesSerializer,
-        responses=SeveritiesSerializer,
-        examples=[
-            OpenApiExample(
-                'UpdateByNameRequest',
-                summary="Payload para actualizar por nombre",
-                request_only=True,
-                value={"nombre": "Highest", "color": "#8B0000"}
-            ),
-            OpenApiExample(
-                'UpdateByNameResponse',
-                summary="Respuesta al actualizar por nombre",
-                response_only=True,
-                value={"id": 1, "nombre": "Highest", "slug": "highest", "color": "#8B0000"}
-            ),
-        ]
-    )
-    @action(detail=False, methods=['put'], url_path='Put-by-name/(?P<name>[^/.]+)')
-    def update_by_name(self, request, name):
-        severity_obj = get_object_or_404(Severities, nombre=name)
-        if severity_obj.nombre == "Normal":
-            return Response(
-                {"detail": "La severidad 'Normal' no se puede editar."},
-                status=drf_status.HTTP_403_FORBIDDEN
-            )
-        serializer = self.get_serializer(severity_obj, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
-    # Eliminar por nombre: reasigna issues y luego elimina
-    @extend_schema(
-        summary="Eliminar una severidad por nombre",
-        description="Elimina una severidad usando su nombre como parámetro, reasignando sus issues a 'Normal'.",
-        tags=["Severities"],
-        parameters=[
-            OpenApiParameter(
-                name="name",
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
-                description="Nombre único de la severidad"
-            )
-        ],
-        responses={204: None},
-        examples=[
-            OpenApiExample(
-                'DeleteByNameExample',
-                summary="Eliminar por nombre",
-                description="Respuesta vacía con código 204 al eliminar por nombre",
-                response_only=True,
-                value=None
-            )
-        ]
-    )
-    @action(detail=False, methods=['delete'], url_path='Delete-by-name/(?P<name>[^/.]+)')
-    def destroy_by_name(self, request, name):
-        severity_obj = get_object_or_404(Severities, nombre=name)
-        if severity_obj.nombre == "Normal":
-            return Response(
-                {"detail": "La severidad 'Normal' no se puede eliminar."},
-                status=drf_status.HTTP_403_FORBIDDEN
-            )
-        normal = get_object_or_404(Severities, nombre="Normal")
-        Issue.objects.filter(severity=severity_obj).update(severity=normal)
-        severity_obj.delete()
-        return Response(status=drf_status.HTTP_204_NO_CONTENT)

@@ -344,19 +344,21 @@ def settings_edit(request, model_name, pk=None):
         'severities': 'Normal'
     }
 
-    # Check if attempting to edit a non-editable default item
-    if model_name in non_editable_defaults and instance.nombre == non_editable_defaults[model_name]:
+    # Sólo si hay instancia y el modelo es uno de los no editables…
+    if instance and model_name in non_editable_defaults \
+            and instance.nombre == non_editable_defaults[model_name]:
         error_message = f"Cannot edit {instance.nombre}, it is a system default."
 
-        # Get all data needed for settings_list
         data = {
             'status': Status.objects.all(),
             'priorities': Priorities.objects.all(),
             'types': Types.objects.all(),
             'severities': Severities.objects.all(),
         }
-
-        return render(request, 'settings/settings_list.html', {'data': data, 'error_message': error_message})
+        return render(request, 'settings/settings_list.html', {
+            'data': data,
+            'error_message': error_message
+        })
 
     if request.method == 'POST':
         form = form_class(request.POST, instance=instance)
