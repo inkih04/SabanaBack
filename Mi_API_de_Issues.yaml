@@ -2,7 +2,11 @@ openapi: 3.0.3
 info:
   title: Mi API de Issues
   version: v1
-  description: Documentación generada con drf-spectacular y OpenAPI 3.0
+  description: Esta documentación Open API para la API REST de nuestra aplicación
+    Sabana ha sido generada con drf-spectacular y OpenAPI 3.0. Una versión webapp
+    estádisponible en <https://it22d-backend.onrender.com/> . Todas las operaciones
+    son ejecutables pero necesitan autentificación. La autentificación se realiza
+    mediante un token que varia de usuario a usuario y que se consigue desde la aplicación.
 paths:
   /api/comments/:
     get:
@@ -845,77 +849,6 @@ paths:
                 items:
                   $ref: '#/components/schemas/Issue'
           description: ''
-  /api/profiles/{id}/edit-bio/:
-    put:
-      operationId: api_profiles_edit_bio_update
-      description: Actualiza la biografía del perfil del usuario. Enviar como formulario
-        simple.
-      summary: Editar biografía
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this profile.
-        required: true
-      tags:
-      - Profile
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              properties:
-                biography:
-                  type: string
-              required:
-              - biography
-      security:
-      - ApiToken: []
-      - ApiToken: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Profile'
-          description: ''
-  /api/profiles/{id}/edit-picture/:
-    put:
-      operationId: api_profiles_edit_picture_update
-      description: Actualiza la imagen de perfil del usuario. Usa un formulario multipart
-        para subir la imagen.
-      summary: Editar imagen de perfil
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this profile.
-        required: true
-      tags:
-      - Profile
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                avatar:
-                  type: string
-                  format: binary
-              required:
-              - avatar
-      security:
-      - ApiToken: []
-      - ApiToken: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Profile'
-          description: ''
   /api/profiles/{id}/user-comments/:
     get:
       operationId: api_profiles_user_comments_list
@@ -968,6 +901,62 @@ paths:
                 items:
                   $ref: '#/components/schemas/Issue'
           description: ''
+  /api/profiles/edit-bio/:
+    put:
+      operationId: api_profiles_edit_bio_update
+      description: Actualiza la biografía del perfil del usuario actual.
+      summary: Editar biografía
+      tags:
+      - Profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                biography:
+                  type: string
+              required:
+              - biography
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+  /api/profiles/edit-picture/:
+    put:
+      operationId: api_profiles_edit_picture_update
+      description: Actualiza la imagen de perfil del usuario actual. Usa un formulario
+        multipart para subir la imagen.
+      summary: Editar imagen de perfil
+      tags:
+      - Profile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+              required:
+              - avatar
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
   /api/profiles/me/:
     get:
       operationId: api_profiles_me_retrieve
@@ -988,14 +977,14 @@ paths:
   /api/severities/:
     get:
       operationId: api_severities_list
-      description: Devuelve una lista de severidades con ordenación.
+      description: Devuelve una lista de severidades con filtrado por nombre.
       summary: Listar severidades
       parameters:
       - in: query
-        name: ordering
+        name: nombre
         schema:
           type: string
-        description: Campos por los que ordenar, ej. `-nombre`
+        description: Filtra las severidades cuyo nombre contenga el valor dado
       tags:
       - Severities
       security:
@@ -1029,7 +1018,7 @@ paths:
                       slug: low
                       color: '#00FF00'
                   summary: Listado de severidades
-                  description: Respuesta con todas las severidades ordenadas por `id`
+                  description: Respuesta con todas las severidades
           description: ''
     post:
       operationId: api_severities_create
@@ -1156,7 +1145,7 @@ paths:
           description: ''
     delete:
       operationId: api_severities_destroy
-      description: Elimina una severidad dado su id.
+      description: Elimina una severidad dado su id, reasignando sus issues a 'Normal'.
       summary: Eliminar una severidad
       parameters:
       - in: path
@@ -1173,119 +1162,17 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/severities/Delete-by-name/{name}/:
-    delete:
-      operationId: api_severities_Delete_by_name_destroy
-      description: Elimina una severidad usando su nombre como parámetro.
-      summary: Eliminar una severidad por nombre
-      parameters:
-      - in: path
-        name: name
-        schema:
-          type: string
-        description: Nombre único de la severidad
-        required: true
-      tags:
-      - Severities
-      security:
-      - ApiToken: []
-      - ApiToken: []
-      responses:
-        '204':
-          description: No response body
-  /api/severities/Get-by-name/{name}/:
-    get:
-      operationId: api_severities_Get_by_name_retrieve
-      description: Devuelve una severidad usando su nombre como parámetro.
-      summary: Obtener una severidad por nombre
-      parameters:
-      - in: path
-        name: name
-        schema:
-          type: string
-        description: Nombre único de la severidad
-        required: true
-      tags:
-      - Severities
-      security:
-      - ApiToken: []
-      - ApiToken: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Severities'
-              examples:
-                RetrieveByNameExample:
-                  value:
-                    id: 1
-                    nombre: Critical
-                    slug: critical
-                    color: '#FF0000'
-                  summary: Obtener severidad por nombre
-          description: ''
-  /api/severities/Put-by-name/{name}/:
-    put:
-      operationId: api_severities_Put_by_name_update
-      description: Actualiza una severidad existente identificada por su nombre.
-      summary: Actualizar una severidad por nombre
-      parameters:
-      - in: path
-        name: name
-        schema:
-          type: string
-        description: Nombre único de la severidad
-        required: true
-      tags:
-      - Severities
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SeveritiesRequest'
-            examples:
-              UpdateByNameRequest:
-                value:
-                  name: Highest
-                  color: '#8B0000'
-                summary: Payload para actualizar por nombre
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/SeveritiesRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/SeveritiesRequest'
-        required: true
-      security:
-      - ApiToken: []
-      - ApiToken: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Severities'
-              examples:
-                UpdateByNameResponse:
-                  value:
-                    id: 1
-                    nombre: Highest
-                    slug: highest
-                    color: '#8B0000'
-                  summary: Respuesta al actualizar por nombre
-          description: ''
   /api/statuses/:
     get:
       operationId: api_statuses_list
-      description: Devuelve una lista de status con ordenación.
+      description: Devuelve una lista de statuses con filtrado por nombre.
       summary: Listar statuses
       parameters:
       - in: query
-        name: ordering
+        name: nombre
         schema:
           type: string
-        description: Campos por los que ordenar, ej. `-nombre`
+        description: Filtra los statuses cuyo nombre contenga el valor dado
       tags:
       - Statuses
       security:
@@ -1311,7 +1198,7 @@ paths:
                       slug: closed
                       color: '#FF0000'
                   summary: Listado de estados
-                  description: Respuesta con todos los estados ordenados por `id`
+                  description: Respuesta con todos los estados
           description: ''
     post:
       operationId: api_statuses_create
@@ -1358,7 +1245,7 @@ paths:
   /api/statuses/{id}/:
     get:
       operationId: api_statuses_retrieve
-      description: Devuelve una status dado su id.
+      description: Devuelve un status dado su id.
       summary: Obtener un status dado su id
       parameters:
       - in: path
@@ -1438,7 +1325,7 @@ paths:
           description: ''
     delete:
       operationId: api_statuses_destroy
-      description: Elimina un status dado su id.
+      description: Elimina un status dado su id, reasignando sus issues a 'New'.
       summary: Eliminar un status
       parameters:
       - in: path
@@ -1455,108 +1342,6 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/statuses/Delete-by-name/{name}/:
-    delete:
-      operationId: api_statuses_Delete_by_name_destroy
-      description: Elimina un status usando su nombre como parámetro.
-      summary: Eliminar un status por nombre
-      parameters:
-      - in: path
-        name: name
-        schema:
-          type: string
-        description: Nombre único del status
-        required: true
-      tags:
-      - Statuses
-      security:
-      - ApiToken: []
-      - ApiToken: []
-      responses:
-        '204':
-          description: No response body
-  /api/statuses/Get-by-name/{name}/:
-    get:
-      operationId: api_statuses_Get_by_name_retrieve
-      description: Devuelve un status usando su nombre como parámetro.
-      summary: Obtener un status por nombre
-      parameters:
-      - in: path
-        name: name
-        schema:
-          type: string
-        description: Nombre único del status
-        required: true
-      tags:
-      - Statuses
-      security:
-      - ApiToken: []
-      - ApiToken: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Status'
-              examples:
-                RetrieveByNameExample:
-                  value:
-                    id: 1
-                    nombre: Open
-                    slug: open
-                    color: '#00FF00'
-                  summary: Obtener status por nombre
-          description: ''
-  /api/statuses/Put-by-name/{name}/:
-    put:
-      operationId: api_statuses_Put_by_name_update
-      description: Actualiza un status existente identificado por su nombre.
-      summary: Actualizar un status por nombre
-      parameters:
-      - in: path
-        name: name
-        schema:
-          type: string
-        description: Nombre único del status
-        required: true
-      tags:
-      - Statuses
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StatusRequest'
-            examples:
-              UpdateByNameRequest:
-                value:
-                  name: En revisión
-                  color: '#123456'
-                summary: Payload para actualizar por nombre
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/StatusRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/StatusRequest'
-        required: true
-      security:
-      - ApiToken: []
-      - ApiToken: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Status'
-              examples:
-                UpdateByNameResponse:
-                  value:
-                    id: 4
-                    nombre: En revisión
-                    slug: en-revision
-                    color: '#123456'
-                  summary: Respuesta al actualizar por nombre
-          description: ''
   /api/types/:
     get:
       operationId: api_types_list
