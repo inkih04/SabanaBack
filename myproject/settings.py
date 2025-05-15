@@ -176,7 +176,11 @@ SWAGGER_SETTINGS = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Mi API de Issues',
-    'DESCRIPTION': 'Documentación generada con drf-spectacular y OpenAPI 3.0',
+    'DESCRIPTION': 'Esta documentación Open API para la API REST de nuestra aplicación Sabana '
+                   'ha sido generada con drf-spectacular y OpenAPI 3.0. Una versión webapp está'
+                   'disponible en <https://it22d-backend.onrender.com/> . Todas las operaciones '
+                   'son ejecutables pero necesitan autentificación. La autentificación se realiza '
+                   'mediante un token que varia de usuario a usuario y que se consigue desde la aplicación.',
     'VERSION': 'v1',
     'SERVE_INCLUDE_SCHEMA': False,
     'SCHEMA_PATH_PREFIX': r'/api/v1',
