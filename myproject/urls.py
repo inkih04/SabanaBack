@@ -17,13 +17,18 @@ Including another URLconf
 from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import path, include
-
+from drf_spectacular.views import SpectacularSwaggerView, SpectacularAPIView
+from drf_spectacular.views import SpectacularYAMLAPIView
 
 urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('issues/', include('issues.urls')),
     path('accounts/', include('allauth.urls')),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('swagger.yaml', SpectacularYAMLAPIView.as_view(), name='schema-yaml'),
+    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
-    path('', lambda request: redirect('issue_list', permanent=True), name='home')
+    path('api/', include('api.urls')),
+    path('', lambda request: redirect('issue_list', permanent=True), name='home'),
 ]

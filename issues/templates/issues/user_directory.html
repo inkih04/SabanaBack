@@ -31,7 +31,9 @@
   <div class="userDirectory__user-card">
       <div class="user-card__avatar">
           {% if data.user.profile.avatar %}
-              <img src="{{ data.user.profile.avatar.url }}" alt="avatar" class="userDirectory_user-card__avatar-img">
+                <div class="user-card__avatar-image-container">
+                    <img src="{{ data.user.profile.avatar.url }}" alt="avatar" class="userDirectory_user-card__avatar-img">
+                </div>
           {% else %}
               <div class="user-card__avatar-icon">
                   <span class="material-icons">person</span>

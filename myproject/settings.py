@@ -55,11 +55,30 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-    'storages'
+    'storages',
+    'rest_framework',
+    'corsheaders',
+    'drf_spectacular',
+    'api.apps.ApiConfig',
+    'django_filters',
+    'drf_spectacular_sidecar',
+    'rest_framework.authtoken',
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'api.authentication.CustomAuthorizationHeaderTokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # Require authentication for all endpoints
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
+}
 
 MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
@@ -73,6 +92,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
+]
+
+CORS_ALLOWED_ORIGINS = [
+  'https://editor.swagger.io',
 ]
 
 # Provider specific settings
@@ -124,6 +148,60 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+}
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'Token': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'Introduce tu token en formato:25e188f92af552bbfab5d262dc50ed47b5b242df'
+        }
+    },
+    # Configuración de servidores para OpenAPI 3
+    'SERVERS': [
+        {
+            'url': 'https://api.example.com/api/v1',
+            'description': 'Servidor de producción'
+        },
+        {
+            'url': 'https://staging-api.example.com/api/v1',
+            'description': 'Servidor de staging'
+        },
+        {
+            'url': 'http://localhost:8000/api/v1',
+            'description': 'Servidor de desarrollo local'
+        },
+    ],
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Mi API de Issues',
+    'DESCRIPTION': 'Esta documentación Open API para la API REST de nuestra aplicación Sabana '
+                   'ha sido generada con drf-spectacular y OpenAPI 3.0. Una versión webapp está'
+                   'disponible en <https://it22d-backend.onrender.com/> . Todas las operaciones '
+                   'son ejecutables pero necesitan autentificación. La autentificación se realiza '
+                   'mediante un token que varia de usuario a usuario y que se consigue desde la aplicación.',
+    'VERSION': 'v1',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX': r'/api/v1',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SWAGGER_UI_DIST': 'SIDECAR',
+    'SORT_OPERATION_PARAMETERS': False,
+    # Configuración de seguridad para tu token personalizado
+    'SECURITY': [
+        {'ApiToken': []}
+    ],
+    'SECURITY_DEFINITIONS': {
+        'ApiToken': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization',
+            'description': 'Introduce tu token directamente sin ningún prefijo'
+        }
+    },
 }
 
 

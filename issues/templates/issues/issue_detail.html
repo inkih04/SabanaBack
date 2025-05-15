@@ -28,7 +28,12 @@
                 </div>
             {% endif %}
             {% if issue.due_date %}
-                <div class="issue-info-due-date-title">
+                <div class="
+                                {% if issue.due_date < today %}
+                                    issue-info-due-date-title-expired
+                                {% else %}
+                                    issue-info-due-date-title
+                                {% endif %}">
                     <span class="material-icons">schedule</span>
                 </div>
             {% endif %}
@@ -351,7 +356,15 @@
             <div class="issue-info-status-buttons">
 
 
-                <div class="issue-info-status-buttons-icon {% if issue.due_date %}issue-info-due-date-set{% endif %}">
+                <div class="issue-info-status-buttons-icon
+                            {% if issue.due_date %}
+                                {% if issue.due_date < today %}
+                                    issue-info-due-date-expired
+                                {% else %}
+                                    issue-info-due-date-set
+                                {% endif %}
+                            {% endif %}">
+
                     <a href="#infoIssueSetDueDateModal">
                         <span class="material-icons">schedule</span>
                     </a>

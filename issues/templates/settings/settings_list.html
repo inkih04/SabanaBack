@@ -48,7 +48,7 @@
                             <form method="post" action="{% url 'settings_edit' 'status' obj.id %}">
                                 {% csrf_token %}
                                 <div class="form__group">
-                                    <label for="nombre">Nombre:</label>
+                                    <label for="nombre">Name:</label>
                                     <input type="text" id="nombre" name="nombre" value="{{ obj.nombre }}" required>
                                 </div>
                                 <div class="form__group">
@@ -56,8 +56,8 @@
                                     <input type="color" id="color" name="color" value="{{ obj.color }}" required>
                                 </div>
                                 <div class="modal__settings__footer">
-                                    <button type="submit" class="btn btn-success">Guardar</button>
-                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-success">Save</button>
+                                    <a href="#" class="btn btn-secondary">Cancel</a>
                                 </div>
                             </form>
                         </div>
@@ -68,16 +68,16 @@
                 <div id="modal-delete-status-{{ obj.id }}" class="modal__settings__edit">
                     <div class="modal__settings__content">
                         <div class="modal__settings__header">
-                            <h2>Eliminar Status</h2>
+                            <h2>Delete Status</h2>
                             <a href="#" class="modal__settings__close">&times;</a>
                         </div>
                         <div class="modal__settings__body">
-                            <p>¿Estás seguro de que deseas eliminar "{{ obj.nombre }}"?</p>
+                            <p>Are you sure you want to delete "{{ obj.nombre }}"?</p>
                             <form method="post" action="{% url 'settings_delete' 'status' obj.id %}">
                                 {% csrf_token %}
                                 <div class="modal__settings__footer">
-                                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                    <a href="#" class="btn btn-secondary">Cancel</a>
                                 </div>
                             </form>
                         </div>
@@ -99,7 +99,7 @@
             <form method="post" action="{% url 'settings_create' 'status' %}">
                 {% csrf_token %}
                 <div class="form__group">
-                    <label for="nombre">Nombre:</label>
+                    <label for="nombre">Name:</label>
                     <input type="text" id="nombre" name="nombre" required>
                 </div>
                 <div class="form__group">
@@ -107,8 +107,8 @@
                     <input type="color" id="color" name="color" required>
                 </div>
                 <div class="modal__settings__footer">
-                    <button type="submit" class="btn btn-success">Guardar</button>
-                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <a href="#" class="btn btn-secondary">Cancel</a>
                 </div>
             </form>
         </div>
@@ -160,7 +160,7 @@
                             <form method="post" action="{% url 'settings_edit' 'priorities' obj.id %}">
                                 {% csrf_token %}
                                 <div class="form__group">
-                                    <label for="nombre">Nombre:</label>
+                                    <label for="nombre">Name:</label>
                                     <input type="text" id="nombre" name="nombre" value="{{ obj.nombre }}" required>
                                 </div>
                                 <div class="form__group">
@@ -168,8 +168,8 @@
                                     <input type="color" id="color" name="color" value="{{ obj.color }}" required>
                                 </div>
                                 <div class="modal__settings__footer">
-                                    <button type="submit" class="btn btn-success">Guardar</button>
-                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-success">Save</button>
+                                    <a href="#" class="btn btn-secondary">Cancel</a>
                                 </div>
                             </form>
                         </div>
@@ -180,16 +180,16 @@
                 <div id="modal-delete-priorities-{{ obj.id }}" class="modal__settings__edit">
                     <div class="modal__settings__content">
                         <div class="modal__settings__header">
-                            <h2>Eliminar Priority</h2>
+                            <h2>Delete Priority</h2>
                             <a href="#" class="modal__settings__close">&times;</a>
                         </div>
                         <div class="modal__settings__body">
-                            <p>¿Estás seguro de que deseas eliminar "{{ obj.nombre }}"?</p>
+                            <p>Are you sure you want to delete "{{ obj.nombre }}"?</p>
                             <form method="post" action="{% url 'settings_delete' 'priorities' obj.id %}">
                                 {% csrf_token %}
                                 <div class="modal__settings__footer">
-                                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                    <a href="#" class="btn btn-secondary">Cancel</a>
                                 </div>
                             </form>
                         </div>
@@ -211,7 +211,7 @@
             <form method="post" action="{% url 'settings_create' 'priorities' %}">
                 {% csrf_token %}
                 <div class="form__group">
-                    <label for="nombre">Nombre:</label>
+                    <label for="nombre">Name:</label>
                     <input type="text" id="nombre" name="nombre" required>
                 </div>
                 <div class="form__group">
@@ -219,8 +219,8 @@
                     <input type="color" id="color" name="color" required>
                 </div>
                 <div class="modal__settings__footer">
-                    <button type="submit" class="btn btn-success">Guardar</button>
-                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <a href="#" class="btn btn-secondary">Cancel</a>
                 </div>
             </form>
         </div>
@@ -272,7 +272,7 @@
                             <form method="post" action="{% url 'settings_edit' 'types' obj.id %}">
                                 {% csrf_token %}
                                 <div class="form__group">
-                                    <label for="nombre">Nombre:</label>
+                                    <label for="nombre">Name:</label>
                                     <input type="text" id="nombre" name="nombre" value="{{ obj.nombre }}" required>
                                 </div>
                                 <div class="form__group">
@@ -280,8 +280,8 @@
                                     <input type="color" id="color" name="color" value="{{ obj.color }}" required>
                                 </div>
                                 <div class="modal__settings__footer">
-                                    <button type="submit" class="btn btn-success">Guardar</button>
-                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-success">Save</button>
+                                    <a href="#" class="btn btn-secondary">Cancel</a>
                                 </div>
                             </form>
                         </div>
@@ -292,16 +292,16 @@
                 <div id="modal-delete-types-{{ obj.id }}" class="modal__settings__edit">
                     <div class="modal__settings__content">
                         <div class="modal__settings__header">
-                            <h2>Eliminar Type</h2>
+                            <h2>Delete Type</h2>
                             <a href="#" class="modal__settings__close">&times;</a>
                         </div>
                         <div class="modal__settings__body">
-                            <p>¿Estás seguro de que deseas eliminar "{{ obj.nombre }}"?</p>
+                            <p>Are you sure you want to delete "{{ obj.nombre }}"?</p>
                             <form method="post" action="{% url 'settings_delete' 'types' obj.id %}">
                                 {% csrf_token %}
                                 <div class="modal__settings__footer">
-                                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                    <a href="#" class="btn btn-secondary">Cancel</a>
                                 </div>
                             </form>
                         </div>
@@ -323,7 +323,7 @@
             <form method="post" action="{% url 'settings_create' 'types' %}">
                 {% csrf_token %}
                 <div class="form__group">
-                    <label for="nombre">Nombre:</label>
+                    <label for="nombre">Name:</label>
                     <input type="text" id="nombre" name="nombre" required>
                 </div>
                 <div class="form__group">
@@ -331,8 +331,8 @@
                     <input type="color" id="color" name="color" required>
                 </div>
                 <div class="modal__settings__footer">
-                    <button type="submit" class="btn btn-success">Guardar</button>
-                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <a href="#" class="btn btn-secondary">Cancel</a>
                 </div>
             </form>
         </div>
@@ -384,7 +384,7 @@
                             <form method="post" action="{% url 'settings_edit' 'severities' obj.id %}">
                                 {% csrf_token %}
                                 <div class="form__group">
-                                    <label for="nombre">Nombre:</label>
+                                    <label for="nombre">Name:</label>
                                     <input type="text" id="nombre" name="nombre" value="{{ obj.nombre }}" required>
                                 </div>
                                 <div class="form__group">
@@ -392,8 +392,8 @@
                                     <input type="color" id="color" name="color" value="{{ obj.color }}" required>
                                 </div>
                                 <div class="modal__settings__footer">
-                                    <button type="submit" class="btn btn-success">Guardar</button>
-                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-success">Save</button>
+                                    <a href="#" class="btn btn-secondary">Cancel</a>
                                 </div>
                             </form>
                         </div>
@@ -404,16 +404,16 @@
                 <div id="modal-delete-severities-{{ obj.id }}" class="modal__settings__edit">
                     <div class="modal__settings__content">
                         <div class="modal__settings__header">
-                            <h2>Eliminar Severity</h2>
+                            <h2>Delete Severity</h2>
                             <a href="#" class="modal__settings__close">&times;</a>
                         </div>
                         <div class="modal__settings__body">
-                            <p>¿Estás seguro de que deseas eliminar "{{ obj.nombre }}"?</p>
+                            <p>Are you sure you want to delete "{{ obj.nombre }}"?</p>
                             <form method="post" action="{% url 'settings_delete' 'severities' obj.id %}">
                                 {% csrf_token %}
                                 <div class="modal__settings__footer">
-                                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                    <a href="#" class="btn btn-secondary">Cancel</a>
                                 </div>
                             </form>
                         </div>
@@ -435,7 +435,7 @@
             <form method="post" action="{% url 'settings_create' 'severities' %}">
                 {% csrf_token %}
                 <div class="form__group">
-                    <label for="nombre">Nombre:</label>
+                    <label for="nombre">Name:</label>
                     <input type="text" id="nombre" name="nombre" required>
                 </div>
                 <div class="form__group">
@@ -443,10 +443,27 @@
                     <input type="color" id="color" name="color" required>
                 </div>
                 <div class="modal__settings__footer">
-                    <button type="submit" class="btn btn-success">Guardar</button>
-                    <a href="#" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <a href="#" class="btn btn-secondary">Cancel</a>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal para mostrar errores -->
+<div id="modal-error" class="modal__settings__edit {% if error_message %}modal-show{% endif %}">
+    <div class="modal__settings__content">
+        <div class="modal__settings__header">
+            <h2>Error</h2>
+            <a href="{% url 'settings_list' %}" class="modal__settings__close">&times;</a>
+        </div>
+        <div class="modal__settings__body">
+            <p>{{ error_message }}</p>
+            <div class="modal__settings__footer">
+                <a href="{% url 'settings_list' %}" class="btn btn-secondary">Accept</a>
+            </div>
         </div>
     </div>
 </div>

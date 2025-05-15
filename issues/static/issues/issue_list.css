@@ -3,27 +3,29 @@
     margin-top: 30px;
     display: grid;
     font-size: 12px;
-    /* Ajusta los anchos de cada columna a tu gusto */
-    grid-template-columns: 40px 40px 40px auto 130px 160px 160px 40px;
+    /* Aumentamos el ancho de las columnas 2 y 3 */
+    grid-template-columns: 45px 60px 60px auto 130px 160px 160px 40px;
     align-items: center;
     font-weight: bold;
     margin-bottom: 10px;
     padding: 0 10px;
-    gap: 25px; /* Espacio entre columnas, opcional */
+    gap: 15px; /* Gap reducido entre columnas */
 }
 
 .issue__key, .issue__text {
     text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Filas de issues */
 .issue__item-content {
     display: grid;
-    /* Misma configuración de columnas que la cabecera */
-    grid-template-columns: 40px 40px 40px auto 130px 160px 160px 40px;
+    grid-template-columns: 45px 60px 60px auto 130px 160px 160px 40px;
     align-items: center;
     padding: 10px;
-    gap: 25px; /* Espacio entre columnas, opcional */
+    gap: 15px; /* Mantener el mismo gap que la cabecera */
 }
 
 /* Estilos generales de la lista */
@@ -607,4 +609,86 @@
     0%   { opacity: 1; }
     80%  { opacity: 1; }
     100% { opacity: 0; height: 0; margin: 0; padding: 0; overflow: hidden; }
+}
+
+/* Estilos para los enlaces de ordenación */
+.sort-link {
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sort-link:hover {
+    color: #008aa8;
+}
+
+.sort-arrow {
+    margin-left: 5px;
+    font-size: 14px;
+}
+
+/* Estilos para las columnas ordenables */
+.issue__key {
+    cursor: pointer;
+}
+
+.issue__key:hover {
+    color: #008aa8;
+}
+
+/* Ajuste para cabeceras ordenables */
+.sort-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    gap: 0; /* Remove gap between text and icon */
+    position: relative;
+    width: 100%;
+}
+
+.sort-header span {
+    font-size: 11px; /* Slightly smaller font */
+    text-align: center;
+    flex-shrink: 0; /* Prevents the text from shrinking */
+}
+
+.sort-icon {
+    text-decoration: none;
+    color: #666;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 2px; /* Small gap between text and icon */
+}
+
+.sort-icon:hover {
+    color: #008aa8;
+}
+
+/* Iconos de Material Design para ordenación - más pequeños */
+.sort-icon .material-icons {
+    font-size: 12px; /* Reduce el tamaño de los iconos */
+}
+
+/* Icono por defecto (menos visible) */
+.sort-default {
+    color: #aaa;
+    font-size: 10px; /* Más pequeño para el ícono por defecto */
+}
+
+/* Asegurar que las cabeceras tienen suficiente espacio */
+.issue__key, .issue__key-container span {
+    display: flex;
+    position: relative;
+    padding-right: 2px; /* Less padding */
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add ellipsis if needed */
+}
+
+/* Ajustar la alineación del header de Issues */
+.issue__key-container span:nth-child(4) .sort-header {
+    justify-content: flex-start; /* Alinear a la izquierda */
 }

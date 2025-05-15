@@ -1,13 +1,119 @@
 <section class="issue__table">
     <!-- Cabecera de columnas -->
     <div class="issue__key-container">
-        <span class="issue__key">Type</span>
-        <span class="issue__key">Severity</span>
-        <span class="issue__key">Priority</span>
-        <span>Issue</span>
-        <span class="issue__key">Status</span>
-        <span class="issue__key">Modified</span>
-        <span class="issue__key">Assign to</span>
+        <!-- Cabecera de columnas con iconos de ordenación -->
+        <span class="issue__key">
+            <div class="sort-header">
+                <span>Type</span>
+                <a href="?sort={% if current_sort.field == 'issue_type' and current_sort.direction == '' %}-{% endif %}issue_type" class="sort-icon">
+                    {% if current_sort.field == 'issue_type' %}
+                        {% if current_sort.direction == '-' %}
+                            <span class="material-icons">arrow_downward</span>
+                        {% else %}
+                            <span class="material-icons">arrow_upward</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="material-icons sort-default">unfold_more</span>
+                    {% endif %}
+                </a>
+            </div>
+        </span>
+        <span class="issue__key">
+            <div class="sort-header">
+                <span>Severity</span>
+                <a href="?sort={% if current_sort.field == 'severity' and current_sort.direction == '' %}-{% endif %}severity" class="sort-icon">
+                    {% if current_sort.field == 'severity' %}
+                        {% if current_sort.direction == '-' %}
+                            <span class="material-icons">arrow_downward</span>
+                        {% else %}
+                            <span class="material-icons">arrow_upward</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="material-icons sort-default">unfold_more</span>
+                    {% endif %}
+                </a>
+            </div>
+        </span>
+        <span class="issue__key">
+            <div class="sort-header">
+                <span>Priority</span>
+                <a href="?sort={% if current_sort.field == 'priority' and current_sort.direction == '' %}-{% endif %}priority" class="sort-icon">
+                    {% if current_sort.field == 'priority' %}
+                        {% if current_sort.direction == '-' %}
+                            <span class="material-icons">arrow_downward</span>
+                        {% else %}
+                            <span class="material-icons">arrow_upward</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="material-icons sort-default">unfold_more</span>
+                    {% endif %}
+                </a>
+            </div>
+        </span>
+        <span>
+            <div class="sort-header">
+                <span>Issue</span>
+                <a href="?sort={% if current_sort.field == 'id' and current_sort.direction == '' %}-{% endif %}id" class="sort-icon">
+                    {% if current_sort.field == 'id' %}
+                        {% if current_sort.direction == '-' %}
+                            <span class="material-icons">arrow_downward</span>
+                        {% else %}
+                            <span class="material-icons">arrow_upward</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="material-icons sort-default">unfold_more</span>
+                    {% endif %}
+                </a>
+            </div>
+        </span>
+        <span class="issue__key">
+            <div class="sort-header">
+                <span>Status</span>
+                <a href="?sort={% if current_sort.field == 'status' and current_sort.direction == '' %}-{% endif %}status" class="sort-icon">
+                    {% if current_sort.field == 'status' %}
+                        {% if current_sort.direction == '-' %}
+                            <span class="material-icons">arrow_downward</span>
+                        {% else %}
+                            <span class="material-icons">arrow_upward</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="material-icons sort-default">unfold_more</span>
+                    {% endif %}
+                </a>
+            </div>
+        </span>
+        <span class="issue__key">
+            <div class="sort-header">
+                <span>Modified</span>
+                <a href="?sort={% if current_sort.field == 'created_at' and current_sort.direction == '' %}-{% endif %}created_at" class="sort-icon">
+                    {% if current_sort.field == 'created_at' %}
+                        {% if current_sort.direction == '-' %}
+                            <span class="material-icons">arrow_downward</span>
+                        {% else %}
+                            <span class="material-icons">arrow_upward</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="material-icons sort-default">unfold_more</span>
+                    {% endif %}
+                </a>
+            </div>
+        </span>
+        <span class="issue__key">
+            <div class="sort-header">
+                <span>Assign to</span>
+                <a href="?sort={% if current_sort.field == 'assigned_to' and current_sort.direction == '' %}-{% endif %}assigned_to" class="sort-icon">
+                    {% if current_sort.field == 'assigned_to' %}
+                        {% if current_sort.direction == '-' %}
+                            <span class="material-icons">arrow_downward</span>
+                        {% else %}
+                            <span class="material-icons">arrow_upward</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="material-icons sort-default">unfold_more</span>
+                    {% endif %}
+                </a>
+            </div>
+        </span>
     </div>
 
     <ul>
