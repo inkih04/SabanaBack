@@ -252,3 +252,35 @@
     font-size: 16px;
     text-align: center;
 }
+
+/* Estilos para mensajes de error en la configuración */
+.settings__error {
+    background-color: #ffebee;
+    border-left: 5px solid #f44336;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.settings__error h2 {
+    color: #d32f2f;
+    margin-top: 0;
+}
+
+.settings__error p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.settings__error-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Add this to your CSS file or create a <style> tag in the template */
+.modal-show {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+}

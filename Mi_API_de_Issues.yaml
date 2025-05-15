@@ -1,0 +1,2064 @@
+openapi: 3.0.3
+info:
+  title: Mi API de Issues
+  version: v1
+  description: Esta documentación Open API para la API REST de nuestra aplicación
+    Sabana ha sido generada con drf-spectacular y OpenAPI 3.0. Una versión webapp
+    estádisponible en <https://it22d-backend.onrender.com/> . Todas las operaciones
+    son ejecutables pero necesitan autentificación. La autentificación se realiza
+    mediante un token que varia de usuario a usuario y que se consigue desde la aplicación.
+servers:
+  - url: https://it22d-backend.onrender.com/
+paths:
+  /api/comments/:
+    get:
+      operationId: api_comments_list
+      description: Recupera la lista de todos los comentarios. Se puede filtrar por
+        issue o por usuario.
+      summary: Listar comentarios
+      parameters:
+      - in: query
+        name: issue
+        schema:
+          type: integer
+        description: Filtrar por ID de issue
+      - in: query
+        name: user
+        schema:
+          type: integer
+        description: Filtrar por ID de usuario
+      tags:
+      - Comments
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+          description: ''
+    post:
+      operationId: api_comments_create
+      description: Crea un nuevo comentario en un issue.
+      summary: Crear comentario
+      tags:
+      - Comments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+        required: true
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+          description: ''
+  /api/comments/{id}/:
+    get:
+      operationId: api_comments_retrieve
+      description: Recupera los detalles de un comentario específico por su ID.
+      summary: Obtener comentario
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: ID del comentario
+        required: true
+      tags:
+      - Comments
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+          description: ''
+    put:
+      operationId: api_comments_update
+      description: Actualiza completamente un comentario existente.
+      summary: Actualizar comentario completo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this comment.
+        required: true
+      tags:
+      - Comments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+        required: true
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+          description: ''
+    delete:
+      operationId: api_comments_destroy
+      description: Elimina un comentario existente.
+      summary: Eliminar comentario
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this comment.
+        required: true
+      tags:
+      - Comments
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '204':
+          description: No response body
+  /api/comments/issue/{issue_id}/:
+    get:
+      operationId: api_comments_issue_list
+      description: Devuelve todos los comentarios de un issue específico.
+      summary: Comentarios de un issue
+      parameters:
+      - in: path
+        name: issue_id
+        schema:
+          type: integer
+        description: ID del issue
+        required: true
+      tags:
+      - Comments
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+          description: ''
+  /api/comments/latest/:
+    get:
+      operationId: api_comments_latest_list
+      description: Devuelve los comentarios más recientes.
+      summary: Comentarios recientes
+      parameters:
+      - in: query
+        name: limit
+        schema:
+          type: integer
+        description: 'Número máximo de comentarios a devolver (predeterminado: 10)'
+      tags:
+      - Comments
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+          description: ''
+  /api/comments/my-comments/:
+    get:
+      operationId: api_comments_my_comments_list
+      description: Devuelve todos los comentarios realizados por el usuario autenticado.
+      summary: Comentarios del usuario actual
+      tags:
+      - Comments
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+          description: ''
+  /api/issues/:
+    get:
+      operationId: api_issues_list
+      description: Devuelve una lista de issues con filtros opcionales ('status',
+        'priority', etc.) y ordenación.
+      summary: Listar issues
+      parameters:
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Filter by status id
+      - in: query
+        name: priority
+        schema:
+          type: string
+        description: Filter by priority id
+      - in: query
+        name: severity
+        schema:
+          type: string
+        description: Filter by severity id
+      - in: query
+        name: status_name
+        schema:
+          type: string
+        description: Filter by status name
+      - in: query
+        name: priority_name
+        schema:
+          type: string
+        description: Filter by priority name
+      - in: query
+        name: severity_name
+        schema:
+          type: string
+        description: Filter by severity name
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - Issues
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Issue'
+              examples:
+                RespuestaEjemploLista:
+                  value:
+                  - - id: 1
+                      title: Bug login
+                      status: 2
+                    - id: 2
+                      title: Añadir tests
+                      status: 1
+                  summary: Respuesta Ejemplo Lista
+          description: ''
+    post:
+      operationId: api_issues_create
+      description: Crea un nuevo issue. Se pueden adjuntar archivos usando el campo
+        'files'.
+      summary: Crear un nuevo issue
+      tags:
+      - Issues
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IssueCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IssueCreateRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueCreateRequest'
+            examples:
+              EjemploRequestCreate:
+                value:
+                  title: Bug registro
+                  description: Al registrarse con email, muestra error.
+                  priority: 3
+                  status: 1
+                summary: Ejemplo Request Create
+        required: true
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+              examples:
+                RespuestaEjemploCreate:
+                  value:
+                    id: 3
+                    title: Bug registro
+                    status: 1
+                  summary: Respuesta Ejemplo Create
+          description: ''
+  /api/issues/{id}/:
+    get:
+      operationId: api_issues_retrieve
+      description: Recupera los detalles de un issue específico por su ID.
+      summary: Obtener issue por ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: ID del issue
+        required: true
+      tags:
+      - Issues
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+              examples:
+                RespuestaEjemploRetrieve:
+                  value:
+                    id: 1
+                    title: Bug login
+                    description: Error 500 al hacer login
+                  summary: Respuesta Ejemplo Retrieve
+          description: ''
+    put:
+      operationId: api_issues_update
+      description: Actualiza campos de un issue existente (parcial o completo).Se
+        pueden subir nuevos archivos con 'files'.
+      summary: Actualizar un issue
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this issue.
+        required: true
+      tags:
+      - Issues
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IssueCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IssueCreateRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueCreateRequest'
+            examples:
+              EjemploRequestUpdate:
+                value:
+                  title: Bug login corregido
+                  status: 2
+                summary: Ejemplo Request Update
+        required: true
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+          description: ''
+    delete:
+      operationId: api_issues_destroy
+      description: Elimina un issue por su ID.
+      summary: Eliminar un issue
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: ID del issue a eliminar
+        required: true
+      tags:
+      - Issues
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '204':
+          description: No response body
+  /api/issues/bulk-create/:
+    post:
+      operationId: api_issues_bulk_create_create
+      description: Crea múltiples issues sin aplicar filtros ni paginación.
+      summary: Permite crear muchos issues a la vez
+      tags:
+      - Issues
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueBulkCreateRequest'
+            examples:
+              BulkCreateRequest:
+                value:
+                  issues:
+                  - subject: Error al guardar perfil
+                  - subject: Mejorar rendimiento API
+                summary: Ejemplo de petición para crear dos issues
+                description: Se envía una lista de objetos con el campo 'subject'.
+        required: true
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Issue'
+              examples:
+                BulkCreateResponse:
+                  value:
+                  - - id: 10
+                      subject: Error al guardar perfil
+                    - id: 11
+                      subject: Mejorar rendimiento API
+                  summary: Respuesta tras crear issues
+                  description: Se devuelven los datos de los issues recién creados,
+                    incluyendo el 'id'.
+          description: ''
+  /api/issues/search/{term}/:
+    get:
+      operationId: api_issues_search_list
+      description: Devuelve todos los issues cuyo subject o description contienen
+        el término dado.
+      summary: Buscar issues por texto
+      parameters:
+      - in: query
+        name: status
+        schema:
+          type: integer
+      - in: query
+        name: priority
+        schema:
+          type: integer
+      - in: query
+        name: severity
+        schema:
+          type: integer
+      - in: query
+        name: status_name
+        schema:
+          type: string
+      - in: query
+        name: priority_name
+        schema:
+          type: string
+      - in: query
+        name: severity_name
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: path
+        name: term
+        schema:
+          type: string
+        description: Texto a buscar en subject o description
+        required: true
+      tags:
+      - Issues
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Issue'
+              examples:
+                BúsquedaConResultados:
+                  value:
+                  - - id: 1
+                      subject: Error de login en app móvil
+                      description: Al intentar iniciar sesión desde la app, se lanza
+                        un error 500.
+                      created_at: '2025-04-18T12:34:56Z'
+                      due_date: '2025-04-25'
+                      status:
+                        id: 2
+                        nombre: Abierto
+                      priority:
+                        id: 3
+                        nombre: Alta
+                      severity:
+                        id: 1
+                        nombre: Crítica
+                      issue_type:
+                        id: 4
+                        nombre: Bug
+                      assigned_to:
+                        id: 7
+                        username: developer_juan
+                        email: juan@example.com
+                      created_by:
+                        id: 1
+                        username: admin
+                        email: admin@example.com
+                      watchers:
+                      - id: 8
+                        username: qa_maria
+                        email: maria@example.com
+                      - id: 9
+                        username: lead_pedro
+                        email: pedro@example.com
+                      attachment:
+                      - id: 101
+                        file: /media/attachments/log-error-20250418.txt
+                      comments:
+                      - id: 201
+                        user:
+                          id: 8
+                          username: qa_maria
+                        text: Este error se produce solo en Android
+                        created_at: '2025-04-19T09:00:00Z'
+                    - id: 2
+                      subject: Login lento en portal web
+                      description: El inicio de sesión tarda más de 10 segundos.
+                      created_at: '2025-04-17T10:00:00Z'
+                      due_date: '2025-04-22'
+                      status:
+                        id: 2
+                        nombre: Abierto
+                      priority:
+                        id: 2
+                        nombre: Media
+                      severity:
+                        id: 2
+                        nombre: Alta
+                      issue_type:
+                        id: 5
+                        nombre: Performance
+                      assigned_to:
+                        id: 10
+                        username: backend_luis
+                        email: luis@example.com
+                      created_by:
+                        id: 1
+                        username: admin
+                        email: admin@example.com
+                      watchers: []
+                      attachment: []
+                      comments: []
+                  summary: Buscar issues que incluyan 'login'
+                  description: Devuelve una lista de issues que contienen la palabra
+                    'login' en subject o description.
+          description: ''
+  /api/priorities/:
+    get:
+      operationId: api_priorities_list
+      description: Devuelve una lista de prioridades i filtra por nombres similares
+        al parametro name.
+      summary: Listar prioridades
+      parameters:
+      - in: query
+        name: name
+        schema:
+          type: string
+        description: Filtro para que solo aparezcan las prioridades que contengan
+          'name' en su nombre, és insensible a mayúsculas/minúsculas.
+      tags:
+      - Priorities
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Priorities'
+              examples:
+                TypeListExample:
+                  value:
+                  - - id: 1
+                      nombre: Urgent
+                      color: '#FF0000'
+                    - id: 2
+                      nombre: High
+                      color: '#FFA500'
+                    - id: 3
+                      nombre: Medium
+                      color: '#bb5816'
+                    - id: 4
+                      nombre: Low
+                      color: '#00FF00'
+                  summary: Listado de prioridades
+                  description: Respuesta con todas las prioridades
+                TypeListFilterResponse:
+                  value:
+                  - - id: 4
+                      nombre: Low
+                      color: '#00FF00'
+                  summary: Respuesta al filtrar por nombre
+                  description: Ejemplo de respuesta al filtrar por nombre 'Low'.
+          description: ''
+    post:
+      operationId: api_priorities_create
+      description: Crea una nueva prioridad con los parametros recibidos.
+      summary: Crea una nueva prioridad
+      tags:
+      - Priorities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrioritiesRequest'
+            examples:
+              CreateTypeRequest:
+                value:
+                  nombre: Low
+                  color: '#00FF00'
+                summary: Body para crear
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PrioritiesRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PrioritiesRequest'
+        required: true
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Priorities'
+              examples:
+                CreateTypeResponse:
+                  value:
+                    id: 4
+                    nombre: Low
+                    color: '#00FF00'
+                  summary: Respuesta al crear
+          description: ''
+        '400':
+          description: Parámetros inválidos
+  /api/priorities/{id}/:
+    get:
+      operationId: api_priorities_retrieve
+      description: Devuelve una prioridad dado su id.
+      summary: Obtener una prioridad dado su id
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: ID de la prioridad a obtener
+        required: true
+      tags:
+      - Priorities
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Priorities'
+              examples:
+                RetrieveTypeExample:
+                  value:
+                    id: 4
+                    nombre: Low
+                    color: '#00FF00'
+                  summary: Obtener una prioridad
+          description: ''
+        '404':
+          description: Prioridad no encontrado
+    put:
+      operationId: api_priorities_update
+      description: Actualiza campos de una prioridad existente.
+      summary: Actualizar una prioridad
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this priorities.
+        required: true
+      tags:
+      - Priorities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrioritiesRequest'
+            examples:
+              UpdateTypeRequest:
+                value:
+                  nombre: Low
+                  color: '#00FF00'
+                summary: Body para actualizar
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PrioritiesRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PrioritiesRequest'
+        required: true
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Priorities'
+              examples:
+                UpdateTypeResponse:
+                  value:
+                    id: 4
+                    nombre: Low
+                    color: '#00FF00'
+                  summary: Respuesta al actualizar
+          description: ''
+        '400':
+          description: Parámetros inválidos
+        '404':
+          description: No encontrado
+        '409':
+          description: No puedes modificar el nombre de la prioridad por defecto
+    delete:
+      operationId: api_priorities_destroy
+      description: Elimina una prioridad dado su id.
+      summary: Eliminar una prioridad
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this priorities.
+        required: true
+      tags:
+      - Priorities
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '204':
+          description: Eliminado correctamente
+        '404':
+          description: No encontrado
+        '409':
+          description: No Puedes Borrar la prioridad por defecto
+  /api/profiles/{id}/:
+    get:
+      operationId: api_profiles_retrieve
+      description: Recupera los detalles del perfil de un usuario por su ID.
+      summary: Obtener perfil de usuario
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: ID del perfil
+        required: true
+      tags:
+      - Profile
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+  /api/profiles/{id}/assigned-issues/:
+    get:
+      operationId: api_profiles_assigned_issues_list
+      description: Devuelve los issues abiertos asignados al usuario.
+      summary: Obtener issues asignados
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this profile.
+        required: true
+      tags:
+      - Profile
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Issue'
+          description: ''
+  /api/profiles/{id}/user-comments/:
+    get:
+      operationId: api_profiles_user_comments_list
+      description: Devuelve los comentarios realizados por el usuario.
+      summary: Obtener comentarios del usuario
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this profile.
+        required: true
+      tags:
+      - Profile
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+          description: ''
+  /api/profiles/{id}/watched-issues/:
+    get:
+      operationId: api_profiles_watched_issues_list
+      description: Devuelve los issues que el usuario está observando.
+      summary: Obtener issues observados
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this profile.
+        required: true
+      tags:
+      - Profile
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Issue'
+          description: ''
+  /api/profiles/edit-bio/:
+    put:
+      operationId: api_profiles_edit_bio_update
+      description: Actualiza la biografía del perfil del usuario actual.
+      summary: Editar biografía
+      tags:
+      - Profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                biography:
+                  type: string
+              required:
+              - biography
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+  /api/profiles/edit-picture/:
+    put:
+      operationId: api_profiles_edit_picture_update
+      description: Actualiza la imagen de perfil del usuario actual. Usa un formulario
+        multipart para subir la imagen.
+      summary: Editar imagen de perfil
+      tags:
+      - Profile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+              required:
+              - avatar
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+  /api/profiles/me/:
+    get:
+      operationId: api_profiles_me_retrieve
+      description: Devuelve el perfil del usuario actualmente autenticado.
+      summary: Obtener perfil del usuario actual
+      tags:
+      - Profile
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+  /api/severities/:
+    get:
+      operationId: api_severities_list
+      description: Devuelve una lista de severidades con filtrado por nombre.
+      summary: Listar severidades
+      parameters:
+      - in: query
+        name: nombre
+        schema:
+          type: string
+        description: Filtra las severidades cuyo nombre contenga el valor dado
+      tags:
+      - Severities
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Severities'
+              examples:
+                SeverityListExample:
+                  value:
+                  - - id: 1
+                      nombre: Critical
+                      slug: critical
+                      color: '#FF0000'
+                    - id: 2
+                      nombre: High
+                      slug: high
+                      color: '#FFA500'
+                    - id: 3
+                      nombre: Medium
+                      slug: medium
+                      color: '#FFFF00'
+                    - id: 4
+                      nombre: Low
+                      slug: low
+                      color: '#00FF00'
+                  summary: Listado de severidades
+                  description: Respuesta con todas las severidades
+          description: ''
+    post:
+      operationId: api_severities_create
+      description: Crea una nueva severidad a partir de un nombre y un color.
+      summary: Crear una nueva severidad
+      tags:
+      - Severities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SeveritiesRequest'
+            examples:
+              CreateSeverityRequest:
+                value:
+                  nombre: Blocker
+                  color: '#8B0000'
+                summary: Payload para crear
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SeveritiesRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SeveritiesRequest'
+        required: true
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Severities'
+              examples:
+                CreateSeverityResponse:
+                  value:
+                    id: 5
+                    nombre: Blocker
+                    slug: blocker
+                    color: '#8B0000'
+                  summary: Respuesta al crear
+          description: ''
+  /api/severities/{id}/:
+    get:
+      operationId: api_severities_retrieve
+      description: Devuelve una severidad dado su id.
+      summary: Obtener una severidad dado su id
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this severities.
+        required: true
+      tags:
+      - Severities
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Severities'
+              examples:
+                RetrieveSeverityExample:
+                  value:
+                    id: 1
+                    nombre: Critical
+                    slug: critical
+                    color: '#FF0000'
+                  summary: Obtener una única severidad
+          description: ''
+    put:
+      operationId: api_severities_update
+      description: Actualiza campos de una severidad existente.
+      summary: Actualizar una severidad
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this severities.
+        required: true
+      tags:
+      - Severities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SeveritiesRequest'
+            examples:
+              UpdateSeverityRequest:
+                value:
+                  nombre: Major
+                  color: '#FF4500'
+                summary: Payload para actualizar
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SeveritiesRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SeveritiesRequest'
+        required: true
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Severities'
+              examples:
+                UpdateSeverityResponse:
+                  value:
+                    id: 2
+                    nombre: Major
+                    slug: major
+                    color: '#FF4500'
+                  summary: Respuesta al actualizar
+          description: ''
+    delete:
+      operationId: api_severities_destroy
+      description: Elimina una severidad dado su id, reasignando sus issues a 'Normal'.
+      summary: Eliminar una severidad
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this severities.
+        required: true
+      tags:
+      - Severities
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '204':
+          description: No response body
+  /api/statuses/:
+    get:
+      operationId: api_statuses_list
+      description: Devuelve una lista de statuses con filtrado por nombre.
+      summary: Listar statuses
+      parameters:
+      - in: query
+        name: nombre
+        schema:
+          type: string
+        description: Filtra los statuses cuyo nombre contenga el valor dado
+      tags:
+      - Statuses
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Status'
+              examples:
+                StatusListExample:
+                  value:
+                  - - id: 1
+                      nombre: Open
+                      slug: open
+                      color: '#00FF00'
+                    - id: 2
+                      nombre: Closed
+                      slug: closed
+                      color: '#FF0000'
+                  summary: Listado de estados
+                  description: Respuesta con todos los estados
+          description: ''
+    post:
+      operationId: api_statuses_create
+      description: Crea un nuevo status a partir de un nombre y un color.
+      summary: Crear un nuevo status
+      tags:
+      - Statuses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusRequest'
+            examples:
+              CreateStatusRequest:
+                value:
+                  nombre: Pending
+                  color: '#FFFF00'
+                summary: Payload para crear
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StatusRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StatusRequest'
+        required: true
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+              examples:
+                CreateStatusResponse:
+                  value:
+                    id: 3
+                    nombre: Pending
+                    slug: pending
+                    color: '#FFFF00'
+                  summary: Respuesta al crear
+          description: ''
+  /api/statuses/{id}/:
+    get:
+      operationId: api_statuses_retrieve
+      description: Devuelve un status dado su id.
+      summary: Obtener un status dado su id
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this status.
+        required: true
+      tags:
+      - Statuses
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+              examples:
+                RetrieveStatusExample:
+                  value:
+                    id: 1
+                    nombre: Open
+                    slug: open
+                    color: '#00FF00'
+                  summary: Obtener un único estado
+          description: ''
+    put:
+      operationId: api_statuses_update
+      description: Actualiza campos de un status existente.
+      summary: Actualizar un status
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this status.
+        required: true
+      tags:
+      - Statuses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusRequest'
+            examples:
+              UpdateStatusRequest:
+                value:
+                  nombre: In Progress
+                  color: '#0000FF'
+                summary: Payload para actualizar
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StatusRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StatusRequest'
+        required: true
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+              examples:
+                UpdateStatusResponse:
+                  value:
+                    id: 1
+                    nombre: In Progress
+                    slug: in-progress
+                    color: '#0000FF'
+                  summary: Respuesta al actualizar
+          description: ''
+    delete:
+      operationId: api_statuses_destroy
+      description: Elimina un status dado su id, reasignando sus issues a 'New'.
+      summary: Eliminar un status
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this status.
+        required: true
+      tags:
+      - Statuses
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '204':
+          description: No response body
+  /api/types/:
+    get:
+      operationId: api_types_list
+      description: Devuelve una lista de tipos i filtra por nombres similares al parametro
+        name.
+      summary: Listar tipos
+      parameters:
+      - in: query
+        name: name
+        schema:
+          type: string
+        description: Filtro para que solo aparezcan los tipos que contengan 'name'
+          en su nombre, és insensible a mayúsculas/minúsculas.
+      tags:
+      - Types
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Types'
+              examples:
+                TypeListExample:
+                  value:
+                  - - id: 3
+                      nombre: Improvement
+                      color: '#3357FF'
+                    - id: 5
+                      nombre: Question
+                      color: '#1eff00'
+                    - id: 7
+                      nombre: Bug
+                      color: '#FF0000'
+                  summary: Listado de tipos
+                  description: Respuesta con todos los tipos
+                TypeListFilterResponse:
+                  value:
+                  - - id: 7
+                      nombre: Bug
+                      color: '#FF0000'
+                  summary: Respuesta al filtrar por nombre
+                  description: Ejemplo de respuesta al filtrar por nombre 'Bug'.
+          description: ''
+    post:
+      operationId: api_types_create
+      description: Crea un nuevo tipo con los parametros recibidos.
+      summary: Crea un nuevo tipo
+      tags:
+      - Types
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TypesRequest'
+            examples:
+              CreateTypeRequest:
+                value:
+                  nombre: Bug
+                  color: '#FF0000'
+                summary: Body para crear
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TypesRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TypesRequest'
+        required: true
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Types'
+              examples:
+                CreateTypeResponse:
+                  value:
+                    id: 7
+                    nombre: Bug
+                    color: '#FF0000'
+                  summary: Respuesta al crear
+          description: ''
+        '400':
+          description: Parámetros inválidos
+  /api/types/{id}/:
+    get:
+      operationId: api_types_retrieve
+      description: Devuelve un tipo dado su id.
+      summary: Obtener un tipo dado su id
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: ID del tipo a obtener
+        required: true
+      tags:
+      - Types
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Types'
+              examples:
+                RetrieveTypeExample:
+                  value:
+                    id: 7
+                    nombre: Bug
+                    color: '#FF0000'
+                  summary: Obtener un tipo
+          description: ''
+        '404':
+          description: Tipo no encontrado
+    put:
+      operationId: api_types_update
+      description: Actualiza campos de un tipo existente.
+      summary: Actualizar un tipo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this types.
+        required: true
+      tags:
+      - Types
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TypesRequest'
+            examples:
+              UpdateTypeRequest:
+                value:
+                  nombre: Bug
+                  color: '#FF0000'
+                summary: Body para actualizar
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TypesRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TypesRequest'
+        required: true
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Types'
+              examples:
+                UpdateTypeResponse:
+                  value:
+                    id: 7
+                    nombre: Bug
+                    color: '#FF0000'
+                  summary: Respuesta al actualizar
+          description: ''
+        '400':
+          description: Parámetros inválidos
+        '404':
+          description: No encontrado
+        '409':
+          description: No puedes modificar el nombre del tipo por defecto
+    delete:
+      operationId: api_types_destroy
+      description: Elimina un tipo dado su id.
+      summary: Eliminar un tipo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this types.
+        required: true
+      tags:
+      - Types
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '204':
+          description: Eliminado correctamente
+        '404':
+          description: No encontrado
+        '409':
+          description: No Puedes Borrar el tipo por defecto
+  /api/users/:
+    get:
+      operationId: api_users_list
+      description: Devuelve una lista de usuarios i los filtra por nombre.
+      summary: Obtener usuarios del sistema
+      parameters:
+      - in: query
+        name: username
+        schema:
+          type: string
+        description: Filtro para buscar usuarios a traves de su nombre de usuario.
+      - in: query
+        name: bio
+        schema:
+          type: string
+        description: Filtro para buscar usuarios por su biografía.
+      tags:
+      - Users
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExtendedUser'
+              examples:
+                UserListExample:
+                  value:
+                  - - id: 1
+                      username: victor
+                      email: ''
+                      profile_id: 1
+                      watched_issues_count: 0
+                      assigned_issues_count: 1
+                      created_issues_count: 0
+                      comments_count: 0
+                    - id: 3
+                      username: david
+                      email: ''
+                      profile_id: 3
+                      watched_issues_count: 6
+                      assigned_issues_count: 5
+                      created_issues_count: 5
+                      comments_count: 0
+                    - id: 4
+                      username: david5
+                      email: ''
+                      profile_id: 4
+                      watched_issues_count: 0
+                      assigned_issues_count: 0
+                      created_issues_count: 0
+                      comments_count: 1
+                  summary: Listado de Usuarios
+                  description: Respuesta con todos los Usuarios
+                UserListFilterResponse:
+                  value:
+                  - - id: 3
+                      username: david
+                      email: ''
+                      profile_id: 3
+                      watched_issues_count: 6
+                      assigned_issues_count: 5
+                      created_issues_count: 5
+                      comments_count: 0
+                    - id: 4
+                      username: david5
+                      email: ''
+                      profile_id: 4
+                      watched_issues_count: 0
+                      assigned_issues_count: 0
+                      created_issues_count: 0
+                      comments_count: 1
+                  summary: Respuesta al filtrar por nombre de usuario
+                  description: Ejemplo de respuesta al filtrar por nombre de usuario
+                    'david'.
+          description: ''
+  /api/users/{id}/:
+    get:
+      operationId: api_users_retrieve
+      description: Recupera los detalles del usuario por su ID.
+      summary: Obtener un Usuario a partir de su id
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: ID del usuario
+        required: true
+      tags:
+      - Users
+      security:
+      - ApiToken: []
+      - ApiToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtendedUser'
+              examples:
+                RetrieveUserExample:
+                  value:
+                    id: 3
+                    username: david
+                    email: ''
+                    profile_id: 3
+                    watched_issues_count: 6
+                    assigned_issues_count: 5
+                    created_issues_count: 5
+                    comments_count: 0
+                  summary: Obtener un Usuario
+          description: ''
+        '404':
+          description: Usuario no encontrado
+components:
+  schemas:
+    Attachment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        file:
+          type: string
+          format: uri
+        uploaded_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - file
+      - id
+      - uploaded_at
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        issue:
+          type: integer
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        text:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - issue
+      - published_at
+      - text
+      - user
+    CommentRequest:
+      type: object
+      properties:
+        issue:
+          type: integer
+        text:
+          type: string
+          minLength: 1
+      required:
+      - issue
+      - text
+    ExtendedUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        profile_id:
+          type: integer
+          readOnly: true
+        watched_issues_count:
+          type: integer
+          readOnly: true
+        assigned_issues_count:
+          type: integer
+          readOnly: true
+        created_issues_count:
+          type: integer
+          readOnly: true
+        comments_count:
+          type: integer
+          readOnly: true
+      required:
+      - assigned_issues_count
+      - comments_count
+      - created_issues_count
+      - id
+      - profile_id
+      - username
+      - watched_issues_count
+    Issue:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        subject:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/Status'
+          readOnly: true
+        priority:
+          allOf:
+          - $ref: '#/components/schemas/Priorities'
+          readOnly: true
+        severity:
+          allOf:
+          - $ref: '#/components/schemas/Severities'
+          readOnly: true
+        issue_type:
+          allOf:
+          - $ref: '#/components/schemas/Types'
+          readOnly: true
+        assigned_to:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        created_by:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        watchers:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          readOnly: true
+        attachment:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+          readOnly: true
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+          readOnly: true
+      required:
+      - assigned_to
+      - attachment
+      - comments
+      - created_at
+      - created_by
+      - description
+      - id
+      - issue_type
+      - priority
+      - severity
+      - status
+      - subject
+      - watchers
+    IssueBulkCreateRequest:
+      type: object
+      properties:
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssueBulkItemRequest'
+      required:
+      - issues
+    IssueBulkItemRequest:
+      type: object
+      properties:
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
+      required:
+      - subject
+    IssueCreateRequest:
+      type: object
+      properties:
+        subject:
+          type: string
+          minLength: 1
+        description:
+          type: string
+          minLength: 1
+        status_name:
+          type: string
+        priority_name:
+          type: string
+        severity_name:
+          type: string
+        issue_type_name:
+          type: string
+        assigned_to_username:
+          type: string
+        watchers_usernames:
+          type: array
+          items:
+            type: string
+        files:
+          type: array
+          items:
+            type: string
+            format: binary
+          description: Lista de ficheros a adjuntar (opcional)
+      required:
+      - description
+      - subject
+    Priorities:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 50
+        color:
+          type: string
+          maxLength: 7
+      required:
+      - id
+      - nombre
+    PrioritiesRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 50
+        color:
+          type: string
+          minLength: 1
+          maxLength: 7
+      required:
+      - nombre
+    Profile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        biography:
+          type: string
+          nullable: true
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - id
+      - user
+    Severities:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 50
+        color:
+          type: string
+          maxLength: 7
+      required:
+      - id
+      - nombre
+    SeveritiesRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 50
+        color:
+          type: string
+          minLength: 1
+          maxLength: 7
+      required:
+      - nombre
+    Status:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 50
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        color:
+          type: string
+          maxLength: 7
+      required:
+      - id
+      - nombre
+    StatusRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 50
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        color:
+          type: string
+          minLength: 1
+          maxLength: 7
+      required:
+      - nombre
+    Types:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 50
+        color:
+          type: string
+          maxLength: 7
+      required:
+      - id
+      - nombre
+    TypesRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 50
+        color:
+          type: string
+          minLength: 1
+          maxLength: 7
+      required:
+      - nombre
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+      required:
+      - id
+      - username
+    UserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+      required:
+      - username
+  securitySchemes:
+    ApiToken:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Introduce tu token directamente sin ningún prefijo

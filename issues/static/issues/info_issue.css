@@ -223,6 +223,22 @@ display:flex;
       background-color: #ec9239;
 }
 
+.issue-info-due-date-expired {
+    background-color: #dd3333;
+    color : #fff;
+}
+
+.issue-info-due-date-expired span {
+    color : #fff;
+}
+
+.issue-info-due-date-expired:hover {
+    background-color: #bb3333;
+}
+
+
+
+
 .issue-info-status-watchers {
       margin-bottom: 10px;
 }
@@ -546,6 +562,18 @@ display:flex;
 
 .issue-info-due-date-title span{
       color: #ea7c0e;
+    font-size: 27px;
+}
+
+
+.issue-info-due-date-title-expired{
+    margin-left: 5px; /* Añade un pequeño margen a la izquierda del icono */
+      display: inline-flex;
+      align-items: center;
+}
+
+.issue-info-due-date-title-expired span{
+    color: #dd3333;
     font-size: 27px;
 }
 

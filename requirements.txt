@@ -1,17 +1,18 @@
 Django~=5.2
-djangorestframework  # Si estás usando Django REST Framework
+djangorestframework
 django-environ~=0.12.0
-django-cors-headers  # Si usas CORS
+django-cors-headers
 django-allauth~=65.7.0
 django-allauth[socialaccount]
 gunicorn
 psycopg2-binary
 dj_database_url
 whitenoise
-django-storages
 django-storages[boto3]==1.14.6
 boto3
-
-
+drf-spectacular[sidecar]
+django-filter>=23.1
 views~=0.3
 requests~=2.25.1
+absl-py
+pillow

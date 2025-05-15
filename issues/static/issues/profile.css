@@ -83,7 +83,7 @@
     margin-top: 35px;
     font-size: 25px;
     padding: 10px 30px;
-    background-color: #83eede;
+    background-color: #43eede;;
     border: none;
     border-radius: 5px;
     box-shadow: 0 0 5px #aaa;
@@ -123,7 +123,7 @@
 .pageChanger {
     padding: 20px 30px;
     font-size: 20px;
-    background-color: #83eede;
+    background-color: #43eede;
     border: none;
     border-radius: 5px;
     box-shadow: 0 0 5px #aaa;
@@ -142,6 +142,43 @@
     background-color: #008aa8;
     color: white;
     cursor: pointer;
+}
+
+
+.pageChangerSchema {
+    display: flex;
+    align-items: center;
+    padding-right: 10px;
+    padding-left: 10px;
+    font-size: 20px;
+    background-color: #43eede;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #aaa;
+    text-decoration: none; /* Elimina el subrayado */
+    color: #000;
+    gap: 15px;
+}
+.pageChangerSchema p {
+    color: #fff;
+    text-shadow: 0 0px 5px rgba(0,0,0,0.3);
+}
+
+.unstyled-link {
+    text-decoration: none; /* Elimina el subrayado */
+    color: inherit; /* Mantiene el color del texto original, o puedes poner un color específico */
+}
+
+.pageChangerSchema:hover {
+    background-color: #008aa8;
+    cursor: pointer;
+}
+
+.pageChangerSchema:hover p{
+    color: #000;
+}
+.pageChangerSchema:hover span{
+    color: #fff;
 }
 
 .content--profile {
@@ -178,7 +215,8 @@
   z-index: 1000;
 }
 
-#modal-edit-bio:target {
+#modal-edit-bio:target,
+#modal-api-token:target {
   display: flex;
 }
 
@@ -319,5 +357,58 @@
 .profile__to-issue-link {
     text-decoration: none;
     color: #008aa8;
+}
 
+/* === API TOKEN MODAL STYLES === */
+.token-display {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.token-display label {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.token-value {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.9rem;
+  overflow-x: auto;
+  word-break: break-all;
+}
+
+.token-info {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.token-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.token-action-button {
+  background-color: #008aa8;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.token-action-button:hover {
+  background-color: #006d85;
 }
