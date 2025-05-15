@@ -770,6 +770,8 @@ paths:
           description: Parámetros inválidos
         '404':
           description: No encontrado
+        '409':
+          description: No puedes modificar el nombre de la prioridad por defecto
     delete:
       operationId: api_priorities_destroy
       description: Elimina una prioridad dado su id.
@@ -1731,6 +1733,8 @@ paths:
           description: Parámetros inválidos
         '404':
           description: No encontrado
+        '409':
+          description: No puedes modificar el nombre del tipo por defecto
     delete:
       operationId: api_types_destroy
       description: Elimina un tipo dado su id.
