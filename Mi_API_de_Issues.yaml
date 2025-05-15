@@ -7,6 +7,8 @@ info:
     estádisponible en <https://it22d-backend.onrender.com/> . Todas las operaciones
     son ejecutables pero necesitan autentificación. La autentificación se realiza
     mediante un token que varia de usuario a usuario y que se consigue desde la aplicación.
+servers:
+  - url: https://it22d-backend.onrender.com/
 paths:
   /api/comments/:
     get:
