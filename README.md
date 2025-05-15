@@ -12,7 +12,7 @@ Backend repository for the **sabana** project.
 ## 📌 Project Management
 
 We use **Taiga** for tracking tasks and project progress:  
-🔗 [Taiga Board](https://taiga.io/project-link-here)
+🔗 [Taiga Board](https://tree.taiga.io/project/victordiez-it22dasw/taskboard/sprint-1-22919)
 
 ## 🚀 Deployment
 
