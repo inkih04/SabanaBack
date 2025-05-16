@@ -15,7 +15,8 @@ from drf_spectacular.utils import (
 
 from issues.models import Issue, Attachment
 from ..filters import IssueFilter
-from ..serializers import IssueSerializer, AttachmentSerializer, IssueBulkCreateSerializer, IssueCreateSerializer
+from ..serializers import IssueSerializer, AttachmentSerializer, IssueBulkCreateSerializer, IssueCreateSerializer, IssueUpdateSerializer
+from ..serializers.IssueUpdateSerializer import IssueUpdateSerializer
 from ..serializers.issueBulk_serializer import IssueBulkResponseSerializer
 
 
@@ -101,7 +102,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
         description="Actualiza campos de un issue existente (parcial o completo)."
                     "Se pueden subir nuevos archivos con 'files'.",
         tags=["Issues"],
-        request=IssueCreateSerializer,
+        request=IssueUpdateSerializer,
         responses=IssueSerializer,
         examples=[
             OpenApiExample(
@@ -166,8 +167,10 @@ class IssueViewSet(viewsets.ModelViewSet):
     serializer_class = IssueSerializer
 
     def get_serializer_class(self):
-        if self.action in ('create', 'update', 'partial_update'):
+        if self.action in ('create', 'partial_update'):
             return IssueCreateSerializer
+        elif self.action =='update':
+            return IssueUpdateSerializer
         elif self.action == 'bulk_create':
             return IssueBulkCreateSerializer
         return IssueSerializer

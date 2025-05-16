@@ -31,7 +31,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = 'django-insecure-g(@l(g*1wva2_d+&y*fk5$k0ox%w=$(8e^d*1#6&pr9d$tr@5k'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = []
 # Agregar el dominio externo de Render a ALLOWED_HOSTS si está disponible
