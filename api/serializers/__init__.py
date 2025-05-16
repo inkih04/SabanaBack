@@ -11,6 +11,8 @@ from .SeveritiesSerializer import SeveritiesSerializer
 from .ProfileSerializer import ProfileSerializer
 from .issueBulk_serializer import IssueBulkItemSerializer, IssueBulkCreateSerializer
 from .issue_create_Serializer import IssueCreateSerializer
+from .CommentUpdateSerializer import CommentUpdateSerializer
+from .IssueUpdateSerializer import IssueUpdateSerializer
 
 __all__ = [
     'StatusSerializer',
@@ -26,5 +28,7 @@ __all__ = [
     'IssueBulkItemSerializer',
     'IssueBulkCreateSerializer',
     'IssueCreateSerializer'
+    'CommentUpdateSerializer',
+    'IssueCreateSerializer',
 ]
 
