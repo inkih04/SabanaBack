@@ -7,6 +7,7 @@ info:
     estádisponible en <https://it22d-backend.onrender.com/> . Todas las operaciones
     son ejecutables pero necesitan autentificación. La autentificación se realiza
     mediante un token que varia de usuario a usuario y que se consigue desde la aplicación.
+  
 servers:
   - url: https://it22d-backend.onrender.com/
 paths:
@@ -95,7 +96,7 @@ paths:
           description: ''
     put:
       operationId: api_comments_update
-      description: Actualiza completamente un comentario existente.
+      description: Actualiza completamente un comentario existente (solo texto).
       summary: Actualizar comentario completo
       parameters:
       - in: path
@@ -110,13 +111,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CommentRequest'
+              $ref: '#/components/schemas/CommentUpdateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/CommentRequest'
+              $ref: '#/components/schemas/CommentUpdateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CommentRequest'
+              $ref: '#/components/schemas/CommentUpdateRequest'
         required: true
       security:
       - ApiToken: []
@@ -147,32 +148,6 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/comments/issue/{issue_id}/:
-    get:
-      operationId: api_comments_issue_list
-      description: Devuelve todos los comentarios de un issue específico.
-      summary: Comentarios de un issue
-      parameters:
-      - in: path
-        name: issue_id
-        schema:
-          type: integer
-        description: ID del issue
-        required: true
-      tags:
-      - Comments
-      security:
-      - ApiToken: []
-      - ApiToken: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Comment'
-          description: ''
   /api/comments/latest/:
     get:
       operationId: api_comments_latest_list
@@ -377,20 +352,19 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/IssueCreateRequest'
+              $ref: '#/components/schemas/IssueUpdateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/IssueCreateRequest'
+              $ref: '#/components/schemas/IssueUpdateRequest'
           application/json:
             schema:
-              $ref: '#/components/schemas/IssueCreateRequest'
+              $ref: '#/components/schemas/IssueUpdateRequest'
             examples:
               EjemploRequestUpdate:
                 value:
                   title: Bug login corregido
                   status: 2
                 summary: Ejemplo Request Update
-        required: true
       security:
       - ApiToken: []
       - ApiToken: []
@@ -1717,6 +1691,14 @@ components:
       required:
       - issue
       - text
+    CommentUpdateRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+      required:
+      - text
     ExtendedUser:
       type: object
       properties:
@@ -1777,33 +1759,30 @@ components:
           format: date
           nullable: true
         status:
-          allOf:
-          - $ref: '#/components/schemas/Status'
+          type: string
           readOnly: true
         priority:
-          allOf:
-          - $ref: '#/components/schemas/Priorities'
+          type: string
           readOnly: true
         severity:
-          allOf:
-          - $ref: '#/components/schemas/Severities'
+          type: string
           readOnly: true
         issue_type:
-          allOf:
-          - $ref: '#/components/schemas/Types'
-          readOnly: true
-        assigned_to:
-          allOf:
-          - $ref: '#/components/schemas/User'
+          type: string
           readOnly: true
         created_by:
-          allOf:
-          - $ref: '#/components/schemas/User'
+          type: string
           readOnly: true
+        assigned_to:
+          type: string
+          readOnly: true
+          nullable: true
         watchers:
           type: array
           items:
-            $ref: '#/components/schemas/User'
+            type: string
+            description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+              only.
           readOnly: true
         attachment:
           type: array
@@ -1813,7 +1792,7 @@ components:
         comments:
           type: array
           items:
-            $ref: '#/components/schemas/Comment'
+            $ref: '#/components/schemas/IssueComment'
           readOnly: true
       required:
       - assigned_to
@@ -1847,6 +1826,21 @@ components:
           maxLength: 200
       required:
       - subject
+    IssueComment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        text:
+          type: string
+        user:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - text
+      - user
     IssueCreateRequest:
       type: object
       properties:
@@ -1879,6 +1873,33 @@ components:
       required:
       - description
       - subject
+    IssueUpdateRequest:
+      type: object
+      properties:
+        subject:
+          type: string
+        description:
+          type: string
+        status_name:
+          type: string
+        priority_name:
+          type: string
+        severity_name:
+          type: string
+        issue_type_name:
+          type: string
+        assigned_to_username:
+          type: string
+        watchers_usernames:
+          type: array
+          items:
+            type: string
+        files:
+          type: array
+          items:
+            type: string
+            format: binary
+          description: Lista de ficheros a adjuntar (opcional)
     Priorities:
       type: object
       properties:

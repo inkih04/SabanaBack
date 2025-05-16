@@ -43,10 +43,33 @@ class IssueCreateSerializer(serializers.ModelSerializer):
         files = validated_data.pop('files', [])
 
         # Resolvemos o creamos instancias relacionales
-        status_obj = Status.objects.get(nombre=status_name)
-        priority_obj = Priorities.objects.get(nombre=priority_name)
-        severity_obj = Severities.objects.get(nombre=severity_name)
-        type_obj = Types.objects.get(nombre=issue_type_name)
+        try:
+            status_obj = Status.objects.get(nombre=status_name)
+        except Status.DoesNotExist:
+            raise serializers.ValidationError({
+                'status_name': f"El status '{status_name}' no existe."
+            })
+
+        try:
+            priority_obj = Priorities.objects.get(nombre=priority_name)
+        except Priorities.DoesNotExist:
+            raise serializers.ValidationError({
+                'priority_name': f"La prioridad '{priority_name}' no existe."
+            })
+
+        try:
+            severity_obj = Severities.objects.get(nombre=severity_name)
+        except Severities.DoesNotExist:
+            raise serializers.ValidationError({
+                'severity_name': f"La severidad '{severity_name}' no existe."
+            })
+
+        try:
+            type_obj = Types.objects.get(nombre=issue_type_name)
+        except Types.DoesNotExist:
+            raise serializers.ValidationError({
+                'issue_type_name': f"El tipo de issue '{issue_type_name}' no existe."
+            })
 
         # Creamos el Issue
         issue = Issue.objects.create(
@@ -72,6 +95,11 @@ class IssueCreateSerializer(serializers.ModelSerializer):
                 })
 
         # Asignar watchers
+        if len(watchers_usernames) == 1 and isinstance(watchers_usernames[0], str) and ',' in watchers_usernames[0]:
+            watchers_usernames = [
+                u.strip() for u in watchers_usernames[0].split(',') if u.strip()
+            ]
+
         for username in watchers_usernames:
             try:
                 watcher = User.objects.get(username=username)
