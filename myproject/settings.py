@@ -97,6 +97,8 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
   'https://editor.swagger.io',
+  'https://it22d-backend.onrender.com',
+  "http://localhost:3000",
 ]
 
 # Provider specific settings
