@@ -295,12 +295,13 @@ class IssueViewSet(viewsets.ModelViewSet):
             qd = request.data.copy()
             qd._mutable = True
         else:
+            # request.data es dict cuando es JSON, copiamos para no modificar original
             qd = request.data.copy()
 
         if hasattr(request.data, 'getlist'):
             raw = request.data.getlist('watchers_usernames')
             if raw:
-                qd.setlist('watchers_usernames', [u.strip() for u in raw if isinstance(u, str) and u.strip()])
+                qd['watchers_usernames'] = [u.strip() for u in raw if isinstance(u, str) and u.strip()]
             else:
                 qd.pop('watchers_usernames', None)
 
@@ -308,7 +309,13 @@ class IssueViewSet(viewsets.ModelViewSet):
             qd.pop('files')
 
         clean_data = {}
-        for key, vals in qd.lists():
+
+        if hasattr(qd, 'lists'):
+            items = qd.lists()
+        else:
+            items = ((k, v if isinstance(v, list) else [v]) for k, v in qd.items())
+
+        for key, vals in items:
             if key in ('watchers_usernames', 'watchers_ids', 'files'):
                 clean_data[key] = vals
             else:
@@ -324,6 +331,7 @@ class IssueViewSet(viewsets.ModelViewSet):
         update_serializer.is_valid(raise_exception=True)
 
         issue = update_serializer.save()
+
         if request.FILES:
             for f in request.FILES.getlist('files'):
                 Attachment.objects.create(issue=issue, file=f)
