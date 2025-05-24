@@ -36,15 +36,21 @@ class AttachmentUploadSerializer(serializers.Serializer):
         tags=["Issues"],
         responses=IssueSerializer(many=True),
         parameters=[
-            OpenApiParameter('status', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by status id"),
-            OpenApiParameter('priority', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by priority id"),
-            OpenApiParameter('severity', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by severity id"),
             OpenApiParameter('status_name', OpenApiTypes.STR, OpenApiParameter.QUERY,
                              description="Filter by status name"),
             OpenApiParameter('priority_name', OpenApiTypes.STR, OpenApiParameter.QUERY,
                              description="Filter by priority name"),
             OpenApiParameter('severity_name', OpenApiTypes.STR, OpenApiParameter.QUERY,
                              description="Filter by severity name"),
+            # Nuevos parámetros para filtrar por usuarios
+            OpenApiParameter('assigned_to', OpenApiTypes.INT, OpenApiParameter.QUERY,
+                             description="Filter by assigned user ID"),
+            OpenApiParameter('assigned_to_username', OpenApiTypes.STR, OpenApiParameter.QUERY,
+                             description="Filter by assigned username"),
+            OpenApiParameter('created_by', OpenApiTypes.INT, OpenApiParameter.QUERY,
+                             description="Filter by creator user ID"),
+            OpenApiParameter('created_by_username', OpenApiTypes.STR, OpenApiParameter.QUERY,
+                             description="Filter by creator username"),
         ],
         examples=[
             OpenApiExample(
@@ -54,6 +60,20 @@ class AttachmentUploadSerializer(serializers.Serializer):
                     {"id": 2, "title": "Añadir tests", "status": 1, }
                 ],
                 response_only=True
+            ),
+            OpenApiExample(
+                'Filtrar por asignado',
+                summary="Filtrar issues por usuario asignado",
+                description="Ejemplo de cómo filtrar issues asignados a un usuario específico",
+                value="?assigned_to=5&status=1",
+                request_only=True
+            ),
+            OpenApiExample(
+                'Filtrar por creador',
+                summary="Filtrar issues por creador",
+                description="Ejemplo de cómo filtrar issues creados por un usuario específico",
+                value="?created_by_username=admin&priority=3",
+                request_only=True
             )
         ]
     ),
@@ -227,7 +247,7 @@ class IssueViewSet(viewsets.ModelViewSet):
                 clean_data[key] = vals[0] if len(vals) == 1 else vals
 
 
-        for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username']:
+        for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username', 'created_by_username']:
             if k in clean_data and clean_data[k] in (None, ''):
                 clean_data.pop(k)
 
@@ -270,7 +290,7 @@ class IssueViewSet(viewsets.ModelViewSet):
                 clean_data[key] = vals[0] if len(vals) == 1 else vals
 
 
-        for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username']:
+        for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username', 'created_by_username']:
             if k in clean_data and clean_data[k] in (None, ''):
                 clean_data.pop(k)
 
@@ -321,7 +341,7 @@ class IssueViewSet(viewsets.ModelViewSet):
             else:
                 clean_data[key] = vals[0] if len(vals) == 1 else vals
 
-        for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username']:
+        for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username', 'created_by_username']:
             if k in clean_data and clean_data[k] in (None, ''):
                 clean_data.pop(k)
 
