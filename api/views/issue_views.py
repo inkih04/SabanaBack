@@ -150,9 +150,23 @@ class AttachmentUploadSerializer(serializers.Serializer):
         ],
         responses={204: None}
     ),
+    partial_update=extend_schema(
+        summary="Actualizar parcialmente un issue",
+        description="Modifica solo algunos campos del issue.",
+        tags=["Issues"],
+        request=IssueUpdateSerializer,
+        responses=IssueSerializer,
+        examples=[
+            OpenApiExample(
+                'Ejemplo PATCH',
+                value={"title": "Nuevo título"},
+                request_only=True
+            )
+        ]
+    ),
 )
 class IssueViewSet(viewsets.ModelViewSet):
-    http_method_names = ['get', 'post', 'put', 'delete']
+    http_method_names = ['get', 'post', 'put', 'delete', 'patch']
     queryset = Issue.objects.all()
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
@@ -167,9 +181,9 @@ class IssueViewSet(viewsets.ModelViewSet):
     serializer_class = IssueSerializer
 
     def get_serializer_class(self):
-        if self.action in ('create', 'partial_update'):
+        if self.action == 'create':
             return IssueCreateSerializer
-        elif self.action =='update':
+        elif self.action in ('update', 'partial_update'):
             return IssueUpdateSerializer
         elif self.action == 'bulk_create':
             return IssueBulkCreateSerializer
@@ -275,6 +289,50 @@ class IssueViewSet(viewsets.ModelViewSet):
 
         response_serializer = IssueSerializer(issue)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+    def partial_update(self, request, *args, **kwargs):
+        if isinstance(request.data, QueryDict):
+            qd = request.data.copy()
+            qd._mutable = True
+        else:
+            qd = request.data.copy()
+
+        if hasattr(request.data, 'getlist'):
+            raw = request.data.getlist('watchers_usernames')
+            if raw:
+                qd.setlist('watchers_usernames', [u.strip() for u in raw if isinstance(u, str) and u.strip()])
+            else:
+                qd.pop('watchers_usernames', None)
+
+        if 'files' in qd and not request.FILES:
+            qd.pop('files')
+
+        clean_data = {}
+        for key, vals in qd.lists():
+            if key in ('watchers_usernames', 'watchers_ids', 'files'):
+                clean_data[key] = vals
+            else:
+                clean_data[key] = vals[0] if len(vals) == 1 else vals
+
+        for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username']:
+            if k in clean_data and clean_data[k] in (None, ''):
+                clean_data.pop(k)
+
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        update_serializer = self.get_serializer(instance, data=clean_data, partial=partial)
+        update_serializer.is_valid(raise_exception=True)
+
+        issue = update_serializer.save()
+        if request.FILES:
+            for f in request.FILES.getlist('files'):
+                Attachment.objects.create(issue=issue, file=f)
+
+        response_serializer = IssueSerializer(issue)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+
+
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
