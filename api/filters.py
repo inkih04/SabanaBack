@@ -5,16 +5,13 @@ from issues.models import Issue, Status, Priorities, Severities, Types
 
 
 class IssueFilter(django_filters.FilterSet):
-    # Filtros por nombre de relaciones
     status_name = django_filters.CharFilter(field_name='status__nombre', lookup_expr='icontains')
     priority_name = django_filters.CharFilter(field_name='priority__nombre', lookup_expr='icontains')
     severity_name = django_filters.CharFilter(field_name='severity__nombre', lookup_expr='icontains')
 
-    # Filtros por usuarios - SOLO LO QUE PEDISTE
     assigned_to = django_filters.NumberFilter(field_name='assigned_to__id')
     created_by = django_filters.NumberFilter(field_name='created_by__id')
 
-    # Filtros por usuarios (username)
     assigned_to_username = django_filters.CharFilter(field_name='assigned_to__username', lookup_expr='iexact')
     created_by_username = django_filters.CharFilter(field_name='created_by__username', lookup_expr='iexact')
 
