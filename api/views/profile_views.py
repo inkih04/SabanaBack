@@ -193,11 +193,10 @@ class ProfileViewSet(viewsets.GenericViewSet):
         # Obtener issues abiertos asignados al usuario
         # Asumiendo que el estado "Abierto" o "En Progreso" son estados donde el issue está abierto
         # Reemplaza con los IDs reales de tus estados abiertos
-        open_statuses = [1, 2]  # IDs de estados abiertos (ajustar según tu BD)
+
 
         issues = Issue.objects.filter(
             assigned_to=profile.user,
-            status__id__in=open_statuses
         )
 
         serializer = IssueSerializer(issues, many=True)
