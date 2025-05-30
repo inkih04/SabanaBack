@@ -674,3 +674,197 @@ class IssueViewSet(viewsets.ModelViewSet):
         if self.action == 'bulk_create':
             return queryset
         return super().filter_queryset(queryset)
+
+    # Agrega estas acciones a tu IssueViewSet existente
+
+    @extend_schema(
+        summary="Eliminar watcher de un issue",
+        description="Elimina un watcher específico de un issue.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
+            OpenApiParameter('watcher_id', OpenApiTypes.INT, OpenApiParameter.PATH,
+                             description="ID del usuario watcher"),
+        ],
+        responses={204: None, 404: {"description": "Issue o watcher no encontrado"}}
+    )
+    @action(
+        detail=True,
+        methods=['delete'],
+        url_path=r'watchers/(?P<watcher_id>[^/.]+)'
+    )
+    def remove_watcher(self, request, pk=None, watcher_id=None):
+        """Eliminar un watcher específico de un issue"""
+        try:
+            issue = self.get_object()
+            watcher_id = int(watcher_id)
+
+            # Verificar que el watcher existe en el issue
+            if not issue.watchers.filter(id=watcher_id).exists():
+                return Response(
+                    {"detail": "Watcher not found in this issue"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Eliminar el watcher
+            issue.watchers.remove(watcher_id)
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except ValueError:
+            return Response(
+                {"detail": "Invalid watcher ID"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Eliminar attachment de un issue",
+        description="Elimina un attachment específico de un issue.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
+            OpenApiParameter('attachment_id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del attachment"),
+        ],
+        responses={204: None, 404: {"description": "Issue o attachment no encontrado"}}
+    )
+    @action(
+        detail=True,
+        methods=['delete'],
+        url_path=r'attachments/(?P<attachment_id>[^/.]+)'
+    )
+    def remove_attachment(self, request, pk=None, attachment_id=None):
+        """Eliminar un attachment específico de un issue"""
+        try:
+            issue = self.get_object()
+            attachment_id = int(attachment_id)
+
+            # Buscar el attachment
+            try:
+                attachment = Attachment.objects.get(id=attachment_id, issue=issue)
+            except Attachment.DoesNotExist:
+                return Response(
+                    {"detail": "Attachment not found in this issue"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Eliminar el archivo del storage y el registro de la base de datos
+            if attachment.file:
+                attachment.file.delete(save=False)
+            attachment.delete()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except ValueError:
+            return Response(
+                {"detail": "Invalid attachment ID"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Remover asignación de un issue",
+        description="Elimina la asignación (assigned_to) de un issue, dejándolo sin asignar.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
+        ],
+        responses={204: None, 404: {"description": "Issue no encontrado"}}
+    )
+    @action(
+        detail=True,
+        methods=['delete'],
+        url_path='assignment'
+    )
+    def remove_assignment(self, request, pk=None):
+        """Eliminar la asignación (assigned_to) de un issue"""
+        try:
+            issue = self.get_object()
+
+            if issue.assigned_to is None:
+                return Response(
+                    {"detail": "Issue is not assigned to anyone"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Remover la asignación
+            issue.assigned_to = None
+            issue.save()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Eliminar todos los watchers de un issue",
+        description="Elimina todos los watchers de un issue de una vez.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
+        ],
+        responses={204: None, 404: {"description": "Issue no encontrado"}}
+    )
+    @action(
+        detail=True,
+        methods=['delete'],
+        url_path='watchers'
+    )
+    def remove_all_watchers(self, request, pk=None):
+        """Eliminar todos los watchers de un issue"""
+        try:
+            issue = self.get_object()
+            issue.watchers.clear()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Eliminar todos los attachments de un issue",
+        description="Elimina todos los attachments de un issue de una vez.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
+        ],
+        responses={204: None, 404: {"description": "Issue no encontrado"}}
+    )
+    @action(
+        detail=True,
+        methods=['delete'],
+        url_path='attachments'
+    )
+    def remove_all_attachments(self, request, pk=None):
+        """Eliminar todos los attachments de un issue"""
+        try:
+            issue = self.get_object()
+
+            # Eliminar todos los archivos del storage
+            for attachment in issue.attachment.all():
+                if attachment.file:
+                    attachment.file.delete(save=False)
+
+            # Eliminar todos los registros de la base de datos
+            issue.attachment.all().delete()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
