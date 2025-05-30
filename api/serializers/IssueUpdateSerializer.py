@@ -4,6 +4,7 @@ from issues.models import (
     Issue, Status, Priorities, Severities, Types, Attachment
 )
 
+
 class IssueUpdateSerializer(serializers.ModelSerializer):
     subject = serializers.CharField(required=False, allow_blank=True)
     description = serializers.CharField(required=False, allow_blank=True)
@@ -12,6 +13,8 @@ class IssueUpdateSerializer(serializers.ModelSerializer):
     priority_name = serializers.CharField(required=False, allow_blank=True)
     issue_type_name = serializers.CharField(required=False, allow_blank=True)
     assigned_to_username = serializers.CharField(required=False, allow_blank=True)
+    due_date = serializers.DateField(required=False, allow_null=True)
+
     watchers_usernames = serializers.ListField(
         child=serializers.CharField(allow_blank=True),
         required=False,
@@ -29,18 +32,43 @@ class IssueUpdateSerializer(serializers.ModelSerializer):
         fields = [
             'subject', 'description',
             'status_name', 'priority_name', 'severity_name', 'issue_type_name',
-            'assigned_to_username', 'watchers_usernames', 'files'
+            'assigned_to_username', 'watchers_usernames', 'files', 'due_date'
         ]
+
+    def validate_due_date(self, value):
+        """
+        Validación personalizada para due_date.
+        - Si viene una cadena vacía, devuelve None (para quitar la fecha)
+        - Si viene None, devuelve None
+        - Si viene una fecha válida, la devuelve
+        """
+        if value == "" or value is None:
+            return None
+        return value
+
+    def to_internal_value(self, data):
+        """
+        Procesa los datos antes de la validación.
+        Convierte cadenas vacías de due_date a None.
+        """
+        # Hacemos una copia para no modificar los datos originales
+        data = data.copy() if hasattr(data, 'copy') else dict(data)
+
+        # Si due_date viene como cadena vacía, lo convertimos a None
+        if 'due_date' in data and data['due_date'] == '':
+            data['due_date'] = None
+
+        return super().to_internal_value(data)
 
     def update(self, instance, validated_data):
         # Extraemos los mismos campos que en create…
-        status_name        = validated_data.pop('status_name', None)
-        priority_name      = validated_data.pop('priority_name', None)
-        severity_name      = validated_data.pop('severity_name', None)
-        issue_type_name    = validated_data.pop('issue_type_name', None)
-        assigned_username  = validated_data.pop('assigned_to_username', None)
+        status_name = validated_data.pop('status_name', None)
+        priority_name = validated_data.pop('priority_name', None)
+        severity_name = validated_data.pop('severity_name', None)
+        issue_type_name = validated_data.pop('issue_type_name', None)
+        assigned_username = validated_data.pop('assigned_to_username', None)
         watchers_usernames = validated_data.pop('watchers_usernames', [])
-        files              = validated_data.pop('files', [])
+        files = validated_data.pop('files', [])
 
         # Si vienen, resolvemos o levantamos error
         if status_name is not None:
@@ -77,6 +105,10 @@ class IssueUpdateSerializer(serializers.ModelSerializer):
             instance.subject = validated_data['subject']
         if 'description' in validated_data:
             instance.description = validated_data['description']
+
+        # Manejo especial para due_date
+        if 'due_date' in validated_data:
+            instance.due_date = validated_data['due_date']  # Ya será None si vino vacío
 
         # Asignar assigned_to si se pasó
         if assigned_username:
