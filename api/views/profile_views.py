@@ -86,12 +86,10 @@ class ProfileViewSet(viewsets.GenericViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
-        # Para acciones de solo lectura (retrieve y acciones personalizadas de consulta),
-        # permitir acceso a todos los perfiles
         if self.action in ['retrieve', 'get_assigned_issues', 'get_watched_issues', 'get_user_comments']:
             return Profile.objects.all()
 
-        # Para acciones de escritura, solo permitir acceso al propio perfil
+
         user = self.request.user
         if user.is_staff:
             return Profile.objects.all()
@@ -113,7 +111,6 @@ class ProfileViewSet(viewsets.GenericViewSet):
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
-        # Obtener el perfil del usuario actual
         try:
             profile = Profile.objects.get(user=request.user)
             serializer = self.get_serializer(profile)
@@ -190,10 +187,6 @@ class ProfileViewSet(viewsets.GenericViewSet):
     def get_assigned_issues(self, request, pk=None):
         profile = self.get_object()
 
-        # Obtener issues abiertos asignados al usuario
-        # Asumiendo que el estado "Abierto" o "En Progreso" son estados donde el issue está abierto
-        # Reemplaza con los IDs reales de tus estados abiertos
-
 
         issues = Issue.objects.filter(
             assigned_to=profile.user,
@@ -205,8 +198,6 @@ class ProfileViewSet(viewsets.GenericViewSet):
     @action(detail=True, methods=['get'], url_path='watched-issues')
     def get_watched_issues(self, request, pk=None):
         profile = self.get_object()
-
-        # Obtener issues que el usuario está observando
         issues = profile.user.watched_issues.all()
 
         serializer = IssueSerializer(issues, many=True)
@@ -216,7 +207,6 @@ class ProfileViewSet(viewsets.GenericViewSet):
     def get_user_comments(self, request, pk=None):
         profile = self.get_object()
 
-        # Obtener comentarios del usuario
         comments = Comment.objects.filter(user=profile.user)
 
         from api.serializers import CommentSerializer
