@@ -86,7 +86,12 @@ class ProfileViewSet(viewsets.GenericViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
-        # Solo permitir ver su propio perfil, a menos que sea staff
+        # Para acciones de solo lectura (retrieve y acciones personalizadas de consulta),
+        # permitir acceso a todos los perfiles
+        if self.action in ['retrieve', 'get_assigned_issues', 'get_watched_issues', 'get_user_comments']:
+            return Profile.objects.all()
+
+        # Para acciones de escritura, solo permitir acceso al propio perfil
         user = self.request.user
         if user.is_staff:
             return Profile.objects.all()
@@ -188,11 +193,10 @@ class ProfileViewSet(viewsets.GenericViewSet):
         # Obtener issues abiertos asignados al usuario
         # Asumiendo que el estado "Abierto" o "En Progreso" son estados donde el issue está abierto
         # Reemplaza con los IDs reales de tus estados abiertos
-        open_statuses = [1, 2]  # IDs de estados abiertos (ajustar según tu BD)
+
 
         issues = Issue.objects.filter(
             assigned_to=profile.user,
-            status__id__in=open_statuses
         )
 
         serializer = IssueSerializer(issues, many=True)
