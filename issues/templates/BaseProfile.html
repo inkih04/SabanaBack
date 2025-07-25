@@ -1,5 +1,5 @@
 {% load static %}
-
+{% load socialaccount %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{% static 'issues/styles.css' %}">
 </head>
 <body>
+    {% get_social_accounts request.user as accounts %}
     <header class="header shadow">
         <div class="header__logo-container">
             <i class="material-icons">home</i>
@@ -19,50 +20,48 @@
             <div class="header__nav-container">
                 <a href="{% url 'issue_list' %}" class="header__nav-link">Go back to Issues</a>
 
-                {% if request.user.profile.avatar %}
-                    <img src="{{ request.user.profile.avatar.url }}" alt="avatar" class="header__avatar-img">
-                {% else %}
-                    <div class="header__avatar-img default-avatar">
-                        <span class="material-icons">person</span>
-                    </div>
-                {% endif %}
+                {% with accounts.google.0.extra_data.picture as google_picture %}
+                    {% if google_picture %}
+                        <img src="{{ google_picture }}" alt="avatar" class="header__avatar-img">
+                    {% else %}
+                        <div class="header__avatar-img default-avatar">
+                            <span class="material-icons">person</span>
+                        </div>
+                    {% endif %}
+                {% endwith %}
 
                 <span class="header__username">{{ request.user.username }}</span>
             </div>
         </nav>
     </header>
-<aside class="profile__sidebar">
+
+    <aside class="profile__sidebar">
         <div class="profile__content">
             <div class="profile__avatar-wrapper">
-              {% if is_own_profile %}
-              <form class="avatar-form" method="post" action="{% url 'update_avatar' %}" enctype="multipart/form-data">
-                {% csrf_token %}
-                    <div class="profile__avatar-circle">
-                        {% if profile_user.profile.avatar %}
-                            <img src="{{ profile_user.profile.avatar.url }}" alt="avatar" class="profile__avatar-img">
+                {% get_social_accounts profile_user as profile_accounts %}
+                <div class="profile__avatar-circle">
+                    {% with profile_accounts.google.0.extra_data.picture as profile_google_picture %}
+                        {% if profile_google_picture %}
+                            <img src="{{ profile_google_picture }}" alt="avatar" class="profile__avatar-img">
                         {% else %}
                             <div>
                                 <span class="material-icons">person</span>
                             </div>
                         {% endif %}
-                    </div>
-                <label for="avatar-upload-sidebar" class="avatar-edit-icon">
-                  <span class="material-icons">edit</span>
-                </label>
-                <input id="avatar-upload-sidebar" type="file" name="avatar" onchange="this.form.submit()">
-              </form>
-              {% else %}
-                <div class="profile__avatar-circle">
-                    {% if profile_user.profile.avatar %}
-                        <img src="{{ profile_user.profile.avatar.url }}" alt="avatar" class="profile__avatar-img">
-                    {% else %}
-                        <div>
-                            <span class="material-icons">person</span>
-                        </div>
-                    {% endif %}
+                    {% endwith %}
                 </div>
-              {% endif %}
+
+                {% if is_own_profile %}
+                <form class="avatar-form" method="post" action="{% url 'update_avatar' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <label for="avatar-upload-sidebar" class="avatar-edit-icon">
+                        <span class="material-icons">edit</span>
+                    </label>
+                    <input id="avatar-upload-sidebar" type="file" name="avatar" onchange="this.form.submit()">
+                </form>
+                {% endif %}
             </div>
+
             <span class="profile__name">{{ profile_user.username }}</span>
             <hr class="divider">
             <div class="profile__stadistics">
@@ -96,42 +95,37 @@
             {% endif %}
             {% if attachment_error %}
                 <p class="alert"> {{ attachment_error }} </p>
-            {% else %}
             {% endif %}
         </div>
-</aside>
+    </aside>
 
-<div class="content--profile">
-    <div class="profile__changePage">
-        {% if is_own_profile %}
-            <a href="{% url 'profile' %}?view=issues" class="pageChanger">Open Assigned Issues</a>
-            <a href="{% url 'profile' %}?view=watched" class="pageChanger">Watched Issues</a>
-            <a href="{% url 'profile' %}?view=comments" class="pageChanger">Comments</a>
-            <a href="#modal-api-token" class="pageChangerSchema">
-                <p>API Token:</p>
-                <span>View token</span>
-            </a>
-        {% else %}
-            <a href="{% url 'user_profile' username=profile_user.username %}?view=issues" class="pageChanger">Open Assigned Issues</a>
-            <a href="{% url 'user_profile' username=profile_user.username %}?view=watched" class="pageChanger">Watched Issues</a>
-            <a href="{% url 'user_profile' username=profile_user.username %}?view=comments" class="pageChanger">Comments</a>
-        {% endif %}
+    <div class="content--profile">
+        <div class="profile__changePage">
+            {% if is_own_profile %}
+                <a href="{% url 'profile' %}?view=issues" class="pageChanger">Open Assigned Issues</a>
+                <a href="{% url 'profile' %}?view=watched" class="pageChanger">Watched Issues</a>
+                <a href="{% url 'profile' %}?view=comments" class="pageChanger">Comments</a>
+                <a href="#modal-api-token" class="pageChangerSchema">
+                    <p>API Token:</p>
+                    <span>View token</span>
+                </a>
+            {% else %}
+                <a href="{% url 'user_profile' username=profile_user.username %}?view=issues" class="pageChanger">Open Assigned Issues</a>
+                <a href="{% url 'user_profile' username=profile_user.username %}?view=watched" class="pageChanger">Watched Issues</a>
+                <a href="{% url 'user_profile' username=profile_user.username %}?view=comments" class="pageChanger">Comments</a>
+            {% endif %}
+        </div>
+
+        <div class="issue-container">
+            {% if view_mode == "comments" %}
+                {% include "issues/Comments.html" %}
+            {% elif view_mode == "watched" %}
+                {% include "issues/issue_table.html" %}
+            {% else %}
+                {% include "issues/issue_table.html" %}
+            {% endif %}
+        </div>
     </div>
-
-    <div class="issue-container">
-        {% if view_mode == "comments" %}
-            {# Aquí puedes incluir otro template, por ejemplo: #}
-            {% include "issues/Comments.html" %}
-
-        {% elif view_mode == "watched" %}
-            {# Aquí incluir otro template o código para "Watched Issues" #}
-            {% include "issues/issue_table.html" %}
-        {% else %}
-            {# Valor por defecto, muestra la tabla de issues asignados #}
-            {% include "issues/issue_table.html" %}
-        {% endif %}
-    </div>
-</div>
 
     {% if is_own_profile %}
     <div id="modal-edit-bio" class="profile__modal">
@@ -143,13 +137,12 @@
             <form method="post" action="{% url 'update_bio' %}" class="profile__modal-form">
                 {% csrf_token %}
                 <label for="biography">Your biography</label>
-                <textarea id="biography" name="biography" rows="6">{% if profile_user.profile.biography %}{{ profile_user.profile.biography }}{% else %}Enter a bio for your profile{% endif %}</textarea>
+                <textarea id="biography" name="biography" rows="6">{{ profile_user.profile.biography|default:"Enter a bio for your profile" }}</textarea>
                 <button type="submit">Save</button>
             </form>
         </div>
     </div>
 
-    <!-- New API Token Modal -->
     <div id="modal-api-token" class="profile__modal">
         <div class="profile__modal-content">
             <div class="profile__modal-header">
@@ -159,7 +152,7 @@
             <div class="token-display">
                 <label>API Token:</label>
                 <div class="token-value">
-                    <span>{{profile_user.profile.api_token}}</span>
+                    <span>{{ profile_user.profile.api_token }}</span>
                 </div>
                 <p class="token-info">Use this token for API authentication in the Swagger UI.</p>
                 <div class="token-actions">

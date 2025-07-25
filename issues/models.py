@@ -51,15 +51,12 @@ class Issue(models.Model):
     status = models.ForeignKey(
         Status,on_delete=models.SET_NULL,null=True,blank=True,related_name="issues"
     )
-    # Relación con Priorities
     priority = models.ForeignKey(
         Priorities,on_delete=models.SET_NULL,null=True,blank=True,related_name="issues"
     )
-    # Relación con Severities
     severity = models.ForeignKey(
         Severities,on_delete=models.SET_NULL,null=True,blank=True,related_name="issues"
     )
-    # Relación con Types
     issue_type = models.ForeignKey(
         Types,on_delete=models.SET_NULL,null=True, blank=True,related_name="issues"
     )
@@ -85,12 +82,8 @@ class Attachment(models.Model):
 
 
 
-# -------------------------------
-# Extensión del modelo User: Profile
-# -------------------------------
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    # Campo para guardar la biografía o descripción breve
     biography = models.TextField(blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', storage=S3Boto3Storage(), blank=True, null=True)
     api_token = models.CharField(
@@ -104,9 +97,7 @@ class Profile(models.Model):
         return f'Perfil de {self.user.username}'
 
 
-# -------------------------------
-# Señales para crear y actualizar el perfil automáticamente
-# -------------------------------
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
@@ -114,7 +105,6 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    # Si ya existe el perfil, lo guarda; en caso contrario, la señal create_user_profile se encargará de crearlo.
     if hasattr(instance, 'profile'):
         instance.profile.save()
 

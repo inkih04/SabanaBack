@@ -15,7 +15,8 @@ from drf_spectacular.utils import (
 
 from issues.models import Issue, Attachment
 from ..filters import IssueFilter
-from ..serializers import IssueSerializer, AttachmentSerializer, IssueBulkCreateSerializer, IssueCreateSerializer, IssueUpdateSerializer
+from ..serializers import IssueSerializer, AttachmentSerializer, IssueBulkCreateSerializer, IssueCreateSerializer, \
+    IssueUpdateSerializer
 from ..serializers.IssueUpdateSerializer import IssueUpdateSerializer
 from ..serializers.issueBulk_serializer import IssueBulkResponseSerializer
 
@@ -29,6 +30,60 @@ class AttachmentUploadSerializer(serializers.Serializer):
     )
 
 
+def normalize_request_data(request_data, request_files=None):
+    """
+    Normaliza los datos de request para manejar tanto JSON como form-data
+    """
+    if isinstance(request_data, QueryDict):
+        # Es form-data (multipart/form-data)
+        qd = request_data.copy()
+        qd._mutable = True
+
+        # Manejo especial para watchers_usernames en form-data
+        if hasattr(request_data, 'getlist'):
+            raw = request_data.getlist('watchers_usernames')
+            if raw:
+                qd.setlist('watchers_usernames', [u.strip() for u in raw if isinstance(u, str) and u.strip()])
+            else:
+                qd.pop('watchers_usernames', None)
+
+        # Eliminar 'files' si no hay archivos reales
+        if 'files' in qd and not request_files:
+            qd.pop('files')
+
+        # Convertir QueryDict a dict normal
+        clean_data = {}
+        for key, vals in qd.lists():
+            if key in ('watchers_usernames', 'watchers_ids', 'files'):
+                clean_data[key] = vals
+            else:
+                clean_data[key] = vals[0] if len(vals) == 1 else vals
+    else:
+        # Es JSON o dict normal
+        clean_data = request_data.copy()
+
+        # Procesar watchers_usernames para JSON
+        if 'watchers_usernames' in clean_data:
+            watchers = clean_data['watchers_usernames']
+            if isinstance(watchers, list):
+                clean_data['watchers_usernames'] = [u.strip() for u in watchers if isinstance(u, str) and u.strip()]
+            elif isinstance(watchers, str):
+                # Si es un string, dividir por comas
+                clean_data['watchers_usernames'] = [u.strip() for u in watchers.split(',') if u.strip()]
+
+        # Eliminar 'files' si no hay archivos reales
+        if 'files' in clean_data and not request_files:
+            clean_data.pop('files')
+
+    # Limpiar campos vacíos
+    for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username',
+              'created_by_username']:
+        if k in clean_data and clean_data[k] in (None, ''):
+            clean_data.pop(k)
+
+    return clean_data
+
+
 @extend_schema_view(
     list=extend_schema(
         summary="Listar issues",
@@ -36,15 +91,21 @@ class AttachmentUploadSerializer(serializers.Serializer):
         tags=["Issues"],
         responses=IssueSerializer(many=True),
         parameters=[
-            OpenApiParameter('status', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by status id"),
-            OpenApiParameter('priority', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by priority id"),
-            OpenApiParameter('severity', OpenApiTypes.STR, OpenApiParameter.QUERY, description="Filter by severity id"),
             OpenApiParameter('status_name', OpenApiTypes.STR, OpenApiParameter.QUERY,
                              description="Filter by status name"),
             OpenApiParameter('priority_name', OpenApiTypes.STR, OpenApiParameter.QUERY,
                              description="Filter by priority name"),
             OpenApiParameter('severity_name', OpenApiTypes.STR, OpenApiParameter.QUERY,
                              description="Filter by severity name"),
+            # Nuevos parámetros para filtrar por usuarios
+            OpenApiParameter('assigned_to', OpenApiTypes.INT, OpenApiParameter.QUERY,
+                             description="Filter by assigned user ID"),
+            OpenApiParameter('assigned_to_username', OpenApiTypes.STR, OpenApiParameter.QUERY,
+                             description="Filter by assigned username"),
+            OpenApiParameter('created_by', OpenApiTypes.INT, OpenApiParameter.QUERY,
+                             description="Filter by creator user ID"),
+            OpenApiParameter('created_by_username', OpenApiTypes.STR, OpenApiParameter.QUERY,
+                             description="Filter by creator username"),
         ],
         examples=[
             OpenApiExample(
@@ -54,6 +115,20 @@ class AttachmentUploadSerializer(serializers.Serializer):
                     {"id": 2, "title": "Añadir tests", "status": 1, }
                 ],
                 response_only=True
+            ),
+            OpenApiExample(
+                'Filtrar por asignado',
+                summary="Filtrar issues por usuario asignado",
+                description="Ejemplo de cómo filtrar issues asignados a un usuario específico",
+                value="?assigned_to=5&status=1",
+                request_only=True
+            ),
+            OpenApiExample(
+                'Filtrar por creador',
+                summary="Filtrar issues por creador",
+                description="Ejemplo de cómo filtrar issues creados por un usuario específico",
+                value="?created_by_username=admin&priority=3",
+                request_only=True
             )
         ]
     ),
@@ -75,40 +150,247 @@ class AttachmentUploadSerializer(serializers.Serializer):
     ),
     create=extend_schema(
         summary="Crear un nuevo issue",
-        description="Crea un nuevo issue. Se pueden adjuntar archivos usando el campo 'files'.",
+        description="Crea un nuevo issue. Puedes usar nombres de referencia (status_name, priority_name, etc.) o adjuntar archivos mediante 'files'.",
         tags=["Issues"],
         request=IssueCreateSerializer,
         responses={201: IssueSerializer},
         examples=[
             OpenApiExample(
-                'Ejemplo Request Create',
+                name='Ejemplo básico - Bug crítico',
+                summary="Crear un bug crítico con asignación",
+                description="Ejemplo típico de creación de un bug crítico asignado a un desarrollador",
                 value={
-                    "title": "Bug registro",
-                    "description": "Al registrarse con email, muestra error.",
-                    "priority": 3,
-                    "status": 1
+                    "subject": "Error 500 al realizar login con Google OAuth",
+                    "description": "Los usuarios reportan error 500 cuando intentan autenticarse usando Google OAuth. El error aparece después de autorizar la aplicación en Google y al redirigir de vuelta a nuestro sistema. Logs muestran 'Invalid state parameter' en el callback.",
+                    "status_name": "New",
+                    "priority_name": "High",
+                    "severity_name": "Critical",
+                    "issue_type_name": "Bug",
+                    "assigned_to_username": "dev_carlos",
+                    "watchers_usernames": ["qa_maria", "lead_pedro"]
                 },
                 request_only=True
             ),
             OpenApiExample(
-                'Respuesta Ejemplo Create',
-                value={"id": 3, "title": "Bug registro", "status": 1, },
+                name='Ejemplo con archivos adjuntos',
+                summary="Issue con múltiples archivos",
+                description="Crear un issue adjuntando capturas de pantalla y logs",
+                value={
+                    "subject": "Interfaz rota en pantalla de configuración",
+                    "description": "La página de configuración del usuario muestra elementos superpuestos en resoluciones menores a 1024px. Adjunto capturas y CSS compilado para análisis.",
+                    "status_name": "Open",
+                    "priority_name": "Medium",
+                    "severity_name": "Normal",
+                    "issue_type_name": "Bug",
+                    "assigned_to_username": "frontend_ana",
+                    "watchers_usernames": ["designer_luis"],
+                    "files": ["screenshot1.png", "screenshot2.png", "compiled.css"]
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                name='Ejemplo mínimo',
+                summary="Creación con campos mínimos requeridos",
+                description="Solo con subject y description (usa valores por defecto)",
+                value={
+                    "subject": "Optimizar consultas de base de datos",
+                    "description": "Las consultas en el dashboard principal tardan más de 3 segundos en ejecutarse. Revisar índices y optimizar queries más pesadas."
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                name='Ejemplo Feature Request',
+                summary="Solicitud de nueva funcionalidad",
+                description="Ejemplo de como crear una solicitud de mejora",
+                value={
+                    "subject": "Implementar notificaciones push",
+                    "description": "Los usuarios han solicitado recibir notificaciones push cuando se les asignan nuevos issues o cuando hay actualizaciones en issues que están observando.",
+                    "status_name": "Backlog",
+                    "priority_name": "Low",
+                    "severity_name": "Enhancement",
+                    "issue_type_name": "Feature",
+                    "watchers_usernames": ["product_manager", "mobile_dev"]
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                name='Respuesta exitosa',
+                summary="Respuesta después de crear issue",
+                description="Datos del issue recién creado con ID asignado",
+                value={
+                    "id": 15,
+                    "subject": "Error 500 al realizar login con Google OAuth",
+                    "description": "Los usuarios reportan error 500 cuando intentan autenticarse usando Google OAuth...",
+                    "status": {"id": 1, "nombre": "New"},
+                    "priority": {"id": 3, "nombre": "High"},
+                    "severity": {"id": 1, "nombre": "Critical"},
+                    "issue_type": {"id": 1, "nombre": "Bug"},
+                    "assigned_to": {"id": 5, "username": "dev_carlos", "email": "carlos@empresa.com"},
+                    "created_by": {"id": 1, "username": "admin", "email": "admin@empresa.com"},
+                    "watchers": [
+                        {"id": 8, "username": "qa_maria", "email": "maria@empresa.com"},
+                        {"id": 12, "username": "lead_pedro", "email": "pedro@empresa.com"}
+                    ],
+                    "created_at": "2025-05-24T10:30:00Z",
+                    "updated_at": "2025-05-24T10:30:00Z"
+                },
                 response_only=True
             )
         ]
     ),
     update=extend_schema(
-        summary="Actualizar un issue",
-        description="Actualiza campos de un issue existente (parcial o completo)."
-                    "Se pueden subir nuevos archivos con 'files'.",
+        summary="Actualizar un issue completamente",
+        description="Actualiza todos los campos de un issue existente (PUT). Puedes cambiar asignación, estado, añadir watchers y subir nuevos archivos.",
         tags=["Issues"],
         request=IssueUpdateSerializer,
         responses=IssueSerializer,
         examples=[
             OpenApiExample(
-                'Ejemplo Request Update',
-                value={"title": "Bug login corregido", "status": 2},
+                name='Actualización completa',
+                summary="Actualizar issue cambiando múltiples campos",
+                description="Ejemplo de actualización completa cambiando status, prioridad y asignación",
+                value={
+                    "subject": "Error 500 al realizar login con Google OAuth - RESUELTO",
+                    "description": "Los usuarios reportan error 500 cuando intentan autenticarse usando Google OAuth. \n\nUPDATE: Se identificó que el problema era en la configuración del callback URL. Se ha corregido y desplegado en producción.",
+                    "status_name": "Resolved",
+                    "priority_name": "High",
+                    "severity_name": "Critical",
+                    "issue_type_name": "Bug",
+                    "assigned_to_username": "dev_carlos",
+                    "watchers_usernames": ["qa_maria", "lead_pedro", "devops_juan"]
+                },
                 request_only=True
+            ),
+            OpenApiExample(
+                name='Cambio de asignación',
+                summary="Reasignar issue a otro desarrollador",
+                description="Cambiar el responsable del issue y añadir contexto",
+                value={
+                    "subject": "Optimizar consultas de base de datos",
+                    "description": "Se requiere revisión completa de las consultas del dashboard. El desarrollador original está en vacaciones, reasignando a especialista en BD.",
+                    "status_name": "In Progress",
+                    "priority_name": "High",
+                    "assigned_to_username": "dba_specialist",
+                    "watchers_usernames": ["dev_original", "team_lead"]
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                name='Actualización con archivos',
+                summary="Añadir documentación y archivos",
+                description="Actualizar issue añadiendo documentación técnica",
+                value={
+                    "subject": "Implementar notificaciones push - Documentación técnica",
+                    "description": "Funcionalidad de notificaciones push. Se adjunta documentación técnica y mockups para revisión del equipo.",
+                    "status_name": "In Review",
+                    "priority_name": "Medium",
+                    "severity_name": "Enhancement",
+                    "issue_type_name": "Feature",
+                    "assigned_to_username": "mobile_dev",
+                    "watchers_usernames": ["product_manager", "ux_designer"],
+                    "files": ["technical_specs.pdf", "mockups.zip", "api_documentation.md"]
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                name='Respuesta actualización',
+                summary="Respuesta después de actualizar",
+                description="Issue actualizado con nuevos valores",
+                value={
+                    "id": 15,
+                    "subject": "Error 500 al realizar login con Google OAuth - RESUELTO",
+                    "description": "Los usuarios reportan error 500 cuando intentan autenticarse usando Google OAuth...",
+                    "status": {"id": 4, "nombre": "Resolved"},
+                    "priority": {"id": 3, "nombre": "High"},
+                    "assigned_to": {"id": 5, "username": "dev_carlos", "email": "carlos@empresa.com"},
+                    "watchers": [
+                        {"id": 8, "username": "qa_maria"},
+                        {"id": 12, "username": "lead_pedro"},
+                        {"id": 20, "username": "devops_juan"}
+                    ],
+                    "updated_at": "2025-05-24T14:45:00Z"
+                },
+                response_only=True
+            )
+        ]
+    ),
+    partial_update=extend_schema(
+        summary="Actualizar parcialmente un issue",
+        description="Modifica solo algunos campos específicos del issue (PATCH). Ideal para cambios rápidos como cambiar estado o prioridad.",
+        tags=["Issues"],
+        request=IssueUpdateSerializer,
+        responses=IssueSerializer,
+        examples=[
+            OpenApiExample(
+                name='Cambio rápido de estado',
+                summary="Solo cambiar el estado del issue",
+                description="Marcar issue como 'In Progress' sin modificar otros campos",
+                value={
+                    "status_name": "In Progress"
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                name='Actualizar prioridad y asignación',
+                summary="Cambiar prioridad y asignar desarrollador",
+                description="Elevar prioridad y asignar a desarrollador específico",
+                value={
+                    "priority_name": "Critical",
+                    "assigned_to_username": "senior_dev"
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                name='Añadir watchers',
+                summary="Agregar observadores al issue",
+                description="Añadir miembros del equipo para que reciban notificaciones",
+                value={
+                    "watchers_usernames": ["qa_team", "project_manager", "client_contact"]
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                name='Actualizar título y descripción',
+                summary="Corregir información del issue",
+                description="Actualizar título para mayor claridad y añadir detalles",
+                value={
+                    "subject": "Error 500 en login OAuth - Callback URL incorrecto",
+                    "description": "Error identificado: el callback URL configurado en Google OAuth no coincide con el endpoint real. Causa pérdida del parámetro 'state' durante el redirect."
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                name='Cerrar issue',
+                summary="Marcar issue como completado",
+                description="Cambiar estado a resuelto con comentario final",
+                value={
+                    "status_name": "Closed",
+                    "description": "Issue resuelto. Se corrigió la configuración del callback URL en Google Cloud Console. Verificado en producción - login OAuth funciona correctamente."
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                name='Adjuntar archivos adicionales',
+                summary="Solo añadir nuevos archivos",
+                description="Subir archivos adicionales sin modificar otros campos",
+                value={
+                    "files": ["log_update.txt", "test_results.png"]
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                name='Respuesta parcial',
+                summary="Respuesta después de actualización parcial",
+                description="Issue con campos actualizados",
+                value={
+                    "id": 15,
+                    "subject": "Error 500 en login OAuth - Callback URL incorrecto",
+                    "status": {"id": 2, "nombre": "In Progress"},
+                    "priority": {"id": 1, "nombre": "Critical"},
+                    "assigned_to": {"id": 8, "username": "senior_dev", "email": "senior@empresa.com"},
+                    "updated_at": "2025-05-24T16:20:00Z"
+                },
+                response_only=True
             )
         ]
     ),
@@ -152,7 +434,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
     ),
 )
 class IssueViewSet(viewsets.ModelViewSet):
-    http_method_names = ['get', 'post', 'put', 'delete']
+    http_method_names = ['get', 'post', 'put', 'delete', 'patch']
     queryset = Issue.objects.all()
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
@@ -167,9 +449,9 @@ class IssueViewSet(viewsets.ModelViewSet):
     serializer_class = IssueSerializer
 
     def get_serializer_class(self):
-        if self.action in ('create', 'partial_update'):
+        if self.action == 'create':
             return IssueCreateSerializer
-        elif self.action =='update':
+        elif self.action in ('update', 'partial_update'):
             return IssueUpdateSerializer
         elif self.action == 'bulk_create':
             return IssueBulkCreateSerializer
@@ -188,106 +470,74 @@ class IssueViewSet(viewsets.ModelViewSet):
         return super().retrieve(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
+        # Normalizar datos usando la función auxiliar
+        clean_data = normalize_request_data(request.data, request.FILES)
 
-        if isinstance(request.data, QueryDict):
-            qd = request.data.copy()
-            qd._mutable = True
-        else:
-            qd = request.data.copy()
-
-        if hasattr(request.data, 'getlist'):
-            raw = request.data.getlist('watchers_usernames')
-            if raw:
-                qd.setlist('watchers_usernames', [u.strip() for u in raw if isinstance(u, str) and u.strip()])
-            else:
-                qd.pop('watchers_usernames', None)
-
-        if 'files' in qd and not request.FILES:
-            qd.pop('files')
-
-        clean_data = {}
-        for key, vals in qd.lists():
-            if key in ('watchers_usernames', 'watchers_ids', 'files'):
-                clean_data[key] = vals
-            else:
-                clean_data[key] = vals[0] if len(vals) == 1 else vals
-
-
-        for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username']:
-            if k in clean_data and clean_data[k] in (None, ''):
-                clean_data.pop(k)
-
-
+        # Crear issue con datos limpios
         create_serializer = self.get_serializer(data=clean_data)
         create_serializer.is_valid(raise_exception=True)
 
-
+        # Guardar issue
         issue = create_serializer.save(created_by=request.user)
 
-
+        # Devolver respuesta
         response_serializer = IssueSerializer(issue)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
-        if isinstance(request.data, QueryDict):
-            qd = request.data.copy()
-            qd._mutable = True
-        else:
-            qd = request.data.copy()
+        # Normalizar datos usando la función auxiliar
+        clean_data = normalize_request_data(request.data, request.FILES)
 
-
-        if hasattr(request.data, 'getlist'):
-            raw = request.data.getlist('watchers_usernames')
-            if raw:
-                qd.setlist('watchers_usernames', [u.strip() for u in raw if isinstance(u, str) and u.strip()])
-            else:
-                qd.pop('watchers_usernames', None)
-
-
-        if 'files' in qd and not request.FILES:
-            qd.pop('files')
-
-
-        clean_data = {}
-        for key, vals in qd.lists():
-            if key in ('watchers_usernames', 'watchers_ids', 'files'):
-                clean_data[key] = vals
-            else:
-                clean_data[key] = vals[0] if len(vals) == 1 else vals
-
-
-        for k in ['status_name', 'priority_name', 'severity_name', 'issue_type_name', 'assigned_to_username']:
-            if k in clean_data and clean_data[k] in (None, ''):
-                clean_data.pop(k)
-
-
+        # Actualizar issue
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         update_serializer = self.get_serializer(instance, data=clean_data, partial=partial)
         update_serializer.is_valid(raise_exception=True)
 
-
+        # Guardar cambios
         issue = update_serializer.save()
+
+        # Manejar archivos si existen
         if request.FILES:
             for f in request.FILES.getlist('files'):
                 Attachment.objects.create(issue=issue, file=f)
 
+        # Devolver respuesta
+        response_serializer = IssueSerializer(issue)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
 
+    def partial_update(self, request, *args, **kwargs):
+        # Normalizar datos usando la función auxiliar
+        clean_data = normalize_request_data(request.data, request.FILES)
+
+        # Actualizar parcialmente
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        update_serializer = self.get_serializer(instance, data=clean_data, partial=partial)
+        update_serializer.is_valid(raise_exception=True)
+
+        # Guardar cambios
+        issue = update_serializer.save()
+
+        # Manejar archivos si existen
+        if request.FILES:
+            for f in request.FILES.getlist('files'):
+                Attachment.objects.create(issue=issue, file=f)
+
+        # Devolver respuesta
         response_serializer = IssueSerializer(issue)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
 
-
+        # Guardar datos antes de eliminar
         response_data = IssueSerializer(instance).data
 
         self.perform_destroy(instance)
 
-
+        # Devolver datos del issue eliminado
         return Response(response_data, status=status.HTTP_200_OK)
-
-
 
     @extend_schema(
         summary="Permite crear muchos issues a la vez",
@@ -424,3 +674,197 @@ class IssueViewSet(viewsets.ModelViewSet):
         if self.action == 'bulk_create':
             return queryset
         return super().filter_queryset(queryset)
+
+    # Agrega estas acciones a tu IssueViewSet existente
+
+    @extend_schema(
+        summary="Eliminar watcher de un issue",
+        description="Elimina un watcher específico de un issue.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
+            OpenApiParameter('watcher_id', OpenApiTypes.INT, OpenApiParameter.PATH,
+                             description="ID del usuario watcher"),
+        ],
+        responses={204: None, 404: {"description": "Issue o watcher no encontrado"}}
+    )
+    @action(
+        detail=True,
+        methods=['delete'],
+        url_path=r'watchers/(?P<watcher_id>[^/.]+)'
+    )
+    def remove_watcher(self, request, pk=None, watcher_id=None):
+        """Eliminar un watcher específico de un issue"""
+        try:
+            issue = self.get_object()
+            watcher_id = int(watcher_id)
+
+            # Verificar que el watcher existe en el issue
+            if not issue.watchers.filter(id=watcher_id).exists():
+                return Response(
+                    {"detail": "Watcher not found in this issue"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Eliminar el watcher
+            issue.watchers.remove(watcher_id)
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except ValueError:
+            return Response(
+                {"detail": "Invalid watcher ID"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Eliminar attachment de un issue",
+        description="Elimina un attachment específico de un issue.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
+            OpenApiParameter('attachment_id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del attachment"),
+        ],
+        responses={204: None, 404: {"description": "Issue o attachment no encontrado"}}
+    )
+    @action(
+        detail=True,
+        methods=['delete'],
+        url_path=r'attachments/(?P<attachment_id>[^/.]+)'
+    )
+    def remove_attachment(self, request, pk=None, attachment_id=None):
+        """Eliminar un attachment específico de un issue"""
+        try:
+            issue = self.get_object()
+            attachment_id = int(attachment_id)
+
+            # Buscar el attachment
+            try:
+                attachment = Attachment.objects.get(id=attachment_id, issue=issue)
+            except Attachment.DoesNotExist:
+                return Response(
+                    {"detail": "Attachment not found in this issue"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Eliminar el archivo del storage y el registro de la base de datos
+            if attachment.file:
+                attachment.file.delete(save=False)
+            attachment.delete()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except ValueError:
+            return Response(
+                {"detail": "Invalid attachment ID"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Remover asignación de un issue",
+        description="Elimina la asignación (assigned_to) de un issue, dejándolo sin asignar.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
+        ],
+        responses={204: None, 404: {"description": "Issue no encontrado"}}
+    )
+    @action(
+        detail=True,
+        methods=['delete'],
+        url_path='assignment'
+    )
+    def remove_assignment(self, request, pk=None):
+        """Eliminar la asignación (assigned_to) de un issue"""
+        try:
+            issue = self.get_object()
+
+            if issue.assigned_to is None:
+                return Response(
+                    {"detail": "Issue is not assigned to anyone"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Remover la asignación
+            issue.assigned_to = None
+            issue.save()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Eliminar todos los watchers de un issue",
+        description="Elimina todos los watchers de un issue de una vez.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
+        ],
+        responses={204: None, 404: {"description": "Issue no encontrado"}}
+    )
+    @action(
+        detail=True,
+        methods=['delete'],
+        url_path='watchers'
+    )
+    def remove_all_watchers(self, request, pk=None):
+        """Eliminar todos los watchers de un issue"""
+        try:
+            issue = self.get_object()
+            issue.watchers.clear()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Eliminar todos los attachments de un issue",
+        description="Elimina todos los attachments de un issue de una vez.",
+        tags=["Issues"],
+        parameters=[
+            OpenApiParameter('id', OpenApiTypes.INT, OpenApiParameter.PATH, description="ID del issue"),
+        ],
+        responses={204: None, 404: {"description": "Issue no encontrado"}}
+    )
+    @action(
+        detail=True,
+        methods=['delete'],
+        url_path='attachments'
+    )
+    def remove_all_attachments(self, request, pk=None):
+        """Eliminar todos los attachments de un issue"""
+        try:
+            issue = self.get_object()
+
+            # Eliminar todos los archivos del storage
+            for attachment in issue.attachment.all():
+                if attachment.file:
+                    attachment.file.delete(save=False)
+
+            # Eliminar todos los registros de la base de datos
+            issue.attachment.all().delete()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
