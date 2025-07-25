@@ -1,4 +1,5 @@
 {% load static %}
+{% load socialaccount %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="{% static 'issues/styles.css' %}">
 </head>
 <body>
+    {% get_social_accounts request.user as accounts %}
     <header class="header shadow">
         <div class="header__logo-container">
             <i class="material-icons">home</i>
@@ -16,13 +18,17 @@
         </div>
         <nav class="header__nav">
             <div class="header__nav-container">
-                {% if request.user.profile.avatar %}
-                    <img src="{{ request.user.profile.avatar.url }}" alt="avatar" class="header__avatar-img">
-                {% else %}
-                    <div class="header__avatar">
-                        <span class="material-icons">person</span>
-                    </div>
-                {% endif %}
+                {% with accounts.google.0.extra_data.picture as google_picture %}
+                    {% if request.user.profile.avatar %}
+                        <img src="{{ request.user.profile.avatar.url }}" alt="avatar" class="header__avatar-img">
+                    {% elif google_picture %}
+                        <img src="{{ google_picture }}" alt="google avatar" class="header__avatar-img">
+                    {% else %}
+                        <div class="header__avatar">
+                            <span class="material-icons">person</span>
+                        </div>
+                    {% endif %}
+                {% endwith %}
                 <span class="header__username">{{ request.user.username }}</span>
             </div>
         </nav>
@@ -48,13 +54,17 @@
             <div class="sidebar__profile">
                 <ul>
                     <li class="sidebar__item">
-                        {% if request.user.profile.avatar %}
-                            <img src="{{ request.user.profile.avatar.url }}" alt="avatar" class="sidebar__avatar">
-                        {% else %}
-                            <div class="sidebar__icons">
-                                <span class="material-icons sidebar__icon">person</span>
-                            </div>
-                        {% endif %}
+                        {% with accounts.google.0.extra_data.picture as google_picture %}
+                            {% if request.user.profile.avatar %}
+                                <img src="{{ request.user.profile.avatar.url }}" alt="avatar" class="sidebar__avatar">
+                            {% elif google_picture %}
+                                <img src="{{ google_picture }}" alt="google avatar" class="sidebar__avatar">
+                            {% else %}
+                                <div class="sidebar__icons">
+                                    <span class="material-icons sidebar__icon">person</span>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
                         <a href="{% url 'profile' %}?view=issues">Profile</a>
                     </li>
                     <li class="sidebar__item">
@@ -64,7 +74,7 @@
                 </ul>
             </div>
         </aside>
-        <div class = "issue-container">
+        <div class="issue-container">
             {% block content %} {% endblock %}
         </div>
     </div>

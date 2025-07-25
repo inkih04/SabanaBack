@@ -99,8 +99,10 @@ CORS_ALLOWED_ORIGINS = [
   'https://editor.swagger.io',
   'https://it22d-backend.onrender.com',
   "http://localhost:3000",
-    "https://saba-front-end.vercel.app/",
-    "https://sabana-five.vercel.app/",
+  "https://saba-front-end.vercel.app",
+
+  "https://sabana-five.vercel.app",
+
 ]
 
 # Provider specific settings
